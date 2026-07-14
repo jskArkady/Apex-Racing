@@ -1,0 +1,47 @@
+import { isTrackId, START_FINISH_PROGRESS } from './trackData'
+import { getTrackVisualCue } from './trackVisualCues'
+
+export function parseVisualCaptureRequest(search, enabled = true) {
+  if (!enabled || typeof search !== 'string') return null
+
+  const params = new URLSearchParams(search)
+  if (params.get('visualCapture') !== '1') return null
+
+  const trackId = params.get('track')
+  const view = params.get('view') ?? 'start'
+  if (!isTrackId(trackId)) return null
+
+  if (view === 'race') {
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      gameMode: 'single',
+      targetSpeed: 120,
+    })
+  }
+
+  if (view === 'start') {
+    return Object.freeze({
+      trackId,
+      view,
+      captureProgress: START_FINISH_PROGRESS,
+      targetProgress: 0.015,
+      targetLateral: 0,
+      targetHeight: 1,
+    })
+  }
+
+  const cue = getTrackVisualCue(trackId, view)
+  if (!cue) return null
+
+  return Object.freeze({
+    trackId,
+    view,
+    captureProgress: cue.captureProgress,
+    targetProgress: cue.progress,
+    targetLateral: cue.lateral ?? 0,
+    targetHeight: cue.targetHeight ?? 1,
+    ...(Number.isFinite(cue.cameraHeight) ? { cameraHeight: cue.cameraHeight } : {}),
+  })
+}
