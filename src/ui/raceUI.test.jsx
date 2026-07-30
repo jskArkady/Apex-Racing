@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
+import App from '../App'
 import { useGameStore } from '../store/gameStore'
 import HUD, { getSpeedEffectIntensity, projectWorldToMinimap } from './HUD'
 import PauseMenu from './PauseMenu'
@@ -159,12 +160,67 @@ describe('race interface', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Settings' }))
 
     fireEvent.change(screen.getByRole('slider', { name: /Audio/i }), { target: { value: '65' } })
-    fireEvent.change(screen.getByRole('combobox', { name: 'Graphics' }), { target: { value: 'low' } })
+    act(() => useGameStore.getState().updateSettings({ graphics: 'low' }))
 
-    expect(useGameStore.getState().settings).toMatchObject({
-      audio: 65,
-      graphics: 'low'
-    })
+    expect(screen.queryByRole('combobox', { name: 'Graphics' })).not.toBeInTheDocument()
+    expect(useGameStore.getState().settings).toEqual({ audio: 65 })
+  })
+
+  it('uses responsive decorative art for every circuit and restores fallback on load failure', () => {
+    const view = render(<MainMenu />)
+    const getHero = () => view.container.querySelector('.menu-hero')
+    const getHeroImage = () => view.container.querySelector('.menu-hero-image')
+    const portraitSource = getHero().querySelector('source')
+
+    expect(getHero()).toHaveAttribute('aria-hidden', 'true')
+    expect(getHeroImage()).toHaveAttribute('alt', '')
+    expect(getHeroImage()).toHaveAttribute('aria-hidden', 'true')
+    expect(getHeroImage()).toHaveAttribute('loading', 'eager')
+    expect(getHeroImage()).toHaveAttribute('fetchpriority', 'high')
+    expect(getHeroImage()).toHaveAttribute('draggable', 'false')
+    expect(getHeroImage().getAttribute('srcset')).toMatch(/640w.+1280w.+1672w/)
+    expect(portraitSource).toHaveAttribute('media', '(orientation: portrait)')
+    expect(portraitSource).toHaveAttribute('type', 'image/webp')
+    expect(portraitSource.getAttribute('srcset')).toMatch(/480w.+720w.+941w/)
+    expect(view.container.querySelector('main')).toHaveClass('main-menu-with-hero')
+    expect(view.container.querySelector('main')).toHaveAttribute('data-menu-hero', 'apex_gp')
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Select Harbour Street' }))
+    expect(getHeroImage()).toHaveAttribute(
+      'src',
+      expect.stringContaining('harbour-street-hero-wide-1280'),
+    )
+    expect(view.container.querySelector('main')).toHaveClass('main-menu-with-hero')
+    expect(view.container.querySelector('main')).toHaveAttribute('data-menu-hero', 'harbour_street')
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Select Temple Speedway' }))
+    expect(getHeroImage()).toHaveAttribute(
+      'src',
+      expect.stringContaining('temple-speedway-hero-wide-1280'),
+    )
+    expect(view.container.querySelector('main')).toHaveClass('main-menu-with-hero')
+    expect(view.container.querySelector('main')).toHaveAttribute('data-menu-hero', 'temple_speedway')
+
+    fireEvent.error(getHeroImage())
+    expect(getHero()).not.toBeInTheDocument()
+    expect(view.container.querySelector('main')).not.toHaveClass('main-menu-with-hero')
+    expect(view.container.querySelector('main')).not.toHaveAttribute('data-menu-hero')
+  })
+
+  it('uses demand rendering for static screens with a fixed high-quality canvas', () => {
+    const view = render(<App />)
+    const canvas = screen.getByTestId('r3f-canvas')
+    expect(canvas).toHaveAttribute('data-frameloop', 'demand')
+    expect(canvas).toHaveAttribute('data-shadows', 'true')
+    expect(canvas).toHaveAttribute('data-dpr', '[1,1.25]')
+    expect(canvas).toHaveAttribute('data-antialias', 'true')
+
+    act(() => useGameStore.setState({ gameState: 'playing' }))
+    expect(canvas).toHaveAttribute('data-frameloop', 'always')
+
+    act(() => useGameStore.setState({ gameState: 'paused' }))
+    expect(canvas).toHaveAttribute('data-frameloop', 'demand')
+    view.unmount()
   })
 
   it('offers three selectable circuits in the main menu', () => {
@@ -251,9 +307,23 @@ describe('race interface', () => {
     expect(screen.getByLabelText('Race progress 47 percent')).toBeInTheDocument()
     expect(screen.getByRole('alert')).toHaveTextContent('WRONG WAY')
     expect(screen.getByLabelText('Race timing')).toHaveTextContent('Current')
-    expect(screen.getByLabelText('Race timing')).toHaveTextContent('Best')
+    expect(screen.getByLabelText('Race timing')).toHaveTextContent('PB')
     expect(screen.getByLabelText('Race timing').querySelector('.timing-current')).toBeInTheDocument()
     expect(screen.getByLabelText('Race timing').querySelector('.timing-best')).toBeInTheDocument()
+  })
+
+  it('does not render keyboard shortcut hints on menu, race, or pause screens', () => {
+    const view = render(<MainMenu />)
+    expect(screen.queryByText('W / ↑')).not.toBeInTheDocument()
+    expect(screen.queryByText('Space')).not.toBeInTheDocument()
+
+    act(() => useGameStore.setState({ gameState: 'playing' }))
+    view.rerender(<HUD />)
+    expect(screen.queryByText('WASD')).not.toBeInTheDocument()
+    expect(screen.queryByText('Esc')).not.toBeInTheDocument()
+
+    view.rerender(<PauseMenu />)
+    expect(screen.queryByText(/Esc.*resumes the race/i)).not.toBeInTheDocument()
   })
 
   it('keeps a semantic finish checkpoint and scales peripheral speed effects', () => {
@@ -352,6 +422,23 @@ describe('race interface', () => {
     expect(useGameStore.getState().gameState).toBe('menu')
   })
 
+  it('moves and traps focus inside the pause dialog', () => {
+    act(() => useGameStore.setState({ gameState: 'paused', countdown: 0 }))
+    render(<PauseMenu />)
+
+    const dialog = screen.getByRole('dialog', { name: 'PAUSED' })
+    const resume = screen.getByRole('button', { name: 'Resume' })
+    const quit = screen.getByRole('button', { name: 'Quit to Menu' })
+    expect(resume).toHaveFocus()
+
+    quit.focus()
+    fireEvent.keyDown(dialog, { key: 'Tab' })
+    expect(resume).toHaveFocus()
+
+    fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true })
+    expect(quit).toHaveFocus()
+  })
+
   it('renders final placement and provides replay', () => {
     act(() => useGameStore.setState({
       gameState: 'finished',
@@ -364,6 +451,7 @@ describe('race interface', () => {
     render(<EndScreen />)
 
     expect(screen.getByText('2ND')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Race Again' })).toHaveFocus()
     fireEvent.click(screen.getByRole('button', { name: 'Race Again' }))
     expect(useGameStore.getState()).toMatchObject({ gameState: 'countdown', countdown: 3 })
   })

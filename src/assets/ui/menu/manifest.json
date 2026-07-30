@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "menu.apex_gp.hero",
+      "revision": 2,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "The existing Apex Racing menu capture was used only for layout and safe-zone guidance. The first generated draft was used only as an edit input; the corrected wide master guided the portrait companion. No external F1, FIA, team, driver, sponsor, or circuit photography was used as an image input.",
+      "promptIntent": {
+        "wide": "Corrected fictional open-wheel car scene on a floodlit desert circuit at night; 16:9; car low center-right; left side kept dark for menu UI; two asymmetrical angular monoliths joined by a low bridge, irregular faceted solar canopies, and low modular pit buildings.",
+        "portrait": "Portrait companion derived from the corrected wide art direction; 9:16; matching car and angular architecture in the lower quarter; upper 58 to 62 percent and central column kept dark for stacked mobile UI."
+      },
+      "promptConstraints": [
+        "No text, numbers, flags, readable signage, logos, pseudo-logos, sponsor marks, team liveries, watermarks, or UI.",
+        "No Formula 1 or FIA branding and no identifiable real-circuit architecture or landmark.",
+        "No circular tiered towers, conical or sail roofs, domes, or repeating tent-canopy silhouettes.",
+        "One fictional car only; no recognizable trade dress."
+      ],
+      "sources": [
+        {
+          "role": "wide master",
+          "dimensions": [1672, 941],
+          "sha256": "55bb7b76f3fa31ca6f6315224d2911c9296f7834890fb397f29aca1f91e042e2"
+        },
+        {
+          "role": "portrait master",
+          "dimensions": [941, 1672],
+          "sha256": "a6e7943baee6bc67c2b0a40153378fc5731a6086c2acf927e66b178028e8712a"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-gp-hero-wide-640.webp",
+          "dimensions": [640, 360],
+          "bytes": 16292,
+          "sha256": "936bce61307d9beb9afbbd7b668e64b0fe97bcdc3ec85effafa3712b36ad65d1"
+        },
+        {
+          "file": "apex-gp-hero-wide-1280.webp",
+          "dimensions": [1280, 720],
+          "bytes": 58750,
+          "sha256": "a9faf33fef203aca81baede0c83a3909f92f356bc983c710c876928e0ef49d91"
+        },
+        {
+          "file": "apex-gp-hero-wide-1672.webp",
+          "dimensions": [1672, 941],
+          "bytes": 87906,
+          "sha256": "a44c9d102b8a0fed961b43bb79f6cfac6b4050c64f79a9eefc30d8cd33785bb9"
+        },
+        {
+          "file": "apex-gp-hero-portrait-480.webp",
+          "dimensions": [480, 853],
+          "bytes": 20474,
+          "sha256": "3644322b386b8728d2db4045f4be20ce7edb6c68cf6c52461b762878d42e2323"
+        },
+        {
+          "file": "apex-gp-hero-portrait-720.webp",
+          "dimensions": [720, 1280],
+          "bytes": 42798,
+          "sha256": "e1d99bac23ebd3620e188a7cd6ac6d7ff5aa2f004096f43de81107f93e1e9161"
+        },
+        {
+          "file": "apex-gp-hero-portrait-941.webp",
+          "dimensions": [941, 1672],
+          "bytes": 65292,
+          "sha256": "109e10b1bd9e3b70afec7ac10b24413a9520d72230e3d3d3982a022608def462"
+        }
+      ],
+      "independentAssetReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "notes": "Revision 1 was rejected because its circular tiered tower and sail-canopy combination strongly recalled a real circuit. Revision 2 replaces those elements with asymmetrical angular monoliths, a bridge, and faceted solar canopies; the corrected wide and portrait masters passed an independent visual, consistency, artifact, and brand-mark review."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed. User approval is the gate before expanding this art direction to the remaining tracks."
+      }
+    },
+    {
+      "id": "menu.harbour_street.hero",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "The approved generated Apex hero was used only for rendering quality, fictional car design, and camera language. The applied Apex menu capture was used only for layout and safe-zone guidance. No external F1, FIA, team, driver, sponsor, Monaco, or circuit photography was used as an image input.",
+      "promptIntent": {
+        "wide": "Fictional cliffside harbour street circuit after rain in cool early-morning daylight; 16:9; car low center-right; left 42 to 45 percent kept dark; angular tunnel portal, stacked cubic apartments, wet Armco bend, and marina water confined mostly to the right.",
+        "portrait": "Portrait companion derived from the wide scene; 9:16; matching car, angular tunnel, apartments, wet bend, and harbour water in the lower half; upper 55 to 60 percent kept calm and blue-grey for stacked mobile UI."
+      },
+      "promptConstraints": [
+        "No text, numbers, flags, readable signage, logos, pseudo-logos, sponsor marks, team liveries, watermarks, people, or UI.",
+        "No Formula 1 or FIA branding and no identifiable real-circuit layout, architecture, skyline, or landmark.",
+        "No Monte Carlo Casino, Hotel de Paris, Fairmont or Grand Hotel hairpin, Port Hercules, Monaco tunnel, Monaco skyline, or recognizable luxury-yacht design.",
+        "One fictional car only; no recognizable trade dress."
+      ],
+      "sources": [
+        {
+          "role": "wide master",
+          "dimensions": [1672, 941],
+          "sha256": "eb1ddd02d64aa6f304d2015fae985570246dd333d28b8ff053f6969d6c2fc3b8"
+        },
+        {
+          "role": "portrait master",
+          "dimensions": [941, 1672],
+          "sha256": "a0eb0d019df93db7157ef376c867576256f80c067e089b7f4aeeecae75813043"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-street-hero-wide-640.webp",
+          "dimensions": [640, 360],
+          "bytes": 23168,
+          "sha256": "50dcc23d691da5059b410130e3bceb94df4ef1238e139b7119acc8a18314c763"
+        },
+        {
+          "file": "harbour-street-hero-wide-1280.webp",
+          "dimensions": [1280, 720],
+          "bytes": 89968,
+          "sha256": "411a3f8907b67d5fbf96690cb3536e90a67a5e689f208baafddbee4dd7064c1c"
+        },
+        {
+          "file": "harbour-street-hero-wide-1672.webp",
+          "dimensions": [1672, 941],
+          "bytes": 142932,
+          "sha256": "be57607de8bc31bd3c17ef9ab6bd6487353e1da24fdc174cfc8c68600e28c4e6"
+        },
+        {
+          "file": "harbour-street-hero-portrait-480.webp",
+          "dimensions": [480, 853],
+          "bytes": 46000,
+          "sha256": "65f735034743d5786980f36c2318668e839652629457acbbec0d2b55e6884484"
+        },
+        {
+          "file": "harbour-street-hero-portrait-720.webp",
+          "dimensions": [720, 1280],
+          "bytes": 100400,
+          "sha256": "060efafea3bcda4f22f35864f5867dd5bce83f7b8c06e3a2c8b5ba3cdb461c00"
+        },
+        {
+          "file": "harbour-street-hero-portrait-941.webp",
+          "dimensions": [941, 1672],
+          "bytes": 155396,
+          "sha256": "b566eb0386d5eee06a553d4c46aee3ec7ee00a7981e6f2aeca633ba0f52e2e31"
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "notes": "Wide and portrait masters were inspected at full size for scene consistency, UI safe zones, compression artifacts, malformed vehicle geometry, readable text, logos, pseudo-logos, trade dress, and recognizable real-world landmarks. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed. User approval is the gate before moving to the Temple Speedway candidate."
+      }
+    },
+    {
+      "id": "menu.temple_speedway.hero",
+      "revision": 2,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "The approved generated Harbour hero was used only for rendering quality, fictional car design, and camera language. The applied Harbour menu capture was used only for layout and safe-zone guidance. No external F1, FIA, team, driver, sponsor, Monza, or circuit photography was used as an image input.",
+      "promptIntent": {
+        "wide": "Fictional forest parkland speedway in subdued late-afternoon daylight; 16:9; car low center-right; left 42 to 45 percent kept dark; heavy-braking chicane, dense trees, and two disconnected straight concrete service decks with an angular gantry and offset V-shaped piers.",
+        "portrait": "Portrait companion derived from the corrected wide art direction; 9:16; matching car, chicane, forest, service decks, angular gantry, and V-shaped piers in the lower half; upper 55 to 60 percent kept subdued with a warm-grey overcast gradient for stacked mobile UI."
+      },
+      "promptConstraints": [
+        "No text, numbers, flags, readable signage, logos, pseudo-logos, sponsor marks, team liveries, watermarks, people, or UI.",
+        "No Formula 1 or FIA branding and no identifiable real-circuit layout, architecture, skyline, or landmark.",
+        "No Monza exact layout, Rettifilo reproduction, Lesmo reproduction, Ascari reproduction, Parabolica reproduction, timing tower, podium, old banking, continuous curved banking, oval profile, or recognizable historic circuit structure.",
+        "One fictional car only; no recognizable trade dress."
+      ],
+      "sources": [
+        {
+          "role": "wide master",
+          "dimensions": [1672, 941],
+          "sha256": "1d421a02aa8f3dfd53ef9f95c01d08c44c2827c974411b8f414fd13c7a83c59c"
+        },
+        {
+          "role": "portrait master",
+          "dimensions": [941, 1672],
+          "sha256": "ee7a1c4d7a6fd4078833ebbe6a629ea9a03a1835fa36ca22ffdf52a1976befe6"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "temple-speedway-hero-wide-640.webp",
+          "dimensions": [640, 360],
+          "bytes": 24600,
+          "sha256": "ebe8d5ebb9c6a36ccb5ebdb1f498af6f4ecfe00791a27f500bfe6aca32f9c231"
+        },
+        {
+          "file": "temple-speedway-hero-wide-1280.webp",
+          "dimensions": [1280, 720],
+          "bytes": 87964,
+          "sha256": "713667fba7c55d2ce9d96e5a4505aef1e63267f9b065935ac1a46801716b45c2"
+        },
+        {
+          "file": "temple-speedway-hero-wide-1672.webp",
+          "dimensions": [1672, 941],
+          "bytes": 132572,
+          "sha256": "773465b1e65ff154411d9f489e4067032392488f8ef22d23538acb597f455c33"
+        },
+        {
+          "file": "temple-speedway-hero-portrait-480.webp",
+          "dimensions": [480, 853],
+          "bytes": 60926,
+          "sha256": "5985e3456719d6089a9dd51d755f50d948b3a62edddea2fc938b501569b9eeff"
+        },
+        {
+          "file": "temple-speedway-hero-portrait-720.webp",
+          "dimensions": [720, 1280],
+          "bytes": 123374,
+          "sha256": "021b46ea76fc8178240c3ab43328804bfff0ecca4fa9883e92fb90aeabc31e35"
+        },
+        {
+          "file": "temple-speedway-hero-portrait-941.webp",
+          "dimensions": [941, 1672],
+          "bytes": 182868,
+          "sha256": "c371b9466bcc286f1f282faa25c550441b4f9a03fd69328a3da91b8ef08931dd"
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "notes": "The initial wide candidate was rejected because its curved concrete ramp resembled historic circuit banking; revision 2 replaced it with disconnected rectilinear service decks, an angular gantry, and V-shaped piers. The portrait sky was also subdued for mobile UI contrast. Final wide and portrait masters were inspected at full size for scene consistency, UI safe zones, compression artifacts, malformed vehicle geometry, readable text, logos, pseudo-logos, trade dress, and recognizable real-world landmarks. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed. User approval is the gate before moving beyond the menu-hero phase."
+      }
+    }
+  ]
+}

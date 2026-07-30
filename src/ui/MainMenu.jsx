@@ -2,16 +2,9 @@ import { useMemo, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { RACE_LAPS } from '../utils/raceConfig'
 import { START_FINISH_PROGRESS, TRACK_PRESETS } from '../utils/trackData'
+import { formatTime } from '../utils/formatTime'
 import { getTrackPreviewData } from '../utils/trackPreviewData'
-
-const controls = [
-  ['W / ↑', 'Accelerate'],
-  ['S / ↓', 'Reverse'],
-  ['A D / ← →', 'Steer'],
-  ['Space', 'Brake'],
-  ['R', 'Reset car'],
-  ['Esc', 'Pause']
-]
+import { getMenuHero } from '../assets/menuHeroes'
 
 const PREVIEW_WIDTH = 120
 const PREVIEW_HEIGHT = 72
@@ -251,9 +244,13 @@ export default function MainMenu() {
   const selectedTrackId = useGameStore(state => state.selectedTrackId)
   const selectTrack = useGameStore(state => state.selectTrack)
   const settings = useGameStore(state => state.settings)
+  const personalBests = useGameStore(state => state.personalBests)
   const updateSettings = useGameStore(state => state.updateSettings)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [failedHeroId, setFailedHeroId] = useState(null)
   const selectedTrack = TRACK_PRESETS.find(track => track.id === selectedTrackId) ?? TRACK_PRESETS[0]
+  const selectedPersonalBest = personalBests?.[selectedTrack.id] ?? 0
+  const menuHero = failedHeroId === selectedTrack.id ? null : getMenuHero(selectedTrack.id)
   const handleTrackOptionKeyDown = (event, currentIndex) => {
     let nextIndex = null
     if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
@@ -275,20 +272,52 @@ export default function MainMenu() {
   }
 
   return (
-    <main className="menu-overlay main-menu">
+    <main
+      className={`menu-overlay main-menu${menuHero ? ' main-menu-with-hero' : ''}`}
+      data-menu-hero={menuHero ? selectedTrack.id : undefined}
+    >
+      {menuHero && (
+        <picture className="menu-hero" aria-hidden="true">
+          <source
+            media="(orientation: portrait)"
+            type="image/webp"
+            srcSet={menuHero.portrait.srcSet}
+            sizes="100vw"
+          />
+          <img
+            className="menu-hero-image"
+            src={menuHero.wide.src}
+            srcSet={menuHero.wide.srcSet}
+            sizes="100vw"
+            width={menuHero.wide.width}
+            height={menuHero.wide.height}
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+            fetchPriority="high"
+            loading="eager"
+            draggable={false}
+            onError={() => setFailedHeroId(selectedTrack.id)}
+          />
+        </picture>
+      )}
       <section className="menu-content" aria-labelledby="game-title">
         <div className="menu-heading">
           <span className="eyebrow">{selectedTrack.shortName} · {RACE_LAPS} lap</span>
           <h1 className="menu-title" id="game-title">APEX RACING</h1>
           <p>{selectedTrack.description}</p>
+          <p className="menu-personal-best">
+            <span>Personal best</span>
+            <strong>{selectedPersonalBest > 0 ? formatTime(selectedPersonalBest) : 'NO TIME SET'}</strong>
+          </p>
         </div>
 
         <div className="menu-actions" aria-label="Choose race mode">
-          <button aria-label="Start Race" className="btn btn-primary interactive" onClick={() => startGame('single')}>
-            <span>Start Race</span><small>4-car grid · {RACE_LAPS} lap</small>
+          <button aria-label="Start Race" aria-describedby="start-race-description" className="btn btn-primary interactive" onClick={() => startGame('single')}>
+            <span>Start Race</span><small id="start-race-description">4-car grid · {RACE_LAPS} lap</small>
           </button>
-          <button aria-label="Time Trial" className="btn interactive" onClick={() => startGame('time_trial')}>
-            <span>Time Trial</span><small>Race the clock</small>
+          <button aria-label="Time Trial" aria-describedby="time-trial-description" className="btn interactive" onClick={() => startGame('time_trial')}>
+            <span>Time Trial</span><small id="time-trial-description">Race the clock</small>
           </button>
           <button
             className="btn btn-quiet interactive"
@@ -314,17 +343,6 @@ export default function MainMenu() {
                 onChange={event => updateSettings({ audio: Number(event.target.value) })}
               />
             </label>
-            <label className="select-setting">
-              <span>Graphics</span>
-              <select
-                value={settings.graphics}
-                onChange={event => updateSettings({ graphics: event.target.value })}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </label>
           </aside>
         ) : (
           <aside className="controls-guide track-picker-panel" aria-labelledby="track-picker-title">
@@ -339,6 +357,7 @@ export default function MainMenu() {
                   role="radio"
                   aria-checked={track.id === selectedTrackId}
                   aria-label={`Select ${track.name}`}
+                  aria-describedby={`track-description-${track.id}`}
                   tabIndex={track.id === selectedTrackId ? 0 : -1}
                   onClick={() => selectTrack(track.id)}
                   onKeyDown={event => handleTrackOptionKeyDown(event, index)}
@@ -348,7 +367,7 @@ export default function MainMenu() {
                     <span className="track-option-name">{track.name}</span>
                     <span className="track-option-code">{getTrackPreviewData(track.id).code}</span>
                   </span>
-                  <small>
+                  <small id={`track-description-${track.id}`}>
                     {track.id === selectedTrackId ? <strong className="track-option-selected">Selected · </strong> : null}
                     {track.inspiration}
                   </small>
@@ -356,15 +375,6 @@ export default function MainMenu() {
               ))}
             </div>
             <p className="track-fidelity">{selectedTrack.fidelityMarkers.join(' · ')}</p>
-            <h2 id="controls-title">Controls</h2>
-            <p className="touch-controls-note">
-              Touch: steer left or right, use the pedals to brake, reverse, and accelerate, then reset or pause in-race.
-            </p>
-            <dl>
-              {controls.map(([key, action]) => (
-                <div key={action}><dt>{key}</dt><dd>{action}</dd></div>
-              ))}
-            </dl>
           </aside>
         )}
       </section>

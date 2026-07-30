@@ -8,7 +8,13 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:unit": "vitest run src/utils src/store",
+    "test:ui": "vitest run src/ui src/components",
+    "test:integration": "vitest run src/test",
+    "test:regression": "vitest run src/test/raceIntegrity.regression.test.js src/utils/progressGuard.test.js src/utils/raceLogic.liveRank.test.js src/test/playerCar.completion.test.jsx src/test/aiRace.acceptance.test.jsx src/test/resetLeaderboard.test.jsx",
+    "test:qa": "vitest run qa.test stress.test adversarial.test",
+    "verify": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

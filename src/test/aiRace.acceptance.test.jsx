@@ -124,6 +124,37 @@ describe('AI race acceptance', () => {
     unmount();
   });
 
+  it('continues checkpoint validation after a 200ms render hitch', () => {
+    const { unmount } = render(<App />);
+    const aiBody = getAI1Body();
+    const track = TRACK_PRESETS.find(candidate => candidate.id === DEFAULT_TRACK_ID);
+    const forwardAxis = new THREE.Vector3(0, 0, -1);
+    const placeForward = (progress, delta) => {
+      const point = track.curve.getPointAt(progress);
+      const tangent = track.curve.getTangentAt(progress).setY(0).normalize();
+      const rotation = new THREE.Quaternion().setFromUnitVectors(forwardAxis, tangent);
+      aiBody.setTranslation({ x: point.x, y: point.y + 1, z: point.z });
+      aiBody.setRotation(rotation);
+      aiBody.setLinvel({ x: tangent.x * 55, y: 0, z: tangent.z * 55 });
+      triggerFrames(delta, 1);
+    };
+
+    act(() => {
+      placeForward(0.997, 1 / 60);
+      const hitchProgress = (0.997 + 11 / track.length) % 1;
+      placeForward(hitchProgress, 0.2);
+      const stepMeters = 2.5;
+      const steps = Math.ceil((0.12 - hitchProgress) * track.length / stepMeters);
+      for (let step = 1; step <= steps; step += 1) {
+        const progress = hitchProgress + step * stepMeters / track.length;
+        placeForward(progress, stepMeters / 55);
+      }
+    });
+
+    expect(getAI1State().nextCheckpointIndex).toBe(2);
+    unmount();
+  });
+
   it.each(TRACK_PRESETS)(
     'accepts all $name checkpoints in order and rolls AI race state into lap two',
     track => {

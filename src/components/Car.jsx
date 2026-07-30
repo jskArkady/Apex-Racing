@@ -7,7 +7,12 @@ import * as THREE from 'three'
 import { useGameStore } from '../store/gameStore'
 import { audioEngine } from '../utils/AudioEngine'
 import { getTrackPreset } from '../utils/trackData'
-import { getLiveRacerRank, hasCrossedFinishLine, isNearCheckpoint } from '../utils/raceLogic'
+import {
+  calculateLiveRaceScore,
+  getLiveRacerRank,
+  hasCrossedFinishLine,
+  isNearCheckpoint
+} from '../utils/raceLogic'
 import { getStartGridPose, getTrackPoseAtProgress } from '../utils/startGrid'
 import FormulaCar from './FormulaCar'
 import {
@@ -28,6 +33,7 @@ import {
 } from '../utils/vehicleDynamics'
 import {
   createProgressGuardState,
+  didConfirmForwardSeamCrossing,
   getSignedWrappedProgressDelta,
   PROGRESS_CORRIDOR_LIMIT,
   projectPointOntoClosedCurve,
@@ -172,6 +178,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
   } = useGameStore.getState()
 
   const playerLastCheckpointTimeRef = useRef(0)
+  const recoveryAnchorRef = useRef(null)
   const progressGuardRef = useRef(createProgressGuardState())
   const resetKeyDownRef = useRef(false)
   const recoveryDirectionGraceRef = useRef(0)
@@ -224,6 +231,21 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       collisionEscapeActiveRef.current = false
       blockingCollisionHandlesRef.current.clear()
       captureFrameTimesRef.current.length = 0
+      recoveryAnchorRef.current = {
+        nextCheckpointIndex: 1,
+        progress: startPose.progress,
+        position: {
+          x: startPose.position[0],
+          y: startPose.position[1],
+          z: startPose.position[2],
+        },
+        tangent: {
+          x: startPose.tangent.x,
+          y: 0,
+          z: startPose.tangent.z,
+        },
+        centerlineDistance: Math.abs(startPose.lateralOffset),
+      }
       setDrivingBackwards(false)
 
       // RigidBody remains mounted when Pause -> Restart changes the state to
@@ -481,17 +503,34 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
         && nextCheckpointIndex === 1
         && playerLastCheckpointTimeRef.current === 0
       const recoveryCheckpointIndex = (nextCheckpointIndex - 1 + checkpointCount) % checkpointCount
-      const recoveryProgress = hasNotReachedFirstCheckpoint
-        ? startPose.progress
-        : recoveryCheckpointIndex / checkpointCount
+      const trustedAnchor = recoveryAnchorRef.current
+      const hasMatchingAnchor = trustedAnchor
+        && trustedAnchor.nextCheckpointIndex === nextCheckpointIndex
+      const recoveryProgress = hasMatchingAnchor
+        ? trustedAnchor.progress
+        : hasNotReachedFirstCheckpoint
+          ? startPose.progress
+          : recoveryCheckpointIndex / checkpointCount
       // Before CP1, recovery returns to the player's own grid slot. Resetting
       // to CP0 would jump a rear-row starter thirteen metres forward.
-      const recoveryPoint = hasNotReachedFirstCheckpoint
-        ? startPose.point.clone()
-        : trackCurve.getPointAt(recoveryProgress)
-      const recoveryTangent = hasNotReachedFirstCheckpoint
-        ? startPose.tangent.clone()
-        : trackCurve.getTangentAt(recoveryProgress)
+      const fallbackPoint = hasNotReachedFirstCheckpoint
+        ? { x: startPose.position[0], y: startPose.position[1], z: startPose.position[2] }
+        : (() => {
+            const point = trackCurve.getPointAt(recoveryProgress)
+            return { x: point.x, y: point.y + 1, z: point.z }
+          })()
+      const recoveryPosition = hasMatchingAnchor
+        ? trustedAnchor.position
+        : fallbackPoint
+      const recoveryTangent = hasMatchingAnchor
+        ? new THREE.Vector3(
+            trustedAnchor.tangent.x,
+            trustedAnchor.tangent.y,
+            trustedAnchor.tangent.z
+          )
+        : hasNotReachedFirstCheckpoint
+          ? startPose.tangent.clone()
+          : trackCurve.getTangentAt(recoveryProgress)
       const recoveryDirection = new THREE.Vector3(recoveryTangent.x, 0, recoveryTangent.z).normalize()
       const recoveryRotation = createTrackYawRotation(recoveryDirection)
 
@@ -502,7 +541,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       resetWrongWayState(wrongWayStateRef.current)
       setPlayerTranslation(
         bodyRef.current,
-        { x: recoveryPoint.x, y: recoveryPoint.y + 1, z: recoveryPoint.z },
+        recoveryPosition,
         PLAYER_TRANSLATION_REASON.MANUAL_RECOVERY,
         {
           raceSessionId,
@@ -525,9 +564,11 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       progressGuardRef.current = createProgressGuardState()
       updateProgressGuardState(
         progressGuardRef.current,
-        { x: recoveryPoint.x, y: recoveryPoint.y + 1, z: recoveryPoint.z },
+        recoveryPosition,
         recoveryProgress,
-        hasNotReachedFirstCheckpoint ? Math.abs(startPose.lateralOffset) : 0,
+        hasMatchingAnchor
+          ? trustedAnchor.centerlineDistance
+          : hasNotReachedFirstCheckpoint ? Math.abs(startPose.lateralOffset) : 0,
         0,
         Math.max(frameDelta, 1 / 120),
         trackLength
@@ -535,10 +576,14 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
 
       if (!window.racerProgress) window.racerProgress = {}
       if (!window.racerPositions) window.racerPositions = {}
-      window.racerProgress.player = recoveryState.lap * 100 + recoveryProgress * 100
+      window.racerProgress.player = calculateLiveRaceScore(
+        recoveryState.lap,
+        nextCheckpointIndex,
+        recoveryProgress
+      )
       const recoveryPlayerPosition = playerPositionRef.current
-      recoveryPlayerPosition.x = recoveryPoint.x
-      recoveryPlayerPosition.z = recoveryPoint.z
+      recoveryPlayerPosition.x = recoveryPosition.x
+      recoveryPlayerPosition.z = recoveryPosition.z
       window.racerPositions.player = recoveryPlayerPosition
 
       const recoveryReportState = useGameStore.getState()
@@ -561,12 +606,17 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       // Snap the chase camera to the same recovered heading. Letting it lerp
       // from a pre-crash heading makes a correct respawn look as if the car has
       // been rotated the wrong way for several frames.
-      const recoveryCameraPosition = recoveryPoint.clone()
+      const recoveryCameraTarget = new THREE.Vector3(
+        recoveryPosition.x,
+        recoveryPosition.y,
+        recoveryPosition.z
+      )
+      const recoveryCameraPosition = recoveryCameraTarget.clone()
         .addScaledVector(recoveryDirection, -6)
         .add(new THREE.Vector3(0, 3.5, 0))
       state.camera.position.lerp(recoveryCameraPosition, 1)
       state.camera.lookAt(
-        recoveryPoint.clone()
+        recoveryCameraTarget.clone()
           .addScaledVector(recoveryDirection, 10)
           .add(new THREE.Vector3(0, 1, 0))
       )
@@ -772,6 +822,9 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       Math.max(frameDelta, 1 / 240),
       trackLength
     )
+    const confirmedForwardSeamCrossing = didConfirmForwardSeamCrossing(
+      progressGuardRef.current
+    )
     // A rejected projection freezes logical progress at the last approved
     // section. It must not rotate/respawn the physical car or feed an aliased
     // tangent into WRONG WAY detection.
@@ -843,6 +896,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
     
     const reachedCheckpoint = nextCheckpointIndex === 0
       ? hasCrossedFinishLine(previousApprovedProgress, approvedProgress)
+        || confirmedForwardSeamCrossing
       : isNearCheckpoint(pos, targetCPPos, 25)
     
     // The HUD deliberately waits for sustained reverse movement before showing
@@ -853,7 +907,9 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       signedTrackTravel,
       longitudinalTrackSpeed,
     })
-    if (reachedCheckpoint && !isBackwards && !reverseCheckpointCrossing && hasContinuousProgress) {
+    const hasCheckpointContinuity = hasContinuousProgress
+      || (nextCheckpointIndex === 0 && confirmedForwardSeamCrossing)
+    if (reachedCheckpoint && !isBackwards && !reverseCheckpointCrossing && hasCheckpointContinuity) {
       const prevCP = nextCheckpointIndex
       passCheckpoint(nextCheckpointIndex)
       
@@ -861,6 +917,17 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       if (updatedNextCP !== prevCP) {
         const postPassState = useGameStore.getState()
         playerLastCheckpointTimeRef.current = postPassState.totalTime + postPassState.currentTime
+        recoveryAnchorRef.current = {
+          nextCheckpointIndex: updatedNextCP,
+          progress: approvedProgress,
+          position: { x: pos.x, y: pos.y, z: pos.z },
+          tangent: {
+            x: flatTrackTangent.x,
+            y: 0,
+            z: flatTrackTangent.z,
+          },
+          centerlineDistance: minDistance,
+        }
       }
     }
 
@@ -874,10 +941,11 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
     // CP0 uses a proximity gate, so the store may advance the lap a few metres
     // before the curve parameter wraps from 1 back to 0. Keep that short seam
     // interval on the previous lap to preserve monotonic visual progress.
-    const liveProgressLap = nextCheckpointIndex === 1 && lap > 1 && approvedProgress > 0.5
-      ? lap - 1
-      : lap
-    window.racerProgress.player = liveProgressLap * 100 + approvedProgress * 100;
+    window.racerProgress.player = calculateLiveRaceScore(
+      lap,
+      nextCheckpointIndex,
+      approvedProgress
+    );
     const playerPosition = playerPositionRef.current
     playerPosition.x = pos.x
     playerPosition.z = pos.z

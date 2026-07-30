@@ -78,12 +78,12 @@ describe('Tier 1: Feature Coverage', () => {
       expect(audioEngine.volume).toBeCloseTo(0.14);
     });
 
-    it('Test 1.4.1: Graphics quality changes the live renderer budget', () => {
+    it('Test 1.4.1: Graphics quality controls stay removed and the renderer uses the fixed budget', () => {
       render(<App />);
       fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
-      fireEvent.change(screen.getByRole('combobox', { name: 'Graphics' }), { target: { value: 'low' } });
-      expect(screen.getByTestId('r3f-canvas')).toHaveAttribute('data-shadows', 'false');
-      expect(screen.getByTestId('r3f-canvas')).toHaveAttribute('data-dpr', '1');
+      expect(screen.queryByRole('combobox', { name: 'Graphics' })).not.toBeInTheDocument();
+      expect(screen.getByTestId('r3f-canvas')).toHaveAttribute('data-shadows', 'true');
+      expect(screen.getByTestId('r3f-canvas')).toHaveAttribute('data-dpr', '[1,1.25]');
     });
 
     it('Test 1.5: Click on Continue on EndScreen transitions game back to menu', () => {
@@ -552,13 +552,16 @@ describe('Tier 2: Boundary & Corner Cases', () => {
   });
 
   describe('Feature 4: Game Pause/Resume', () => {
-    it('Test 2.4.1: Rapidly pressing Escape key toggles state correctly', () => {
+    it('Test 2.4.1: Escape auto-repeat is ignored until a fresh key press', () => {
       render(<App />);
       act(() => {
         useGameStore.setState({ gameState: 'playing', countdown: 0 });
       });
       fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
-      fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
+      fireEvent.keyDown(window, { key: 'Escape', code: 'Escape', repeat: true });
+      expect(useGameStore.getState().gameState).toBe('paused');
+      fireEvent.keyUp(window, { key: 'Escape', code: 'Escape' });
+      fireEvent.keyDown(window, { key: 'Escape', code: 'Escape', repeat: false });
       expect(useGameStore.getState().gameState).toBe('playing');
     });
 
@@ -762,7 +765,7 @@ describe('Tier 3: Cross-Feature Combinations', () => {
     expect(useGameStore.getState().gameState).toBe('menu');
     expect(useGameStore.getState().lap).toBe(1);
     expect(useGameStore.getState().currentTime).toBe(0);
-    expect(useGameStore.getState().bestLapTime).toBe(0);
+    expect(useGameStore.getState().bestLapTime).toBeGreaterThan(0);
   });
 });
 

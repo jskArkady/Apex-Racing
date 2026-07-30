@@ -1,14 +1,25 @@
+import { useRef } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { formatTime } from '../utils/formatTime'
+import { useDialogFocus } from './useDialogFocus'
 
 export default function PauseMenu() {
   const {
     resumeGame, restartRace, returnToMenu, lap, maxLaps,
     currentTime, totalTime, position, totalRacers, gameMode
   } = useGameStore()
+  const resumeRef = useRef(null)
+  const dialogRef = useDialogFocus(resumeRef)
 
   return (
-    <div className="menu-overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div
+      ref={dialogRef}
+      className="menu-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pause-title"
+      tabIndex={-1}
+    >
       <section className="menu-content pause-content">
         <div className="menu-heading">
           <span className="eyebrow">Race suspended</span>
@@ -22,12 +33,11 @@ export default function PauseMenu() {
         </dl>
 
         <div className="menu-actions">
-          <button className="btn btn-primary interactive" onClick={resumeGame}>Resume</button>
+          <button ref={resumeRef} className="btn btn-primary interactive" onClick={resumeGame}>Resume</button>
           <button className="btn interactive" onClick={restartRace}>Restart Race</button>
           <button className="btn btn-quiet interactive" onClick={returnToMenu}>Quit to Menu</button>
         </div>
 
-        <p className="keyboard-note"><kbd>Esc</kbd> also resumes the race</p>
       </section>
     </div>
   )

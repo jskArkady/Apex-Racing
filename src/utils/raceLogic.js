@@ -172,6 +172,29 @@ export function calculateRacerScore(lap, progress) {
   return Number.isFinite(score) ? score : 0;
 }
 
+/**
+ * Produces a monotonic live-race score across the start/finish seam.
+ *
+ * Race state starts at lap one even though the standing grid is physically
+ * behind the line (curve progress near one). While CP1 is still the next
+ * checkpoint, that pre-start segment belongs to the previous score band. The
+ * same rule also covers the short interval after a later lap has been awarded
+ * by the finish gate but before the curve projection wraps to zero.
+ */
+export function calculateLiveRaceScore(lap, nextCheckpointIndex, progress) {
+  const parsedLap = Number(lap)
+  const parsedProgress = Number(progress)
+  if (!Number.isFinite(parsedLap) || !Number.isFinite(parsedProgress)) return 0
+
+  const safeLap = Math.max(0, Math.floor(parsedLap))
+  const relativeProgress = (((parsedProgress - START_FINISH_PROGRESS) % 1) + 1) % 1
+  const scoreLap = Number(nextCheckpointIndex) === 1 && relativeProgress > 0.5
+    ? Math.max(0, safeLap - 1)
+    : safeLap
+  const score = scoreLap * 100 + relativeProgress * 100
+  return Number.isFinite(score) ? score : 0
+}
+
 const isFinished = (r) => r && (r.finished === true || r.status === 'finished' || r.gameState === 'finished');
 
 const getFinishedTime = (racer) => {

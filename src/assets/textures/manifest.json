@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "surface.track_asphalt.albedo",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external circuit, road, brand, vehicle, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "Strictly top-down, neutral, uniform racing-circuit asphalt with fine aggregate and restrained rubber grain; intended as a repeating Three.js albedo tile without baked light or identifiable markings.",
+      "promptConstraints": [
+        "No lane markings, kerbs, painted lines, arrows, letters, numbers, logos, flags, tire tracks, long skid marks, oil stains, puddles, loose debris, leaves, manholes, drains, watermarks, or UI.",
+        "No perspective, horizon, directional light, vignette, obvious focal point, color cast, directional pattern, or identifiable real-circuit surface.",
+        "The runtime derivative must tile without visible edge discontinuity and remain a power-of-two texture."
+      ],
+      "sources": [
+        {
+          "role": "generated texture master",
+          "dimensions": [1254, 1254],
+          "bytes": 3690701,
+          "sha256": "0f6df6a4841c5d70d8c604b2d32896230a7d48d659c4ce973ac227bcfa80d063"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "track-asphalt-albedo-512.webp",
+          "dimensions": [512, 512],
+          "bytes": 46348,
+          "sha256": "9eb3a0df4d0586b6befa9374794ba3e25bbefee3caf857af11c41a6aa89197b4",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Grayscale-neutralized, stripped of low-frequency luminance variation with a Gaussian high-pass, tone-mapped to mean luminance 198.12, mirror-synthesized into a power-of-two periodic tile, and downscaled with Lanczos."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "metrics": {
+          "meanLuminance": 198.12,
+          "luminanceStdDev": 7.05,
+          "leftRightEdgeMae": 2.6,
+          "topBottomEdgeMae": 2.95
+        },
+        "notes": "The first runtime derivative was rejected after WebGL QA revealed low-frequency longitudinal repetition. Metrics were re-measured from the decoded final WebP. The corrected high-pass derivative and its 3x3 tiled preview were inspected for borders, large-scale repetition, directional patterns, text, markings, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.apex.infield.albedo",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external desert, circuit, road, brand, vehicle, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "Strictly top-down, high-key compacted desert hardpack and fine pale gravel; intended as a tintable repeating Three.js infield albedo without baked light or identifiable markings.",
+      "promptConstraints": [
+        "No dunes, wind ripples, footprints, tire tracks, markings, kerbs, plants, large rocks, litter, oil, water, holes, text, logos, flags, watermarks, or UI.",
+        "No perspective, horizon, directional light, vignette, obvious focal point, directional pattern, or identifiable real-circuit surface.",
+        "The runtime derivative must remain low-contrast, power-of-two, and visually seamless when repeated."
+      ],
+      "sources": [
+        {
+          "role": "generated texture master",
+          "dimensions": [1254, 1254],
+          "bytes": 3788408,
+          "sha256": "39cc2c287c612c19bdd454bb063412822df2d8907402095337e985168cb16ed3"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-desert-infield-albedo-512.webp",
+          "dimensions": [512, 512],
+          "bytes": 52812,
+          "sha256": "90198feac0e734a7f13889753a6ab932da70bf0904646d3711b06667aa1d59cd",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Stripped of low-frequency luminance variation with a Gaussian high-pass, normalized around RGB 224/220/210, mirror-synthesized into a power-of-two periodic tile, and downscaled with Lanczos."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "metrics": {
+          "meanLuminance": 220.32,
+          "luminanceStdDev": 7.9,
+          "leftRightEdgeMae": 3,
+          "topBottomEdgeMae": 3.25
+        },
+        "notes": "Metrics were measured from the decoded final WebP. The 3x3 tiled preview was visually inspected for borders, large-scale repetition, directional patterns, text, markings, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.infield.albedo",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external city, concrete, circuit, road, brand, vehicle, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "Strictly top-down, high-key salt-weathered fine-aggregate service concrete; intended as a tintable repeating Three.js urban infield albedo without joints, baked light, or identifiable markings.",
+      "promptConstraints": [
+        "No slab joints, seams, cracks, drains, grates, manholes, markings, kerbs, footprints, tire tracks, oil, rust, puddles, moss, litter, text, logos, flags, watermarks, or UI.",
+        "No perspective, horizon, directional light, reflections, vignette, obvious focal point, directional pattern, or identifiable real-city or real-circuit surface.",
+        "The runtime derivative must remain low-contrast, power-of-two, and visually seamless when repeated."
+      ],
+      "sources": [
+        {
+          "role": "generated texture master",
+          "dimensions": [1254, 1254],
+          "bytes": 2988425,
+          "sha256": "16bb24f0bbea2572b7ca71b6b119b62c1fa80318058549442d2682c632c1d88a"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-concrete-infield-albedo-512.webp",
+          "dimensions": [512, 512],
+          "bytes": 49804,
+          "sha256": "13b098356ffdf20d14596e5d5df9b3a2300b693e02504239b9d34c653953c03e",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Stripped of low-frequency luminance variation with a Gaussian high-pass, normalized around RGB 223/225/224, mirror-synthesized into a power-of-two periodic tile, and downscaled with Lanczos."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "metrics": {
+          "meanLuminance": 224.75,
+          "luminanceStdDev": 7.78,
+          "leftRightEdgeMae": 2.59,
+          "topBottomEdgeMae": 2.81
+        },
+        "notes": "Metrics were measured from the decoded final WebP. The 3x3 tiled preview was visually inspected for borders, large-scale repetition, directional patterns, text, markings, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.temple.infield.albedo",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external park, turf, circuit, road, brand, vehicle, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "Strictly top-down, high-key maintained parkland turf with tiny compacted soil flecks; intended as a tintable repeating Three.js infield albedo without baked light or identifiable markings.",
+      "promptConstraints": [
+        "No long grass, flowers, clover, large blades, leaves, twigs, stones, bare patches, mud, mower stripes, footprints, tire tracks, kerbs, markings, litter, text, logos, flags, watermarks, or UI.",
+        "No perspective, horizon, directional light, vignette, obvious focal point, directional growth, or identifiable real-park or real-circuit surface.",
+        "The runtime derivative must remain low-contrast, power-of-two, and visually seamless when repeated."
+      ],
+      "sources": [
+        {
+          "role": "generated texture master",
+          "dimensions": [1254, 1254],
+          "bytes": 4062348,
+          "sha256": "e86553fbb98c1a57cdc515f48d68cecf8de76882c7216570fee29d2ff81e78cf"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "temple-turf-infield-albedo-512.webp",
+          "dimensions": [512, 512],
+          "bytes": 54130,
+          "sha256": "2fd72b6f74981fe67d437e8b8548a5ae7865ac2eb20f911ffa59042a2d197ca8",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Stripped of low-frequency luminance variation with a Gaussian high-pass, normalized around RGB 218/228/216, mirror-synthesized into a power-of-two periodic tile, and downscaled with Lanczos."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "metrics": {
+          "meanLuminance": 225.2,
+          "luminanceStdDev": 7.89,
+          "leftRightEdgeMae": 3.03,
+          "topBottomEdgeMae": 3.52
+        },
+        "notes": "Metrics were measured from the decoded final WebP. The 3x3 tiled preview was visually inspected for borders, large-scale repetition, directional patterns, text, markings, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "environment.apex.sky.panorama",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external sky, landscape, circuit, city, brand, vehicle, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "A sky-only dark navy 360-degree desert-night panorama with restrained high haze and no baked stars; intended for an inside-facing Three.js sky dome beneath the existing procedural star layer.",
+      "promptConstraints": [
+        "No stars, celestial bodies, land, water, buildings, vehicles, roads, flags, signs, text, logos, trademarks, sponsor marks, UI, or watermark.",
+        "No visible light source, lens flare, bloom, vignette, focal point, identifiable real venue, or unrelated foreground object.",
+        "The runtime derivative must be a horizontally periodic 2:1 power-of-two panorama with a stable zenith."
+      ],
+      "sources": [
+        {
+          "role": "generated panorama master",
+          "dimensions": [1774, 887],
+          "bytes": 1215965,
+          "sha256": "28600f8eae78a5b00da3b6e289a1a4b1fee6abe3712e4fb186c4e75bbb9c7383"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-night-sky-panorama-1024.webp",
+          "dimensions": [1024, 512],
+          "bytes": 5124,
+          "sha256": "5b84f7dfe2ccf4e97a90f1f5d64df121b81b6f75df37c41575c9c70f8c31ee9c",
+          "encoding": "WebP quality 84, method 6",
+          "processing": "Downscaled with Lanczos, made horizontally periodic by distributing the source edge delta over the full panorama, stabilized at the zenith with a row-mean blend, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "metrics": {
+          "meanLuminance": 39.64,
+          "luminanceStdDev": 32.03,
+          "leftRightEdgeMae": 0.88,
+          "leftRightEdgeP95": 3,
+          "zenithLuminance": 14.63,
+          "horizonLuminance": 117.1
+        },
+        "notes": "Metrics were measured from the decoded final WebP. The 3x horizontal wrap preview was inspected for seams, bands, repeated motifs, text, foreground objects, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "environment.harbour.sky.panorama",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external sky, coastline, city, circuit, brand, vehicle, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "A sky-only clear coastal-day 360-degree panorama with sparse high cirrus and pale horizon haze; intended for an inside-facing Three.js sky dome behind the urban scenery.",
+      "promptConstraints": [
+        "No land, sea, skyline, buildings, yachts, vehicles, roads, flags, aircraft, birds, signs, text, logos, trademarks, sponsor marks, UI, or watermark.",
+        "No visible sun disc, storm, lens flare, bloom, vignette, focal point, identifiable real city or venue, or unrelated foreground object.",
+        "The runtime derivative must be a horizontally periodic 2:1 power-of-two panorama with a stable zenith."
+      ],
+      "sources": [
+        {
+          "role": "generated panorama master",
+          "dimensions": [1774, 887],
+          "bytes": 1469190,
+          "sha256": "0d53d219628d47d0c450672c2f22fb12d8fa9af58eca68ef350725cd84742804"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-day-sky-panorama-1024.webp",
+          "dimensions": [1024, 512],
+          "bytes": 16796,
+          "sha256": "6f5a79101495d8c1248a79e9aaddf6b4434ee7ef5f582b96bffde8936fd05ebb",
+          "encoding": "WebP quality 84, method 6",
+          "processing": "Downscaled with Lanczos, made horizontally periodic by distributing the source edge delta over the full panorama, stabilized at the zenith with a row-mean blend, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "metrics": {
+          "meanLuminance": 149.03,
+          "luminanceStdDev": 48,
+          "leftRightEdgeMae": 1.51,
+          "leftRightEdgeP95": 4,
+          "zenithLuminance": 94.96,
+          "horizonLuminance": 226.29
+        },
+        "notes": "Metrics were measured from the decoded final WebP. A local cross-fade derivative was rejected for a visible vertical blur band and a mirror derivative was rejected for obvious cloud symmetry. The final 3x horizontal wrap preview was inspected for seams, bands, repeated motifs, text, foreground objects, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "environment.temple.sky.panorama",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-30",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external sky, park, forest, circuit, brand, vehicle, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "A sky-only temperate race-afternoon 360-degree panorama with scattered gentle high clouds and warm horizon haze; intended for an inside-facing Three.js sky dome behind the parkland scenery.",
+      "promptConstraints": [
+        "No land, trees, skyline, buildings, vehicles, roads, flags, aircraft, birds, signs, text, logos, trademarks, sponsor marks, UI, or watermark.",
+        "No visible sun disc, dramatic sunset, storm, lens flare, bloom, vignette, focal point, identifiable real park or venue, or unrelated foreground object.",
+        "The runtime derivative must be a horizontally periodic 2:1 power-of-two panorama with a stable zenith."
+      ],
+      "sources": [
+        {
+          "role": "generated panorama master",
+          "dimensions": [1774, 887],
+          "bytes": 1610957,
+          "sha256": "740ede33c2540bb2980068d3eaf795756408f1e9c3b69986a529549eb1bc1148"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "temple-day-sky-panorama-1024.webp",
+          "dimensions": [1024, 512],
+          "bytes": 26840,
+          "sha256": "f2728ae339aec4190970eb2cb3b099a971875594eb96d788285fbff087a8af38",
+          "encoding": "WebP quality 84, method 6",
+          "processing": "Downscaled with Lanczos, made horizontally periodic by distributing the source edge delta over the full panorama, stabilized at the zenith with a row-mean blend, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-30",
+        "metrics": {
+          "meanLuminance": 156.71,
+          "luminanceStdDev": 48.53,
+          "leftRightEdgeMae": 2.18,
+          "leftRightEdgeP95": 7,
+          "zenithLuminance": 82.38,
+          "horizonLuminance": 204.72
+        },
+        "notes": "Metrics were measured from the decoded final WebP. A local cross-fade derivative was rejected for a visible vertical blur band and a mirror derivative was rejected for obvious cloud symmetry. The final 3x horizontal wrap preview was inspected for seams, bands, repeated motifs, text, foreground objects, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    }
+  ]
+}

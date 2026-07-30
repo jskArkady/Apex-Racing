@@ -107,7 +107,8 @@ describe('Leaderboard Reset and Synchronization Verification', () => {
 
     expect(ai1RacerDuringReset?.lap).toBe(ai1RacerPreFall?.lap);
     expect(ai1RacerDuringReset?.nextCheckpointIndex).toBe(ai1RacerPreFall?.nextCheckpointIndex);
-    expect(ai1RacerDuringReset?.currentTime).toBeCloseTo(ai1RacerPreFall?.currentTime, 5);
+    expect(ai1RacerDuringReset?.currentTime).toBeGreaterThan(ai1RacerPreFall?.currentTime);
+    expect(ai1RacerDuringReset?.currentTime).toBeLessThanOrEqual(ai1RacerPreFall.currentTime + 0.1);
     expect(ai1RacerDuringReset?.totalTime).toBe(ai1RacerPreFall?.totalTime);
 
     // 2. Run one more frame after the reset frame to allow AI state update to propagate

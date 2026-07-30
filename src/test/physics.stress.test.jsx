@@ -14,7 +14,6 @@ const getCleanDefaultState = () => ({
   gameMode: 'single',
   settings: {
     audio: 50,
-    graphics: 'high',
     autoTransmission: true,
     tractionControl: true,
     abs: true,

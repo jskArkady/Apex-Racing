@@ -188,6 +188,78 @@ describe('player car completion controls', () => {
     view.unmount()
   })
 
+  it('confirms a finish crossed during a plausible suspended frame', () => {
+    const view = render(<App />)
+    const body = getPlayerBody()
+    const forwardAxis = new THREE.Vector3(0, 0, -1)
+    const placeForward = (progress, delta) => {
+      const point = trackCurve.getPointAt(progress)
+      const tangent = trackCurve.getTangentAt(progress).setY(0).normalize()
+      body.setTranslation({ x: point.x, y: point.y + 1, z: point.z })
+      body.setLinvel({ x: tangent.x * 30, y: 0, z: tangent.z * 30 })
+      body.setRotation(new THREE.Quaternion().setFromUnitVectors(forwardAxis, tangent))
+      triggerFrames(delta, 1)
+    }
+
+    act(() => {
+      useGameStore.setState({ nextCheckpointIndex: 0 })
+      placeForward(0.99, 1 / 60)
+      placeForward(0.005, 0.6)
+      expect(useGameStore.getState().gameState).toBe('playing')
+      placeForward(0.006, 1 / 60)
+    })
+
+    expect(useGameStore.getState().gameState).toBe('finished')
+    view.unmount()
+  })
+
+  it('recovers to the actual accepted checkpoint pose instead of its centre', () => {
+    const view = render(<App />)
+    const body = getPlayerBody()
+    const forwardAxis = new THREE.Vector3(0, 0, -1)
+    let acceptedPose = null
+
+    act(() => {
+      const stepMeters = 2
+      const startProgress = 0.997
+      const steps = Math.ceil(trackLength * 0.12 / stepMeters)
+      for (let step = 0; step <= steps; step += 1) {
+        const progress = (startProgress + step * stepMeters / trackLength) % 1
+        const point = trackCurve.getPointAt(progress)
+        const tangent = trackCurve.getTangentAt(progress).setY(0).normalize()
+        const candidatePose = { x: point.x, y: point.y + 1, z: point.z }
+        body.setTranslation(candidatePose)
+        body.setLinvel({ x: tangent.x * 30, y: 0, z: tangent.z * 30 })
+        body.setRotation(new THREE.Quaternion().setFromUnitVectors(forwardAxis, tangent))
+        triggerFrames(stepMeters / 30, 1)
+        if (useGameStore.getState().nextCheckpointIndex === 2) {
+          acceptedPose = candidatePose
+          break
+        }
+      }
+    })
+
+    expect(acceptedPose).not.toBeNull()
+    const checkpointCentre = trackCurve.getPointAt(0.1)
+    expect(Math.hypot(
+      acceptedPose.x - checkpointCentre.x,
+      acceptedPose.z - checkpointCentre.z
+    )).toBeGreaterThan(1)
+
+    act(() => {
+      const laterPoint = trackCurve.getPointAt(0.14)
+      body.setTranslation({ x: laterPoint.x, y: laterPoint.y + 1, z: laterPoint.z })
+      window.mockKeys.reset = true
+      triggerFrames(1 / 60, 1)
+      window.mockKeys.reset = false
+    })
+
+    expect(body.translation().x).toBeCloseTo(acceptedPose.x, 5)
+    expect(body.translation().y).toBeCloseTo(acceptedPose.y, 5)
+    expect(body.translation().z).toBeCloseTo(acceptedPose.z, 5)
+    view.unmount()
+  })
+
   it('keeps continuous leaderboard progress between CP9 and the finish line', () => {
     const view = render(<App />)
     const body = getPlayerBody()

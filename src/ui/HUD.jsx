@@ -201,7 +201,7 @@ export default function HUD() {
         <section className="hud-readout hud-timing" aria-label="Race timing">
           <div className="timing-current"><span>Current</span><strong>{formatTime(safeNumber(currentTime))}</strong></div>
           <div className="timing-total"><span>Total</span><strong>{formatTime(safeNumber(totalTime) + safeNumber(currentTime))}</strong></div>
-          <div className="timing-best"><span>Best</span><strong>{bestLapTime > 0 ? formatTime(bestLapTime) : '--:--:---'}</strong></div>
+          <div className="timing-best"><span>PB</span><strong>{bestLapTime > 0 ? formatTime(bestLapTime) : '--:--:---'}</strong></div>
           {lastLapTime > 0 && <div className="timing-last"><span>Last</span><strong>{formatTime(lastLapTime)}</strong></div>}
         </section>
 
@@ -209,13 +209,6 @@ export default function HUD() {
           <span style={{ width: raceProgress + '%' }} />
         </div>
       </header>
-
-      <div className="hud-controls" aria-label="Driving controls">
-        <span><kbd>WASD</kbd> Drive</span>
-        <span><kbd>Space</kbd> Brake</span>
-        <span><kbd>R</kbd> Reset</span>
-        <span><kbd>Esc</kbd> Pause</span>
-      </div>
 
       <div className="hud-bottom-left minimap" aria-label="Track position map" role="img">
         <svg className="minimap-track" viewBox="0 0 100 100" aria-hidden="true" focusable="false">

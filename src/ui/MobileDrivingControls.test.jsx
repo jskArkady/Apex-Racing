@@ -124,4 +124,32 @@ describe('mobile driving controls', () => {
     expect(useGameStore.getState().gameState).toBe('paused')
     expect(useGameStore.getState().touchControls.forward).toBe(false)
   })
+
+  it('supports Enter and Space press-and-hold semantics', () => {
+    render(<MobileDrivingControls />)
+    const accelerator = screen.getByRole('button', { name: 'Accelerate' })
+    const brake = screen.getByRole('button', { name: 'Brake or reverse' })
+
+    fireEvent.keyDown(accelerator, { key: 'Enter', repeat: false })
+    expect(useGameStore.getState().touchControls.forward).toBe(true)
+    fireEvent.keyUp(screen.getByRole('button', { name: 'Accelerate' }), { key: 'Enter' })
+    expect(useGameStore.getState().touchControls.forward).toBe(false)
+
+    fireEvent.keyDown(brake, { key: ' ' })
+    expect(useGameStore.getState().touchControls.backward).toBe(true)
+    fireEvent.keyUp(brake, { key: ' ' })
+    expect(useGameStore.getState().touchControls.backward).toBe(false)
+  })
+
+  it('offers a latched assistive-technology click alternative', () => {
+    render(<MobileDrivingControls />)
+    const accelerator = screen.getByRole('button', { name: 'Accelerate' })
+
+    fireEvent.click(accelerator, { detail: 0 })
+    expect(useGameStore.getState().touchControls.forward).toBe(true)
+    expect(accelerator).toHaveAttribute('aria-pressed', 'true')
+
+    fireEvent.click(accelerator, { detail: 0 })
+    expect(useGameStore.getState().touchControls.forward).toBe(false)
+  })
 })

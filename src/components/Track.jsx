@@ -2,6 +2,10 @@ import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { RigidBody, TrimeshCollider } from '@react-three/rapier'
 import { TriMeshFlags } from '@dimforge/rapier3d-compat'
+import apexInfieldAlbedoUrl from '../assets/textures/apex-desert-infield-albedo-512.webp'
+import harbourInfieldAlbedoUrl from '../assets/textures/harbour-concrete-infield-albedo-512.webp'
+import templeInfieldAlbedoUrl from '../assets/textures/temple-turf-infield-albedo-512.webp'
+import asphaltAlbedoUrl from '../assets/textures/track-asphalt-albedo-512.webp'
 import { getTrackPreset } from '../utils/trackData'
 import {
   BARRIER_SEGMENTS,
@@ -16,11 +20,16 @@ import {
   HARBOUR_WATER,
   ROAD_SEGMENTS,
 } from './trackGeometry'
-import { useGameStore } from '../store/gameStore'
 
 const HARBOUR_TUNNEL_LIGHT_PRESETS = Object.freeze({
-  medium: Object.freeze({ intensity: 46, distance: 29, stride: 2 }),
-  high: Object.freeze({ intensity: 64, distance: 34, stride: 1 }),
+  medium: Object.freeze({ intensity: 38, distance: 30, stride: 2 }),
+  high: Object.freeze({ intensity: 52, distance: 34, stride: 1 }),
+})
+const FLOODLIGHT_STRIDES = Object.freeze({ low: Infinity, medium: 2, high: 1 })
+const INFIELD_ALBEDO_BY_VENUE = Object.freeze({
+  apex: apexInfieldAlbedoUrl,
+  harbour: harbourInfieldAlbedoUrl,
+  temple: templeInfieldAlbedoUrl,
 })
 
 function createSurfaceTexture(size, contrast = 0.35) {
@@ -66,10 +75,9 @@ export function createTrackTrimeshArgs(geometry) {
   ]
 }
 
-export default function Track({ track = getTrackPreset(), graphicsQuality }) {
+export default function Track({ track = getTrackPreset(), graphicsQuality = 'high' }) {
   const activeTrack = track ?? getTrackPreset()
   const activeGraphicsQuality = graphicsQuality
-    ?? useGameStore.getState().settings.graphics
   const trackCurve = activeTrack.curve
   const trackBounds = activeTrack.bounds
   const roadWidth = activeTrack.roadWidth ?? 16
@@ -97,6 +105,31 @@ export default function Track({ track = getTrackPreset(), graphicsQuality }) {
       Math.ceil(activeTrack.length / 10),
       roadWidth,
     )
+    const asphaltAlbedoTexture = new THREE.TextureLoader().load(asphaltAlbedoUrl)
+    asphaltAlbedoTexture.name = 'generated-track-asphalt-albedo'
+    asphaltAlbedoTexture.colorSpace = THREE.SRGBColorSpace
+    asphaltAlbedoTexture.wrapS = THREE.RepeatWrapping
+    asphaltAlbedoTexture.wrapT = THREE.RepeatWrapping
+    asphaltAlbedoTexture.minFilter = THREE.LinearMipmapLinearFilter
+    asphaltAlbedoTexture.magFilter = THREE.LinearFilter
+    asphaltAlbedoTexture.generateMipmaps = true
+    asphaltAlbedoTexture.anisotropy = 4
+    asphaltAlbedoTexture.repeat.set(7, 110)
+    const infieldAlbedoUrl = INFIELD_ALBEDO_BY_VENUE[activeTrack.venue]
+    const infieldAlbedoTexture = infieldAlbedoUrl
+      ? new THREE.TextureLoader().load(infieldAlbedoUrl)
+      : null
+    if (infieldAlbedoTexture) {
+      infieldAlbedoTexture.name = `generated-${activeTrack.venue}-infield-albedo`
+      infieldAlbedoTexture.colorSpace = THREE.SRGBColorSpace
+      infieldAlbedoTexture.wrapS = THREE.RepeatWrapping
+      infieldAlbedoTexture.wrapT = THREE.RepeatWrapping
+      infieldAlbedoTexture.minFilter = THREE.LinearMipmapLinearFilter
+      infieldAlbedoTexture.magFilter = THREE.LinearFilter
+      infieldAlbedoTexture.generateMipmaps = true
+      infieldAlbedoTexture.anisotropy = 2
+      infieldAlbedoTexture.repeat.set(70, 70)
+    }
     const asphaltTexture = createSurfaceTexture(128, 0.5)
     asphaltTexture.repeat.set(7, 110)
     const terrainTexture = createSurfaceTexture(96, 0.8)
@@ -109,6 +142,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality }) {
       sceneryGeometry,
       glowGeometry,
       catchFenceGeometry,
+      asphaltAlbedoTexture,
+      infieldAlbedoTexture,
       asphaltTexture,
       terrainTexture,
       roadColliderArgs: createTrackTrimeshArgs(roadColliderGeometry),
@@ -119,6 +154,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality }) {
         : [],
       roadMaterial: new THREE.MeshStandardMaterial({
         color: activeTrack.theme.roadColor,
+        map: asphaltAlbedoTexture,
         roughness: activeTrack.venue === 'harbour' ? 0.78 : 0.9,
         roughnessMap: asphaltTexture,
         bumpMap: asphaltTexture,
@@ -143,9 +179,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality }) {
       }),
       glowMaterial: new THREE.MeshBasicMaterial({
         vertexColors: true,
-        toneMapped: false,
         transparent: true,
-        opacity: 0.9,
+        opacity: 0.76,
       }),
       waterMaterial: activeTrack.venue === 'harbour'
         ? new THREE.MeshPhysicalMaterial({
@@ -173,6 +208,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality }) {
       assets.sceneryGeometry,
       assets.glowGeometry,
       assets.catchFenceGeometry,
+      assets.asphaltAlbedoTexture,
+      assets.infieldAlbedoTexture,
       assets.asphaltTexture,
       assets.terrainTexture,
       assets.roadMaterial,
@@ -191,6 +228,10 @@ export default function Track({ track = getTrackPreset(), graphicsQuality }) {
   const visibleTunnelLights = tunnelLightPreset
     ? assets.tunnelLights.filter((_, index) => index % tunnelLightPreset.stride === 0)
     : []
+  const floodlightStride = FLOODLIGHT_STRIDES[activeGraphicsQuality] ?? 1
+  const visibleFloodlights = Number.isFinite(floodlightStride)
+    ? assets.floodlights.filter((_, index) => index % floodlightStride === 0)
+    : []
 
   return (
     <group>
@@ -204,6 +245,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality }) {
           <boxGeometry args={[infieldWidth, 2, infieldDepth]} />
           <meshStandardMaterial
             color={activeTrack.theme.groundColor}
+            map={assets.infieldAlbedoTexture}
             roughness={1}
             roughnessMap={assets.terrainTexture}
             bumpMap={assets.terrainTexture}
@@ -242,7 +284,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality }) {
       <mesh
         geometry={assets.sceneryGeometry}
         material={assets.sceneryMaterial}
-        castShadow
+        castShadow={activeGraphicsQuality === 'high'}
         receiveShadow
       />
       <mesh geometry={assets.glowGeometry} material={assets.glowMaterial} />
@@ -259,9 +301,10 @@ export default function Track({ track = getTrackPreset(), graphicsQuality }) {
         renderOrder={2}
       />
 
-      {assets.floodlights.map((position, index) => (
+      {visibleFloodlights.map((position, index) => (
         <pointLight
           key={index}
+          name={`circuit-floodlight-${index}`}
           position={position}
           color="#ffe1ad"
           intensity={92}

@@ -184,8 +184,36 @@ function DetailBox({ detail, palette, accent }) {
   )
 }
 
-function Wheel({ index, side, x, z, radius, wheelRefs, showTyreTags = true }) {
+function Wheel({
+  index,
+  side,
+  x,
+  z,
+  radius,
+  wheelRefs,
+  showTyreTags = true,
+  compact = false,
+}) {
   const width = radius > 0.4 ? 0.34 : 0.29
+  if (compact) {
+    return (
+      <group
+        name={`formula-wheel-${index}`}
+        ref={(node) => { wheelRefs.current[index] = node }}
+        position={[x, radius, z]}
+      >
+        <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[radius, radius * 0.985, width, 14, 1]} />
+          <meshStandardMaterial color={TYRE} roughness={0.92} metalness={0.02} />
+        </mesh>
+        <mesh rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[radius * 0.34, radius * 0.34, width + 0.018, 10]} />
+          <meshStandardMaterial color={METAL} roughness={0.28} metalness={0.88} />
+        </mesh>
+      </group>
+    )
+  }
+
   return (
     <group
       name={`formula-wheel-${index}`}
@@ -248,10 +276,12 @@ export default function FormulaCar({
 }) {
   const rootRef = useRef()
   const wheelRefs = useRef([])
-  // Only an explicit AI race LOD opts out of micro geometry. A player car is
-  // always rendered as the hero asset so an accidental caller override cannot
-  // degrade the primary chase-camera silhouette.
-  const showHeroDetail = isPlayer || detail !== 'race'
+  // The player remains the close-camera hero. AI cars get a race LOD, with an
+  // additional low-quality silhouette tier that removes hidden mechanical
+  // pieces and multi-element aero while retaining the recognizable outline.
+  const showHeroDetail = isPlayer || detail === 'hero'
+  const isLowDetail = !isPlayer && detail === 'low'
+  const showRaceDetail = !isLowDetail
   const palette = useMemo(() => {
     const primary = new THREE.Color(color)
     return {
@@ -300,7 +330,7 @@ export default function FormulaCar({
           <meshStandardMaterial color={accent} roughness={0.48} metalness={0.35} />
         </mesh>
       ))}
-      {FLOOR_FENCES.map(x => (
+      {showRaceDetail && FLOOR_FENCES.map(x => (
         <mesh key={`floor-fence-${x}`} position={[x, 0.31, -0.72]} rotation={[0.08, 0, 0]}>
           <boxGeometry args={[0.035, 0.28, 1.04]} />
           <meshStandardMaterial color={CARBON_EDGE} roughness={0.44} metalness={0.66} />
@@ -320,13 +350,13 @@ export default function FormulaCar({
       >
         <meshPhysicalMaterial color={palette.primary} roughness={0.26} metalness={0.34} clearcoat={0.72} clearcoatRoughness={0.2} />
       </TaperedShell>
-      {LIVERY_DETAILS.map(detail => (
+      {showRaceDetail && LIVERY_DETAILS.map(detail => (
         <DetailBox key={detail.key} detail={detail} palette={palette} accent={accent} />
       ))}
-      <mesh position={[0, 0.9, -0.28]} rotation={[0.06, 0, 0]}>
+      {showRaceDetail && <mesh position={[0, 0.9, -0.28]} rotation={[0.06, 0, 0]}>
         <boxGeometry args={[0.28, 0.035, 1.28]} />
         <meshStandardMaterial color={accent} roughness={0.3} metalness={0.38} />
-      </mesh>
+      </mesh>}
       <TaperedShell
         position={[0, 0.39, -1.74]}
         frontWidth={0.2}
@@ -351,14 +381,14 @@ export default function FormulaCar({
           >
             <meshPhysicalMaterial color={palette.shadow} roughness={0.3} metalness={0.38} clearcoat={0.62} />
           </TaperedShell>
-          <mesh position={[x, 0.59, -0.36]} rotation={[Math.PI / 2, 0, 0]}>
+          {showRaceDetail && <mesh position={[x, 0.59, -0.36]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.26, 0.17, 0.18, 8]} />
             <meshStandardMaterial color={CARBON} roughness={0.78} metalness={0.18} />
-          </mesh>
-          <mesh position={[x, 0.64, 0.06]}>
+          </mesh>}
+          {showRaceDetail && <mesh position={[x, 0.64, 0.06]}>
             <boxGeometry args={[0.48, 0.055, 1.02]} />
             <meshStandardMaterial color={accent} roughness={0.38} metalness={0.34} />
-          </mesh>
+          </mesh>}
           {showHeroDetail && SIDE_DECALS.map((detail, index) => (
             <mesh
               key={`sidepod-decal-${x}-${index}`}
@@ -399,7 +429,7 @@ export default function FormulaCar({
         <boxGeometry args={[0.16, 0.1, 0.24]} />
         <meshStandardMaterial color="#e9efeb" roughness={0.26} metalness={0.52} />
       </mesh>
-      {[-0.64, 0.64].map(x => (
+      {showRaceDetail && [-0.64, 0.64].map(x => (
         <group key={`mirror-${x}`}>
           <SuspensionStrut
             name="formula-mirror-support"
@@ -432,7 +462,8 @@ export default function FormulaCar({
       </mesh>
 
       {/* Multi-element wings and endplates create recognizable aero surfaces. */}
-      {FRONT_WING_PLANES.map(({ position, rotation, size, material }, index) => (
+      {(isLowDetail ? FRONT_WING_PLANES.slice(0, 1) : FRONT_WING_PLANES)
+        .map(({ position, rotation, size, material }, index) => (
         <AeroPlane
           key={`front-wing-plane-${index}`}
           name={`formula-front-wing-${index}`}
@@ -451,13 +482,14 @@ export default function FormulaCar({
           <meshStandardMaterial color={palette.primary} roughness={0.34} metalness={0.54} />
         </mesh>
       ))}
-      {[-0.86, 0.86].map(x => (
+      {showRaceDetail && [-0.86, 0.86].map(x => (
         <mesh key={`front-slot-gap-${x}`} position={[x, 0.44, -2.03]} rotation={[0, 0, x > 0 ? 0.18 : -0.18]}>
           <boxGeometry args={[0.06, 0.24, 0.5]} />
           <meshStandardMaterial color={CARBON} roughness={0.48} metalness={0.58} />
         </mesh>
       ))}
-      {REAR_WING_PLANES.map(({ position, rotation, size, material }, index) => (
+      {(isLowDetail ? REAR_WING_PLANES.slice(0, 1) : REAR_WING_PLANES)
+        .map(({ position, rotation, size, material }, index) => (
         <AeroPlane
           key={`rear-wing-plane-${index}`}
           name={`formula-rear-wing-${index}`}
@@ -476,7 +508,7 @@ export default function FormulaCar({
           <meshStandardMaterial color={CARBON} roughness={0.44} metalness={0.64} />
         </mesh>
       ))}
-      {[-0.52, 0.52].map(x => (
+      {showRaceDetail && [-0.52, 0.52].map(x => (
         <mesh key={`beam-wing-${x}`} position={[x, 0.58, 1.47]} rotation={[-0.18, 0, 0]}>
           <boxGeometry args={[0.42, 0.045, 0.18]} />
           <meshStandardMaterial color={accent} roughness={0.38} metalness={0.48} />
@@ -486,13 +518,13 @@ export default function FormulaCar({
         <boxGeometry args={[0.13, 0.7, 0.13]} />
         <meshStandardMaterial color={CARBON_EDGE} roughness={0.4} metalness={0.7} />
       </mesh>
-      {REAR_LIGHT_STRIPS.map(([x, y, z], index) => (
+      {REAR_LIGHT_STRIPS.filter((_, index) => showRaceDetail || index === 1).map(([x, y, z], index) => (
         <mesh key={`rear-light-${index}`} position={[x, y, z]}>
           <boxGeometry args={index === 1 ? [0.2, 0.09, 0.05] : [0.055, 0.26, 0.05]} />
           <meshStandardMaterial color="#ff2727" emissive="#d40808" emissiveIntensity={2.7} />
         </mesh>
       ))}
-      {SIDE_SAFETY_LIGHTS.map(([x, y, z]) => (
+      {showRaceDetail && SIDE_SAFETY_LIGHTS.map(([x, y, z]) => (
         <mesh key={`side-safety-light-${x}`} position={[x, y, z]}>
           <boxGeometry args={[0.05, 0.16, 0.06]} />
           <meshStandardMaterial color="#41d6ff" emissive="#1789ff" emissiveIntensity={1.6} roughness={0.3} />
@@ -518,6 +550,7 @@ export default function FormulaCar({
           {...wheel}
           wheelRefs={wheelRefs}
           showTyreTags={showHeroDetail}
+          compact={isLowDetail}
         />
       ))}
     </group>

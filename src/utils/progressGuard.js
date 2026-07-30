@@ -254,6 +254,7 @@ const rejectProgress = (state, reason) => {
   state.segmentValid = false;
   state.reason = reason;
   state.timingReanchorAllowed = false;
+  state.pendingForwardSeamCrossing = false;
   return false;
 };
 
@@ -264,8 +265,14 @@ export function createProgressGuardState(segmentValid = true) {
     curveProgress: 0,
     segmentValid,
     reason: null,
-    timingReanchorAllowed: false
+    timingReanchorAllowed: false,
+    pendingForwardSeamCrossing: false,
+    confirmedForwardSeamCrossing: false
   };
+}
+
+export function didConfirmForwardSeamCrossing(state) {
+  return state?.confirmedForwardSeamCrossing === true;
 }
 
 /**
@@ -290,6 +297,7 @@ export function updateProgressGuardState(
   trackLength
 ) {
   if (!state) return false;
+  state.confirmedForwardSeamCrossing = false;
 
   if (
     !isFiniteVector(worldPosition)
@@ -322,8 +330,16 @@ export function updateProgressGuardState(
       );
       timingReanchorAllowed = suspendedDisplacement <= suspendedDisplacementLimit;
     }
+    const normalizedProgress = wrapProgress(curveProgress);
+    const wrappedDelta = state.initialized
+      ? getSignedWrappedProgressDelta(state.curveProgress, normalizedProgress)
+      : 0;
     rejectProgress(state, 'timing-discontinuity');
     state.timingReanchorAllowed = timingReanchorAllowed;
+    state.pendingForwardSeamCrossing = timingReanchorAllowed
+      && state.curveProgress > 0.5
+      && normalizedProgress < 0.5
+      && wrappedDelta > 0;
     return false;
   }
 
@@ -362,6 +378,8 @@ export function updateProgressGuardState(
     state.segmentValid = true;
     state.reason = 'continuity-reanchored';
     state.timingReanchorAllowed = false;
+    state.confirmedForwardSeamCrossing = state.pendingForwardSeamCrossing === true;
+    state.pendingForwardSeamCrossing = false;
     return false;
   }
 
@@ -400,6 +418,7 @@ export function updateProgressGuardState(
   state.segmentValid = true;
   state.reason = null;
   state.timingReanchorAllowed = false;
+  state.pendingForwardSeamCrossing = false;
   return true;
 }
 

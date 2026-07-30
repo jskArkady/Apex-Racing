@@ -5,7 +5,11 @@ import { CoefficientCombineRule } from '@dimforge/rapier3d-compat'
 import * as THREE from 'three'
 import { useGameStore } from '../store/gameStore'
 import { getTrackPreset } from '../utils/trackData'
-import { handleCheckpointPass, hasCrossedFinishLine } from '../utils/raceLogic'
+import {
+  calculateLiveRaceScore,
+  handleCheckpointPass,
+  hasCrossedFinishLine
+} from '../utils/raceLogic'
 import { getStartGridPose } from '../utils/startGrid'
 import FormulaCar from './FormulaCar'
 import { isClearlyBelowTrack } from '../utils/drivingGuards'
@@ -25,6 +29,7 @@ import {
 } from '../utils/vehicleDynamics'
 import {
   createProgressGuardState,
+  didConfirmForwardSeamCrossing,
   getSignedWrappedProgressDelta,
   snapProgressAtClosedCurveSeam,
   updateProgressGuardState
@@ -150,13 +155,14 @@ export default function Opponents({ track = getTrackPreset() }) {
           gameState={gameState}
           raceSessionId={raceSessionId}
           track={raceTrack}
+          visualDetail="race"
         />
       ))}
     </group>
   )
 }
 
-function AIOpponent({ data, gameState, raceSessionId, track }) {
+function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
   const bodyRef = useRef()
   const trackCurve = track.curve
   const trackLength = track.length
@@ -350,6 +356,7 @@ function AIOpponent({ data, gameState, raceSessionId, track }) {
       window.racerPositions[myId] = racerPosObj
       return
     }
+    currentTimeRef.current += elapsedTimeDelta
     
     const pos = bodyRef.current.translation()
     const rot = bodyRef.current.rotation()
@@ -451,26 +458,13 @@ function AIOpponent({ data, gameState, raceSessionId, track }) {
        driveCommandRef.current.steeringInput = 0
        driveCommandRef.current.gripScale = 1
 
-       // Periodic leaderboard reports intentionally lag the controller clock
-       // by at most 100ms. A physical recovery must preserve the last accepted
-       // race time instead of publishing that pending sample as a time jump.
-       const acceptedRacer = useGameStore.getState().racers
-         .find(racer => racer.id === myId)
-       if (acceptedRacer) {
-         currentTimeRef.current = Number.isFinite(acceptedRacer.currentTime)
-           ? acceptedRacer.currentTime
-           : currentTimeRef.current
-         totalTimeRef.current = Number.isFinite(acceptedRacer.totalTime)
-           ? acceptedRacer.totalTime
-           : totalTimeRef.current
-         lastCheckpointTimeRef.current = Number.isFinite(acceptedRacer.lastCheckpointTime)
-           ? acceptedRacer.lastCheckpointTime
-           : lastCheckpointTimeRef.current
-       }
-
        if (!window.racerProgress) window.racerProgress = {}
        if (!window.racerPositions) window.racerPositions = {}
-       window.racerProgress[myId] = lapRef.current * 100 + recoveryProgress * 100
+       window.racerProgress[myId] = calculateLiveRaceScore(
+         lapRef.current,
+         nextCheckpointIndexRef.current,
+         recoveryProgress
+       )
        const racerPosObj = racerPosObjRef.current
        racerPosObj.x = tempCurvePoint.x
        racerPosObj.z = tempCurvePoint.z
@@ -573,8 +567,11 @@ function AIOpponent({ data, gameState, raceSessionId, track }) {
       currentT,
       centerlineDistance,
       currentSpeed,
-      frameDelta,
+      elapsedTimeDelta,
       trackLength
+    )
+    const confirmedForwardSeamCrossing = didConfirmForwardSeamCrossing(
+      progressGuardRef.current
     )
 
     // 2. Wall avoidance uses the selected venue's physical road width and the
@@ -761,11 +758,6 @@ function AIOpponent({ data, gameState, raceSessionId, track }) {
     driveCommandRef.current.steeringInput = steeringInput
     driveCommandRef.current.gripScale = gripScale
 
-    // Increment current time if not finished
-    if (!finishedRef.current) {
-      currentTimeRef.current += elapsedTimeDelta
-    }
-
     // Checkpoint proximity detection
     const aiCPProgress = nextCheckpointIndexRef.current / (totalCheckpoints || 1)
     trackCurve.getPointAt(aiCPProgress, tempCurvePoint)
@@ -782,9 +774,11 @@ function AIOpponent({ data, gameState, raceSessionId, track }) {
 
     let progressChangedThisFrame = false
     const reachedCheckpoint = nextCheckpointIndexRef.current === 0
-      ? hasCrossedFinishLine(previousT, currentT)
+      ? hasCrossedFinishLine(previousT, currentT) || confirmedForwardSeamCrossing
       : cpDist < 25
-    if (reachedCheckpoint && hasValidCheckpointDirection && hasContinuousProgress) {
+    const hasCheckpointContinuity = hasContinuousProgress
+      || (nextCheckpointIndexRef.current === 0 && confirmedForwardSeamCrossing)
+    if (reachedCheckpoint && hasValidCheckpointDirection && hasCheckpointContinuity) {
       const aiState = {
         nextCheckpointIndex: nextCheckpointIndexRef.current,
         totalCheckpoints: totalCheckpoints,
@@ -828,7 +822,11 @@ function AIOpponent({ data, gameState, raceSessionId, track }) {
     if (!window.racerProgress) window.racerProgress = {}
     if (!window.racerPositions) window.racerPositions = {}
     
-    window.racerProgress[myId] = lapRef.current * 100 + progressRef.current * 100
+    window.racerProgress[myId] = calculateLiveRaceScore(
+      lapRef.current,
+      nextCheckpointIndexRef.current,
+      progressRef.current
+    )
     
     const racerPosObj = racerPosObjRef.current
     racerPosObj.x = pos.x
@@ -880,7 +878,7 @@ function AIOpponent({ data, gameState, raceSessionId, track }) {
         <FormulaCar
           color={data.color}
           accent={data.accent}
-          detail="race"
+          detail={visualDetail}
           rigidBodyRef={bodyRef}
         />
       </group>

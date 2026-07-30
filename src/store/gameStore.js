@@ -19,6 +19,58 @@ const nextRaceSessionId = (value) => (
 );
 
 const normalizeTrackId = (trackId) => isTrackId(trackId) ? trackId : DEFAULT_TRACK_ID;
+export const PERSONAL_BEST_STORAGE_KEY = 'apex-racing:personal-bests:v1';
+
+const sanitizePersonalBests = (value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).filter(([trackId, time]) => (
+      isTrackId(trackId)
+      && Number.isFinite(time)
+      && time > 0
+      && time < 24 * 60 * 60
+    ))
+  );
+};
+
+const loadPersonalBests = () => {
+  if (typeof window === 'undefined' || !window.localStorage) return {};
+  try {
+    return sanitizePersonalBests(JSON.parse(
+      window.localStorage.getItem(PERSONAL_BEST_STORAGE_KEY) ?? '{}'
+    ));
+  } catch {
+    return {};
+  }
+};
+
+const savePersonalBests = (personalBests) => {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    window.localStorage.setItem(
+      PERSONAL_BEST_STORAGE_KEY,
+      JSON.stringify(sanitizePersonalBests(personalBests))
+    );
+  } catch {
+    // Storage can be unavailable in privacy mode. Race completion must remain
+    // functional even when persistence is denied.
+  }
+};
+
+const updatePersonalBest = (personalBests, trackId, lapTime) => {
+  const safeBests = sanitizePersonalBests(personalBests);
+  if (!isTrackId(trackId) || !Number.isFinite(lapTime) || lapTime <= 0) {
+    return safeBests;
+  }
+  const currentBest = safeBests[trackId];
+  if (Number.isFinite(currentBest) && currentBest <= lapTime) return safeBests;
+  return { ...safeBests, [trackId]: lapTime };
+};
+
+const getPersonalBest = (personalBests, trackId) => {
+  const value = personalBests?.[normalizeTrackId(trackId)];
+  return Number.isFinite(value) && value > 0 ? value : 0;
+};
 
 const TOUCH_CONTROL_NAMES = [
   'forward',
@@ -47,18 +99,21 @@ const createRaceReset = (
   gameMode,
   gameState = 'countdown',
   previousSessionId = 0,
-  selectedTrackId = DEFAULT_TRACK_ID
-) => ({
+  selectedTrackId = DEFAULT_TRACK_ID,
+  personalBests = {}
+) => {
+  const safeTrackId = normalizeTrackId(selectedTrackId);
+  return {
   gameState,
   gameMode,
-  selectedTrackId: normalizeTrackId(selectedTrackId),
+  selectedTrackId: safeTrackId,
   raceSessionId: nextRaceSessionId(previousSessionId),
   lap: 1,
   maxLaps: RACE_LAPS,
   position: 1,
   totalRacers: gameMode === 'time_trial' ? 1 : 4,
   currentTime: 0,
-  bestLapTime: 0,
+  bestLapTime: getPersonalBest(personalBests, safeTrackId),
   lastLapTime: 0,
   totalTime: 0,
   countdown: gameState === 'countdown' ? 3 : 0,
@@ -69,8 +124,10 @@ const createRaceReset = (
   totalCheckpoints: 10,
   isDrivingBackwards: false,
   touchControls: createTouchControls(),
-  racers: createRacers(gameMode)
-});
+  racers: createRacers(gameMode),
+  personalBests: sanitizePersonalBests(personalBests)
+  };
+};
 
 const finiteNonNegativeOr = (value, fallback) => (
   Number.isFinite(value) && value >= 0 ? value : fallback
@@ -86,6 +143,8 @@ const getLeaderboardPosition = (racers, fallback = 1) => {
   return rank === -1 ? fallback : rank;
 };
 
+const initialPersonalBests = loadPersonalBests();
+
 export const useGameStore = create((set) => ({
   gameState: 'menu', // 'menu', 'countdown', 'playing', 'paused', 'finished'
   gameMode: 'single', // 'single', 'time_trial'
@@ -95,7 +154,6 @@ export const useGameStore = create((set) => ({
   // Settings
   settings: {
     audio: 50,
-    graphics: 'high',
   },
   updateSettings: (newSettings) => set((state) => {
     const candidate = newSettings && typeof newSettings === 'object' ? newSettings : {};
@@ -105,10 +163,6 @@ export const useGameStore = create((set) => ({
       updated.audio = Number.isFinite(audio)
         ? Math.max(0, Math.min(100, audio))
         : state.settings.audio;
-    }
-    if (Object.prototype.hasOwnProperty.call(candidate, 'graphics')
-      && ['low', 'medium', 'high'].includes(candidate.graphics)) {
-      updated.graphics = candidate.graphics;
     }
     return { settings: updated };
   }),
@@ -121,7 +175,7 @@ export const useGameStore = create((set) => ({
   
   // Times
   currentTime: 0,
-  bestLapTime: 0,
+  bestLapTime: getPersonalBest(initialPersonalBests, DEFAULT_TRACK_ID),
   lastLapTime: 0,
   totalTime: 0,
   countdown: 3,
@@ -162,24 +216,33 @@ export const useGameStore = create((set) => ({
 
   // Racers
   racers: createRacers(),
+  personalBests: initialPersonalBests,
   
   // Actions
   startGame: (mode = 'single') => set((state) => {
     if (state.gameState !== 'menu') return state;
     const safeMode = mode === 'time_trial' ? 'time_trial' : 'single';
-    return createRaceReset(safeMode, 'countdown', state.raceSessionId, state.selectedTrackId);
+    return createRaceReset(
+      safeMode,
+      'countdown',
+      state.raceSessionId,
+      state.selectedTrackId,
+      state.personalBests
+    );
   }),
   restartRace: () => set((state) => createRaceReset(
     state.gameMode,
     'countdown',
     state.raceSessionId,
-    state.selectedTrackId
+    state.selectedTrackId,
+    state.personalBests
   )),
   returnToMenu: () => set((state) => createRaceReset(
     state.gameMode,
     'menu',
     state.raceSessionId,
-    state.selectedTrackId
+    state.selectedTrackId,
+    state.personalBests
   )),
   selectTrack: (trackId) => set((state) => {
     if (state.gameState !== 'menu') return state;
@@ -227,11 +290,18 @@ export const useGameStore = create((set) => ({
           currentTime: activeLapTime
         }
       : racer);
+    const personalBests = updatePersonalBest(
+      state.personalBests,
+      state.selectedTrackId,
+      finalLapTime
+    );
+    if (personalBests !== state.personalBests) savePersonalBests(personalBests);
     return {
       gameState: 'finished',
       totalTime: finalTotalTime,
       lastLapTime: finalLapTime,
       bestLapTime,
+      personalBests,
       racers,
       touchControls: createTouchControls(),
       position: getLeaderboardPosition(racers, state.position)
@@ -263,10 +333,19 @@ export const useGameStore = create((set) => ({
           currentTime: finiteNonNegativeOr(nextState.currentTime, racer.currentTime)
         }
       : racer);
+    const personalBests = nextState.gameState === 'finished'
+      ? updatePersonalBest(
+          state.personalBests,
+          state.selectedTrackId,
+          nextState.lastLapTime
+        )
+      : state.personalBests;
+    if (personalBests !== state.personalBests) savePersonalBests(personalBests);
 
     return {
       ...nextState,
       racers,
+      personalBests,
       ...(nextState.gameState === 'finished'
         ? { touchControls: createTouchControls() }
         : {}),

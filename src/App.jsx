@@ -8,6 +8,7 @@ import Car from './components/Car'
 import Track from './components/Track'
 import Opponents from './components/Opponents'
 import RaceLighting from './components/RaceLighting'
+import SkyBackdrop from './components/SkyBackdrop'
 import MainMenu from './ui/MainMenu'
 import HUD from './ui/HUD'
 import PauseMenu from './ui/PauseMenu'
@@ -100,18 +101,12 @@ function App() {
   const gameMode = useGameStore(state => state.gameMode)
   const selectedTrackId = useGameStore(state => state.selectedTrackId)
   const pauseGame = useGameStore(state => state.pauseGame)
-  const graphicsQuality = useGameStore(state => state.settings.graphics)
   const audioVolume = useGameStore(state => state.settings.audio)
   const selectedTrack = useMemo(() => getTrackPreset(selectedTrackId), [selectedTrackId])
   const environment = useMemo(() => ({
     ...DEFAULT_TRACK_ENVIRONMENT,
     ...selectedTrack.environment,
   }), [selectedTrack])
-  const shadowsEnabled = graphicsQuality !== 'low'
-  const renderDpr = graphicsQuality === 'low'
-    ? 1
-    : graphicsQuality === 'medium' ? [1, 1.15] : [1, 1.25]
-
   useEffect(() => {
     if (!visualCaptureRequest) return undefined
 
@@ -169,7 +164,7 @@ function App() {
       }
     }
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !e.repeat) {
         const state = useGameStore.getState().gameState
         if (state === 'playing' || state === 'countdown') {
           useGameStore.getState().pauseGame()
@@ -189,8 +184,11 @@ function App() {
   return (
     <KeyboardControls map={keyboardMap}>
       <Canvas
-        shadows={shadowsEnabled}
-        dpr={renderDpr}
+        shadows
+        dpr={[1, 1.25]}
+        frameloop={gameState === 'menu' || gameState === 'paused' || gameState === 'finished'
+          ? 'demand'
+          : 'always'}
         camera={{ position: [0, 5, 12], fov: 58, near: 0.1, far: 1600 }}
         gl={{
           antialias: true,
@@ -200,11 +198,12 @@ function App() {
       >
         <color attach="background" args={[environment.skyColor]} />
         <fog attach="fog" args={[environment.fogColor, environment.fogNear, environment.fogFar]} />
+        <SkyBackdrop track={selectedTrack} />
         {environment.stars && <NightStars />}
         <RaceLighting
           environment={environment}
-          graphicsQuality={graphicsQuality}
-          shadowsEnabled={shadowsEnabled}
+          graphicsQuality="high"
+          shadowsEnabled
           track={selectedTrack}
           gameMode={gameMode}
         />
@@ -216,7 +215,7 @@ function App() {
             gravity={[0, -9.81, 0]}
             timeStep={VEHICLE_DYNAMICS.physicsStep}
           >
-            <Track track={selectedTrack} />
+            <Track track={selectedTrack} graphicsQuality="high" />
             <Car
               track={selectedTrack}
               captureRequest={visualCaptureRequest}

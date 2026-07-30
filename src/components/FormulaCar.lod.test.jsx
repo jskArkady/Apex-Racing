@@ -57,4 +57,19 @@ describe('FormulaCar visual LOD', () => {
     expect(countNamed(container, 'front-active-hinge-left')).toBe(0)
     expect(countNamed(container, 'rear-overtake-mode-strip')).toBe(0)
   })
+
+  it('adds a low-quality silhouette tier below the normal race LOD', () => {
+    const view = render(<FormulaCar detail="race" />)
+    const raceMeshCount = countMeshes(view.container)
+
+    view.rerender(<FormulaCar detail="low" />)
+    const lowMeshCount = countMeshes(view.container)
+
+    expect(countNamed(view.container, 'formula-monocoque')).toBe(1)
+    expect(countNamed(view.container, 'formula-halo')).toBe(1)
+    expect(view.container.querySelectorAll('group[name^="formula-wheel-"]')).toHaveLength(4)
+    expect(view.container.querySelectorAll('[name^="formula-front-wing-"]')).toHaveLength(1)
+    expect(view.container.querySelectorAll('[name^="formula-rear-wing-"]')).toHaveLength(1)
+    expect(lowMeshCount).toBeLessThanOrEqual(Math.floor(raceMeshCount * 0.65))
+  })
 })

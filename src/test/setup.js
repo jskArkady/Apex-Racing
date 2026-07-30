@@ -1,4 +1,4 @@
-import { vi, beforeEach } from 'vitest';
+import { vi, afterAll, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useMemo } from 'react';
 global.React = React;
@@ -45,6 +45,34 @@ global.AudioContext = class {
   destination = {};
 };
 global.webkitAudioContext = global.AudioContext;
+
+// React DOM does not understand R3F intrinsic tags such as <mesh> and
+// <boxGeometry>. These warnings are expected from the deliberate jsdom scene
+// mock and previously buried real assertion output under hundreds of thousands
+// of lines. Suppress only the known renderer-mismatch messages; application
+// warnings and every other React error still reach stderr.
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const isExpectedSceneMockMessage = (args) => {
+  const message = args.map(value => String(value)).join(' ');
+  return message.includes('is using incorrect casing')
+    || message.includes('is unrecognized in this browser')
+    || message.includes('React does not recognize the')
+    || message.includes('for a non-boolean attribute')
+    || message.includes('THREE.WARNING: Multiple instances of Three.js');
+};
+
+console.error = (...args) => {
+  if (!isExpectedSceneMockMessage(args)) originalConsoleError(...args);
+};
+console.warn = (...args) => {
+  if (!isExpectedSceneMockMessage(args)) originalConsoleWarn(...args);
+};
+
+afterAll(() => {
+  console.error = originalConsoleError;
+  console.warn = originalConsoleWarn;
+});
 
 // ----------------------------------------------------
 // B. Mock R3F Frame Scheduler & Canvas
@@ -99,10 +127,12 @@ vi.mock('@react-three/fiber', async () => {
   const actual = await vi.importActual('@react-three/fiber');
   return {
     ...actual,
-    Canvas: ({ children, shadows, dpr }) => React.createElement('div', {
+    Canvas: ({ children, shadows, dpr, frameloop, gl }) => React.createElement('div', {
       'data-testid': 'r3f-canvas',
       'data-shadows': String(Boolean(shadows)),
-      'data-dpr': JSON.stringify(dpr)
+      'data-dpr': JSON.stringify(dpr),
+      'data-frameloop': frameloop,
+      'data-antialias': String(gl?.antialias !== false)
     }, children),
     useFrame: (callback) => {
       useEffect(() => {

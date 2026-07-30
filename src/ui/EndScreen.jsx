@@ -1,5 +1,7 @@
+import { useRef } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { formatTime } from '../utils/formatTime'
+import { useDialogFocus } from './useDialogFocus'
 
 const ordinal = (value) => {
   const number = Number.isFinite(value) ? value : 1
@@ -14,9 +16,18 @@ export default function EndScreen() {
     gameMode, restartRace, returnToMenu
   } = useGameStore()
   const isTimeTrial = gameMode === 'time_trial'
+  const raceAgainRef = useRef(null)
+  const dialogRef = useDialogFocus(raceAgainRef)
 
   return (
-    <div className="menu-overlay finish-overlay" role="dialog" aria-modal="true" aria-labelledby="finish-title">
+    <div
+      ref={dialogRef}
+      className="menu-overlay finish-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="finish-title"
+      tabIndex={-1}
+    >
       <section className="menu-content finish-content">
         <div className="menu-heading">
           <span className="eyebrow">{isTimeTrial ? 'Session complete' : 'Chequered flag'}</span>
@@ -30,12 +41,12 @@ export default function EndScreen() {
 
         <dl className="result-times">
           <div><dt>Total time</dt><dd>{formatTime(totalTime)}</dd></div>
-          <div><dt>Best lap</dt><dd>{bestLapTime > 0 ? formatTime(bestLapTime) : '--:--:---'}</dd></div>
+          <div><dt>Personal best</dt><dd>{bestLapTime > 0 ? formatTime(bestLapTime) : '--:--:---'}</dd></div>
           <div><dt>Final lap</dt><dd>{lastLapTime > 0 ? formatTime(lastLapTime) : '--:--:---'}</dd></div>
         </dl>
 
         <div className="menu-actions finish-actions">
-          <button className="btn btn-primary interactive" onClick={restartRace}>Race Again</button>
+          <button ref={raceAgainRef} className="btn btn-primary interactive" onClick={restartRace}>Race Again</button>
           <button className="btn interactive" onClick={returnToMenu}>Continue</button>
         </div>
       </section>
