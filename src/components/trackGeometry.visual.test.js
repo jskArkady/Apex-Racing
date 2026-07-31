@@ -3,12 +3,24 @@ import * as THREE from 'three'
 import { START_FINISH_PROGRESS, TRACK_CENTERLINE_Y, TRACK_PRESETS, trackCurve, trackLength } from '../utils/trackData'
 import { START_GRID, START_GRID_DISTANCE_BEHIND_LINE, getStartGridPose } from '../utils/startGrid'
 import {
+  BARRIER_GRAPHICS_BOTTOM_OFFSET,
+  BARRIER_GRAPHICS_HEIGHT,
+  BARRIER_SEGMENTS,
+  createBarrierGraphicsGeometry,
   createBarrierGeometry,
   createCatchFenceGeometry,
   createCircuitGlowGeometry,
   createCircuitSceneryGeometry,
+  createCrowdPanelGeometry,
+  createGantryDisplayGeometry,
+  createHarbourBuildingFacadeGeometry,
+  createHarbourRetainingWallFacadeGeometry,
+  createHarbourTunnelCeilingPortalGeometry,
+  createHarbourTunnelWallGeometry,
+  createPitGarageFacadeGeometry,
   createRoadColliderGeometry,
   createRoadGeometry,
+  createTempleTreeBillboardGeometry,
   CHEVRON_LANE_CENTERS,
   CURB_CENTER_OFFSET,
   CURB_LENGTH_FACTOR,
@@ -18,20 +30,27 @@ import {
   EDGE_LINE_OFFSET,
   EDGE_LINE_WIDTH,
   FINISH_LINE_LEVEL,
+  GANTRY_DISPLAY_LAYOUTS,
   getCurbSegmentLength,
   getFloodlightPositions,
   getHarbourTunnelLayout,
   getHarbourTunnelLightingLayout,
+  GRANDSTAND_LAYOUTS,
   HARBOUR_BUILDINGS,
+  HARBOUR_RETAINING_WALL_LAYOUT,
   HARBOUR_SWIMMING_POOL_PANELS,
   HARBOUR_TUNNEL_END_PROGRESS,
   HARBOUR_TUNNEL_LIGHT_COUNT,
   HARBOUR_TUNNEL_LIGHT_HEIGHT,
+  HARBOUR_TUNNEL_LINER_INNER_OFFSET,
   HARBOUR_TUNNEL_PANEL_OVERLAP,
+  HARBOUR_TUNNEL_ROOF_CENTER_Y,
+  HARBOUR_TUNNEL_ROOF_HEIGHT,
   HARBOUR_TUNNEL_ROOF_UNDERSIDE,
   HARBOUR_TUNNEL_START_PROGRESS,
   HARBOUR_WATER,
   HARBOUR_WATER_SURFACE_Y,
+  PIT_GARAGE_FACADE_LAYOUTS,
   ROAD_SEGMENTS,
   ROAD_WIDTH,
   ROAD_TOP_OFFSET,
@@ -43,6 +62,7 @@ import {
   START_LIGHT_LATERALS,
   SURFACE_LEVELS,
   TEMPLE_BANKING_LAYOUT,
+  TEMPLE_TREE_LAYOUT,
 } from './trackGeometry'
 
 describe('circuit visual geometry', () => {
@@ -52,7 +72,32 @@ describe('circuit visual geometry', () => {
         createRoadGeometry(preset.curve, Math.ceil(preset.length / 3.5), preset.roadWidth),
         createRoadColliderGeometry(preset.curve, Math.ceil(preset.length / 3.5), preset.roadWidth),
         createBarrierGeometry(preset.curve, Math.ceil(preset.length / 4.25), preset.roadWidth),
+        createBarrierGraphicsGeometry(
+          preset.curve,
+          Math.max(BARRIER_SEGMENTS, Math.ceil(preset.length / 4.25)),
+          preset.roadWidth,
+        ),
         createCircuitSceneryGeometry(preset.curve, preset.venue, preset.roadWidth),
+        createCrowdPanelGeometry(preset.curve, preset.venue),
+        createPitGarageFacadeGeometry(preset.curve, preset.venue),
+        createGantryDisplayGeometry(preset.curve, preset.venue),
+        ...(preset.venue === 'harbour'
+          ? [
+            createHarbourTunnelWallGeometry(preset.curve, preset.roadWidth),
+            createHarbourTunnelCeilingPortalGeometry(
+              preset.curve,
+              preset.roadWidth,
+            ),
+            createHarbourBuildingFacadeGeometry(preset.curve),
+            createHarbourRetainingWallFacadeGeometry(
+              preset.curve,
+              preset.roadWidth,
+            ),
+          ]
+          : []),
+        ...(preset.venue === 'temple'
+          ? [createTempleTreeBillboardGeometry(preset.curve)]
+          : []),
         createCircuitGlowGeometry(preset.curve, preset.venue, preset.roadWidth),
         createCatchFenceGeometry(preset.curve, Math.ceil(preset.length / 10), preset.roadWidth),
       ]
@@ -74,6 +119,100 @@ describe('circuit visual geometry', () => {
 
         geometry.dispose()
       }
+    }
+  })
+
+  it('faces every generated gantry display toward approaching drivers', () => {
+    for (const preset of TRACK_PRESETS) {
+      const geometry = createGantryDisplayGeometry(preset.curve, preset.venue)
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+      const layouts = GANTRY_DISPLAY_LAYOUTS[preset.venue]
+
+      expect(positions.count).toBe(layouts.length * 4)
+      expect(normals.count).toBe(positions.count)
+      expect(uvs.count).toBe(positions.count)
+      expect(geometry.getIndex().count).toBe(layouts.length * 6)
+      expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(uvs.array).every(value => value === 0 || value === 1)).toBe(true)
+      expect(geometry.boundingBox.min.y).toBeGreaterThan(5)
+      expect(geometry.boundingBox.max.y).toBeLessThan(7.6)
+
+      for (let panel = 0; panel < layouts.length; panel += 1) {
+        const tangent = preset.curve
+          .getTangentAt(layouts[panel].progress)
+          .normalize()
+        const normal = new THREE.Vector3().fromBufferAttribute(normals, panel * 4)
+        expect(normal.dot(tangent)).toBeLessThan(-0.9)
+      }
+
+      geometry.dispose()
+    }
+  })
+
+  it('maps one facade panel across every configured pit-garage section', () => {
+    for (const preset of TRACK_PRESETS) {
+      const geometry = createPitGarageFacadeGeometry(preset.curve, preset.venue)
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+      const layout = PIT_GARAGE_FACADE_LAYOUTS[preset.venue]
+
+      expect(positions.count).toBe(layout.panelCount * 4)
+      expect(normals.count).toBe(positions.count)
+      expect(uvs.count).toBe(positions.count)
+      expect(geometry.getIndex().count).toBe(layout.panelCount * 6)
+      expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(uvs.array).every(value => value === 0 || value === 1)).toBe(true)
+      expect(geometry.boundingBox.min.y).toBeGreaterThan(0.2)
+      expect(geometry.boundingBox.max.y).toBeLessThan(5.7)
+
+      const tangent = preset.curve.getTangentAt(layout.progress).normalize()
+      const side = new THREE.Vector3().crossVectors(
+        new THREE.Vector3(0, 1, 0),
+        tangent,
+      ).normalize()
+      const normal = new THREE.Vector3().fromBufferAttribute(normals, 0)
+      expect(normal.dot(side)).toBeGreaterThan(0.9)
+
+      geometry.dispose()
+    }
+  })
+
+  it('maps one finite crowd facade across every configured grandstand', () => {
+    for (const preset of TRACK_PRESETS) {
+      const geometry = createCrowdPanelGeometry(preset.curve, preset.venue)
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+      const layouts = GRANDSTAND_LAYOUTS[preset.venue]
+
+      expect(positions.count).toBe(layouts.length * 4)
+      expect(normals.count).toBe(positions.count)
+      expect(uvs.count).toBe(positions.count)
+      expect(geometry.getIndex().count).toBe(layouts.length * 6)
+      expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(uvs.array).every(value => value === 0 || value === 1)).toBe(true)
+      expect(geometry.boundingBox.min.y).toBeGreaterThan(0.8)
+      expect(geometry.boundingBox.max.y).toBeLessThan(5)
+
+      for (let panel = 0; panel < layouts.length; panel += 1) {
+        const { progress, side: sideSign } = layouts[panel]
+        const tangent = preset.curve.getTangentAt(progress).normalize()
+        const side = new THREE.Vector3().crossVectors(
+          new THREE.Vector3(0, 1, 0),
+          tangent,
+        ).normalize()
+        const normal = new THREE.Vector3().fromBufferAttribute(normals, panel * 4)
+
+        expect(normal.dot(side) * sideSign).toBeLessThan(-0.1)
+      }
+
+      geometry.dispose()
     }
   })
 
@@ -380,6 +519,71 @@ describe('circuit visual geometry', () => {
     barrierGeometry.dispose()
   })
 
+  it('wraps alternating atlas modules around both road-facing barrier walls', () => {
+    for (const preset of TRACK_PRESETS) {
+      const geometry = createBarrierGraphicsGeometry(
+        preset.curve,
+        Math.max(BARRIER_SEGMENTS, Math.ceil(preset.length / 4.25)),
+        preset.roadWidth,
+      )
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+      const panelCount = Math.max(
+        BARRIER_SEGMENTS,
+        Math.ceil(preset.length / 4.25),
+      )
+
+      expect(positions.count).toBe(panelCount * 2 * 4)
+      expect(normals.count).toBe(positions.count)
+      expect(uvs.count).toBe(positions.count)
+      expect(geometry.getIndex().count).toBe(panelCount * 2 * 6)
+      expect(geometry.boundingBox.min.y).toBeCloseTo(
+        TRACK_CENTERLINE_Y + BARRIER_GRAPHICS_BOTTOM_OFFSET,
+        5,
+      )
+      expect(geometry.boundingBox.max.y).toBeCloseTo(
+        TRACK_CENTERLINE_Y
+          + BARRIER_GRAPHICS_BOTTOM_OFFSET
+          + BARRIER_GRAPHICS_HEIGHT,
+        5,
+      )
+
+      for (let panel = 0; panel < panelCount; panel += 1) {
+        const progress = (panel + 0.5) / panelCount
+        const tangent = preset.curve.getTangentAt(progress).normalize()
+        const side = new THREE.Vector3().crossVectors(
+          new THREE.Vector3(0, 1, 0),
+          tangent,
+        ).normalize()
+
+        for (const [sideOffset, sideSign] of [[0, -1], [1, 1]]) {
+          const vertex = (panel * 2 + sideOffset) * 4
+          const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+          const moduleUvs = Array.from(
+            { length: 4 },
+            (_, index) => uvs.getX(vertex + index),
+          )
+          const verticalUvs = Array.from(
+            { length: 4 },
+            (_, index) => uvs.getY(vertex + index),
+          )
+          const expectedVariant = (panel + (sideSign > 0 ? 0 : 1)) % 2
+
+          expect(normal.dot(side) * sideSign).toBeLessThan(-0.9)
+          expect(Math.min(...moduleUvs)).toBeGreaterThan(expectedVariant * 0.5)
+          expect(Math.max(...moduleUvs)).toBeLessThan(
+            (expectedVariant + 1) * 0.5,
+          )
+          expect(Math.min(...verticalUvs)).toBeGreaterThan(0)
+          expect(Math.max(...verticalUvs)).toBeLessThan(1)
+        }
+      }
+
+      geometry.dispose()
+    }
+  })
+
   it('keeps the eight real lights finite and distributed around the lap', () => {
     const positions = getFloodlightPositions(trackCurve)
 
@@ -428,6 +632,149 @@ describe('circuit visual geometry', () => {
     }
   })
 
+  it('alternates two atlas modules across inward-facing Monaco tunnel walls', () => {
+    const harbour = TRACK_PRESETS.find(track => track.venue === 'harbour')
+    const layout = getHarbourTunnelLayout(harbour.curve)
+    const geometry = createHarbourTunnelWallGeometry(
+      harbour.curve,
+      harbour.roadWidth,
+    )
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+
+    expect(positions.count).toBe(layout.panelCount * 2 * 4)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(geometry.getIndex().count).toBe(layout.panelCount * 2 * 6)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value >= 0 && value <= 1
+    ))).toBe(true)
+    expect(geometry.boundingBox.min.y).toBeGreaterThan(0)
+    expect(geometry.boundingBox.max.y).toBeLessThan(
+      HARBOUR_TUNNEL_ROOF_UNDERSIDE,
+    )
+    expect(HARBOUR_TUNNEL_LINER_INNER_OFFSET).toBeLessThan(0.77)
+
+    for (let panel = 0; panel < layout.panelCount; panel += 1) {
+      const tangent = harbour.curve
+        .getTangentAt(layout.progresses[panel])
+        .normalize()
+      const side = new THREE.Vector3().crossVectors(
+        new THREE.Vector3(0, 1, 0),
+        tangent,
+      ).normalize()
+      for (const [sideOffset, sideSign] of [[0, -1], [1, 1]]) {
+        const vertex = (panel * 2 + sideOffset) * 4
+        const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+        const moduleUvs = Array.from(
+          { length: 4 },
+          (_, index) => uvs.getX(vertex + index),
+        )
+        const expectedVariant = (panel + (sideSign > 0 ? 0 : 1)) % 2
+
+        expect(normal.dot(side) * sideSign).toBeLessThan(-0.9)
+        expect(Math.min(...moduleUvs)).toBeGreaterThan(expectedVariant * 0.5)
+        expect(Math.max(...moduleUvs)).toBeLessThan((expectedVariant + 1) * 0.5)
+      }
+    }
+
+    geometry.dispose()
+  })
+
+  it('textures the Harbour tunnel ceiling, soffits, joints, and portal ends', () => {
+    const harbour = TRACK_PRESETS.find(track => track.venue === 'harbour')
+    const layout = getHarbourTunnelLayout(harbour.curve)
+    const geometry = createHarbourTunnelCeilingPortalGeometry(
+      harbour.curve,
+      harbour.roadWidth,
+    )
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const facesPerPanel = 7
+    const facadeCount = layout.panelCount * facesPerPanel + 2
+
+    expect(positions.count).toBe(facadeCount * 4)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(geometry.getIndex().count).toBe(facadeCount * 6)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value > 0 && value < 1
+    ))).toBe(true)
+    expect(geometry.boundingBox.min.y).toBeGreaterThan(0)
+    expect(geometry.boundingBox.max.y).toBeLessThan(
+      HARBOUR_TUNNEL_ROOF_CENTER_Y + HARBOUR_TUNNEL_ROOF_HEIGHT / 2,
+    )
+
+    for (let panel = 0; panel < layout.panelCount; panel += 1) {
+      const vertex = panel * facesPerPanel * 4
+      const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+      const panelUvs = Array.from(
+        { length: 4 },
+        (_, index) => ({
+          u: uvs.getX(vertex + index),
+          v: uvs.getY(vertex + index),
+        }),
+      )
+      const expectedColumn = panel % 2
+
+      expect(normal.dot(new THREE.Vector3(0, -1, 0))).toBeGreaterThan(0.99)
+      expect(Math.min(...panelUvs.map(uv => uv.u))).toBeGreaterThan(
+        expectedColumn * 0.5,
+      )
+      expect(Math.max(...panelUvs.map(uv => uv.u))).toBeLessThan(
+        (expectedColumn + 1) * 0.5,
+      )
+      expect(Math.min(...panelUvs.map(uv => uv.v))).toBeGreaterThan(0.5)
+      expect(Math.max(...panelUvs.map(uv => uv.v))).toBeLessThan(1)
+
+      for (const soffitFace of [1, 4]) {
+        const soffitVertex = vertex + soffitFace * 4
+        const soffitNormal = new THREE.Vector3().fromBufferAttribute(
+          normals,
+          soffitVertex,
+        )
+        expect(soffitNormal.y).toBeLessThan(-0.8)
+      }
+
+      for (const jointFace of [2, 3, 5, 6]) {
+        const jointVertex = vertex + jointFace * 4
+        const jointUvs = Array.from(
+          { length: 4 },
+          (_, index) => uvs.getY(jointVertex + index),
+        )
+        expect(Math.min(...jointUvs)).toBeGreaterThan(0)
+        expect(Math.max(...jointUvs)).toBeLessThan(0.5)
+      }
+    }
+
+    const portalVertexOffset = layout.panelCount * facesPerPanel * 4
+    for (const [endIndex, endSign] of [[0, -1], [1, 1]]) {
+      const progress = endIndex === 0
+        ? layout.progresses[0]
+        : layout.progresses.at(-1)
+      const tangent = harbour.curve.getTangentAt(progress).normalize()
+
+      const vertex = portalVertexOffset + endIndex * 4
+      const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+      const verticalUvs = Array.from(
+        { length: 4 },
+        (_, index) => uvs.getY(vertex + index),
+      )
+
+      expect(normal.dot(tangent) * endSign).toBeGreaterThan(0.9)
+      expect(Math.min(...verticalUvs)).toBeGreaterThan(0)
+      expect(Math.max(...verticalUvs)).toBeLessThan(0.5)
+    }
+
+    geometry.dispose()
+  })
+
   it('spaces a bounded set of finite lights inside the Monaco tunnel', () => {
     const harbour = TRACK_PRESETS.find(track => track.venue === 'harbour')
     const layout = getHarbourTunnelLightingLayout(harbour.curve, harbour.roadWidth)
@@ -446,6 +793,183 @@ describe('circuit visual geometry', () => {
       expect(light.position[1] - trackY).toBeCloseTo(HARBOUR_TUNNEL_LIGHT_HEIGHT, 8)
       expect(light.position[1] - trackY).toBeLessThan(HARBOUR_TUNNEL_ROOF_UNDERSIDE)
     }
+  })
+
+  it('maps four atlas variants onto every visible Monaco apartment face', () => {
+    const harbour = TRACK_PRESETS.find(track => track.venue === 'harbour')
+    const geometry = createHarbourBuildingFacadeGeometry(harbour.curve)
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+
+    expect(positions.count).toBe(HARBOUR_BUILDINGS.length * 4 * 4)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(geometry.getIndex().count).toBe(HARBOUR_BUILDINGS.length * 4 * 6)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(geometry.boundingBox.min.y).toBeGreaterThan(0)
+    expect(geometry.boundingBox.max.y).toBeGreaterThan(35)
+
+    for (const [buildingIndex, building] of HARBOUR_BUILDINGS.entries()) {
+      const vertex = buildingIndex * 4 * 4
+      const tangent = harbour.curve
+        .getTangentAt(building.progress)
+        .normalize()
+      const side = new THREE.Vector3().crossVectors(
+        new THREE.Vector3(0, 1, 0),
+        tangent,
+      ).normalize()
+      const sideSign = Math.sign(building.lateral) || 1
+      const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+      const moduleUvs = Array.from(
+        { length: 4 },
+        (_, index) => uvs.getX(vertex + index),
+      )
+      const expectedVariant = buildingIndex % 4
+
+      expect(normal.dot(side) * sideSign).toBeLessThan(-0.9)
+      expect(Math.min(...moduleUvs)).toBeGreaterThan(expectedVariant * 0.25)
+      expect(Math.max(...moduleUvs)).toBeLessThan((expectedVariant + 1) * 0.25)
+
+      const outsideVertex = vertex + 4
+      const outsideNormal = new THREE.Vector3().fromBufferAttribute(
+        normals,
+        outsideVertex,
+      )
+      const outsideUvs = Array.from(
+        { length: 4 },
+        (_, index) => uvs.getX(outsideVertex + index),
+      )
+      const outsideVariant = (buildingIndex + 3) % 4
+
+      expect(outsideNormal.dot(side) * sideSign).toBeGreaterThan(0.9)
+      expect(Math.min(...outsideUvs)).toBeGreaterThan(outsideVariant * 0.25)
+      expect(Math.max(...outsideUvs)).toBeLessThan((outsideVariant + 1) * 0.25)
+
+      for (const [endOffset, endSign] of [[2, -1], [3, 1]]) {
+        const endVertex = vertex + endOffset * 4
+        const endNormal = new THREE.Vector3().fromBufferAttribute(
+          normals,
+          endVertex,
+        )
+        const endUvs = Array.from(
+          { length: 4 },
+          (_, index) => uvs.getX(endVertex + index),
+        )
+        const endVariant = (
+          buildingIndex + (endSign < 0 ? 1 : 2)
+        ) % 4
+
+        expect(endNormal.dot(tangent) * endSign).toBeGreaterThan(0.9)
+        expect(Math.min(...endUvs)).toBeGreaterThan(endVariant * 0.25)
+        expect(Math.max(...endUvs)).toBeLessThan((endVariant + 1) * 0.25)
+      }
+    }
+
+    geometry.dispose()
+  })
+
+  it('covers every player-visible face of the Harbour retaining structures', () => {
+    const harbour = TRACK_PRESETS.find(track => track.venue === 'harbour')
+    const geometry = createHarbourRetainingWallFacadeGeometry(
+      harbour.curve,
+      harbour.roadWidth,
+    )
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const wallCount = HARBOUR_RETAINING_WALL_LAYOUT.progresses.length
+    const tunnelLayout = getHarbourTunnelLayout(harbour.curve)
+    const facadeCount = wallCount * 4 + tunnelLayout.panelCount * 2
+
+    expect(positions.count).toBe(facadeCount * 4)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(geometry.getIndex().count).toBe(facadeCount * 6)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value > 0 && value < 1
+    ))).toBe(true)
+    expect(geometry.boundingBox.min.y).toBeGreaterThan(0)
+    expect(geometry.boundingBox.max.y).toBeLessThan(
+      HARBOUR_TUNNEL_ROOF_UNDERSIDE,
+    )
+
+    for (const [wallIndex, progress] of (
+      HARBOUR_RETAINING_WALL_LAYOUT.progresses.entries()
+    )) {
+      const vertex = wallIndex * 4 * 4
+      const tangent = harbour.curve.getTangentAt(progress).normalize()
+      const side = new THREE.Vector3().crossVectors(
+        new THREE.Vector3(0, 1, 0),
+        tangent,
+      ).normalize()
+      const frontNormal = new THREE.Vector3().fromBufferAttribute(
+        normals,
+        vertex,
+      )
+      const rearNormal = new THREE.Vector3().fromBufferAttribute(
+        normals,
+        vertex + 4,
+      )
+      const frontUvs = Array.from(
+        { length: 4 },
+        (_, index) => uvs.getX(vertex + index),
+      )
+      const frontVariant = wallIndex % 2
+
+      expect(frontNormal.dot(side)).toBeLessThan(-0.9)
+      expect(rearNormal.dot(side)).toBeGreaterThan(0.9)
+      expect(Math.min(...frontUvs)).toBeGreaterThan(frontVariant * 0.5)
+      expect(Math.max(...frontUvs)).toBeLessThan((frontVariant + 1) * 0.5)
+
+      for (const [endOffset, endSign] of [[2, -1], [3, 1]]) {
+        const endVertex = vertex + endOffset * 4
+        const endNormal = new THREE.Vector3().fromBufferAttribute(
+          normals,
+          endVertex,
+        )
+        const endUvs = Array.from(
+          { length: 4 },
+          (_, index) => uvs.getX(endVertex + index),
+        )
+
+        expect(endNormal.dot(tangent) * endSign).toBeGreaterThan(0.9)
+        expect(Math.max(...endUvs) - Math.min(...endUvs)).toBeLessThan(0.08)
+        expect(Math.max(...endUvs) - Math.min(...endUvs)).toBeGreaterThan(0.05)
+      }
+    }
+
+    const tunnelVertexOffset = wallCount * 4 * 4
+    for (let panel = 0; panel < tunnelLayout.panelCount; panel += 1) {
+      const tangent = harbour.curve
+        .getTangentAt(tunnelLayout.progresses[panel])
+        .normalize()
+      const side = new THREE.Vector3().crossVectors(
+        new THREE.Vector3(0, 1, 0),
+        tangent,
+      ).normalize()
+
+      for (const [sideOffset, sideSign] of [[0, -1], [1, 1]]) {
+        const vertex = tunnelVertexOffset + (panel * 2 + sideOffset) * 4
+        const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+        const moduleUvs = Array.from(
+          { length: 4 },
+          (_, index) => uvs.getX(vertex + index),
+        )
+        const expectedVariant = (panel + (sideSign > 0 ? 0 : 1)) % 2
+
+        expect(normal.dot(side) * sideSign).toBeGreaterThan(0.9)
+        expect(Math.min(...moduleUvs)).toBeGreaterThan(expectedVariant * 0.5)
+        expect(Math.max(...moduleUvs)).toBeLessThan(
+          (expectedVariant + 1) * 0.5,
+        )
+      }
+    }
+
+    geometry.dispose()
   })
 
   it('keeps every Monaco apartment footprint clear of every road branch', () => {
@@ -537,6 +1061,59 @@ describe('circuit visual geometry', () => {
       const panelBottom = panel.position[1] - panel.size[1] / 2
       expect(panelBottom - HARBOUR_WATER_SURFACE_Y).toBeGreaterThanOrEqual(0.009)
     }
+  })
+
+  it('maps four alpha-atlas tree variants across the full Temple woodland', () => {
+    const temple = TRACK_PRESETS.find(track => track.venue === 'temple')
+    const geometry = createTempleTreeBillboardGeometry(temple.curve)
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+
+    expect(TEMPLE_TREE_LAYOUT).toHaveLength(144)
+    expect(positions.count).toBe(TEMPLE_TREE_LAYOUT.length * 4)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(geometry.getIndex().count).toBe(TEMPLE_TREE_LAYOUT.length * 6)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value > 0 && value < 1
+    ))).toBe(true)
+    expect(geometry.boundingBox.min.y).toBeGreaterThan(0)
+    expect(geometry.boundingBox.max.y).toBeLessThan(14)
+
+    for (const [treeIndex, tree] of TEMPLE_TREE_LAYOUT.entries()) {
+      const vertex = treeIndex * 4
+      const tangent = temple.curve.getTangentAt(tree.progress).normalize()
+      const side = new THREE.Vector3().crossVectors(
+        new THREE.Vector3(0, 1, 0),
+        tangent,
+      ).normalize()
+      const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+      const moduleUvs = Array.from(
+        { length: 4 },
+        (_, index) => ({
+          u: uvs.getX(vertex + index),
+          v: uvs.getY(vertex + index),
+        }),
+      )
+      const column = tree.variant % 2
+      const row = Math.floor(tree.variant / 2)
+
+      expect(normal.dot(side) * -Math.sign(tree.lateral)).toBeGreaterThan(0.9)
+      expect(Math.min(...moduleUvs.map(uv => uv.u))).toBeGreaterThan(column * 0.5)
+      expect(Math.max(...moduleUvs.map(uv => uv.u))).toBeLessThan(
+        (column + 1) * 0.5,
+      )
+      if (row === 0) {
+        expect(Math.min(...moduleUvs.map(uv => uv.v))).toBeGreaterThan(0.5)
+      } else {
+        expect(Math.max(...moduleUvs.map(uv => uv.v))).toBeLessThan(0.5)
+      }
+    }
+
+    geometry.dispose()
   })
 
   it('joins the historic Monza banking arms, deck, supports, and cap beam', () => {

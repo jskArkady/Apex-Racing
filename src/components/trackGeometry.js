@@ -6,6 +6,8 @@ import { START_FINISH_PROGRESS, trackLength } from '../utils/trackData.js'
 export const ROAD_WIDTH = 16
 export const ROAD_SEGMENTS = Math.ceil(trackLength / 3.5)
 export const BARRIER_SEGMENTS = Math.ceil(trackLength / 4.25)
+export const BARRIER_GRAPHICS_BOTTOM_OFFSET = 0.02
+export const BARRIER_GRAPHICS_HEIGHT = 1.32
 export const CURB_SEGMENTS = Math.ceil(trackLength / 6)
 export const SURFACE_SEGMENTS = Math.ceil(trackLength / 5)
 export const LOW_DETAIL_SURFACE_SEGMENTS = Math.ceil(trackLength / 10)
@@ -36,9 +38,12 @@ export const HARBOUR_TUNNEL_ROOF_UNDERSIDE = (
 export const HARBOUR_TUNNEL_START_PROGRESS = 0.43
 export const HARBOUR_TUNNEL_END_PROGRESS = 0.562
 export const HARBOUR_TUNNEL_MAX_PANEL_SPACING = 6.5
-export const HARBOUR_TUNNEL_PANEL_OVERLAP = 1.08
+export const HARBOUR_TUNNEL_PANEL_OVERLAP = 1.2
 export const HARBOUR_TUNNEL_LIGHT_COUNT = 6
 export const HARBOUR_TUNNEL_LIGHT_HEIGHT = 5.55
+export const HARBOUR_TUNNEL_LINER_INNER_OFFSET = 0.758
+const HARBOUR_TUNNEL_SIDE_WALL_CENTER_OFFSET = 1.02
+const HARBOUR_TUNNEL_SIDE_WALL_WIDTH = 0.5
 export const HARBOUR_WATER = Object.freeze({
   size: Object.freeze([300, 0.08, 76]),
   position: Object.freeze([20, 0.105, 121]),
@@ -148,6 +153,17 @@ export const HARBOUR_SWIMMING_POOL_PANELS = Object.freeze([
     color: COLORS.white,
   }),
 ])
+export const HARBOUR_RETAINING_WALL_LAYOUT = Object.freeze({
+  progresses: Object.freeze([0.045, 0.085, 0.125, 0.165, 0.205, 0.245]),
+  lateralOffsetFromRoad: 4.2,
+  capLateralOffsetFromRoad: 3.78,
+  centerY: 2.3,
+  width: 0.7,
+  height: 4.6,
+  length: 15,
+  capCenterY: 4.52,
+  capSize: Object.freeze([0.16, 0.24, 14.5]),
+})
 export const HARBOUR_BUILDINGS = Object.freeze([
   { progress: 0.08, lateral: 16, height: 22, width: 11, color: COLORS.cream },
   { progress: 0.11, lateral: 38, height: 31, width: 12, color: COLORS.apartment },
@@ -170,7 +186,137 @@ const CROWD_PALETTE = Object.freeze([
   COLORS.crowdRed,
   COLORS.crowdPale,
 ])
+export const GRANDSTAND_LAYOUTS = Object.freeze({
+  apex: Object.freeze([
+    Object.freeze({
+      progress: PIT_STRAIGHT_PROGRESS,
+      side: 1,
+      tiers: 6,
+      length: 66,
+      seatStart: 15.5,
+      crowdSeats: 7,
+      crowdSpacing: 4.1,
+    }),
+    Object.freeze({
+      progress: 0.2,
+      side: -1,
+      tiers: 5,
+      length: 28,
+      seatStart: 16,
+      crowdSeats: 6,
+      crowdSpacing: 2.05,
+    }),
+    Object.freeze({
+      progress: 0.75,
+      side: 1,
+      tiers: 5,
+      length: 28,
+      seatStart: 16,
+      crowdSeats: 6,
+      crowdSpacing: 2.05,
+    }),
+  ]),
+  harbour: Object.freeze([
+    Object.freeze({
+      progress: 0.72,
+      side: 1,
+      tiers: 4,
+      length: 30,
+      seatStart: 15,
+      crowdSeats: 7,
+      crowdSpacing: 2,
+      accent: COLORS.red,
+    }),
+  ]),
+  temple: Object.freeze([
+    Object.freeze({
+      progress: PIT_STRAIGHT_PROGRESS,
+      side: 1,
+      tiers: 6,
+      length: 64,
+      seatStart: 15.5,
+      crowdSeats: 9,
+      crowdSpacing: 3.2,
+      accent: COLORS.italianGreen,
+    }),
+    Object.freeze({
+      progress: 0.2,
+      side: -1,
+      tiers: 5,
+      length: 34,
+      seatStart: 17,
+      crowdSeats: 8,
+      crowdSpacing: 2.1,
+      accent: COLORS.red,
+    }),
+  ]),
+})
+export const PIT_GARAGE_FACADE_LAYOUTS = Object.freeze({
+  apex: Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -16.66,
+    centerY: 2.55,
+    totalWidth: 54,
+    height: 4.4,
+    panelCount: 3,
+    panelGap: 0.25,
+  }),
+  harbour: Object.freeze({
+    progress: 0.985,
+    lateral: -12.78,
+    centerY: 3.35,
+    totalWidth: 31,
+    height: 3.8,
+    panelCount: 2,
+    panelGap: 0.25,
+  }),
+  temple: Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -16.3,
+    centerY: 3,
+    totalWidth: 54,
+    height: 4.4,
+    panelCount: 3,
+    panelGap: 0.25,
+  }),
+})
 const MEDIA_BRIDGE_PROGRESS = Object.freeze([0.245, 0.585, 0.855])
+export const GANTRY_DISPLAY_LAYOUTS = Object.freeze({
+  apex: Object.freeze([
+    Object.freeze({
+      progress: START_GANTRY_PROGRESS,
+      centerY: 7.28,
+      width: 7.2,
+      height: 0.48,
+      approachOffset: -0.39,
+    }),
+    ...MEDIA_BRIDGE_PROGRESS.map(progress => Object.freeze({
+      progress,
+      centerY: 5.5,
+      width: 7.2,
+      height: 0.54,
+      approachOffset: -0.37,
+    })),
+  ]),
+  harbour: Object.freeze([
+    Object.freeze({
+      progress: START_GANTRY_PROGRESS,
+      centerY: 7.28,
+      width: 7.2,
+      height: 0.48,
+      approachOffset: -0.39,
+    }),
+  ]),
+  temple: Object.freeze([
+    Object.freeze({
+      progress: START_GANTRY_PROGRESS,
+      centerY: 7.28,
+      width: 7.2,
+      height: 0.48,
+      approachOffset: -0.39,
+    }),
+  ]),
+})
 const MARSHAL_POST_PROGRESS = Object.freeze([0.12, 0.31, 0.47, 0.66, 0.84])
 const GRID_SLOT_LABEL_PATTERNS = Object.freeze({
   ai_1: Object.freeze([-0.48]),
@@ -371,6 +517,101 @@ export function createBarrierGeometry(curve, samples = BARRIER_SEGMENTS, roadWid
   return geometry
 }
 
+export function createBarrierGraphicsGeometry(
+  curve,
+  samples = BARRIER_SEGMENTS,
+  roadWidth = ROAD_WIDTH,
+) {
+  if (!curve || typeof curve.getLength !== 'function') {
+    throw new TypeError('Barrier graphics require a finite track curve')
+  }
+  if (!Number.isInteger(samples) || samples < 3) {
+    throw new RangeError('Barrier graphics require at least three samples')
+  }
+  if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
+    throw new RangeError('Barrier graphics require a usable road width')
+  }
+
+  const length = curve.getLength()
+  if (!Number.isFinite(length) || length <= 0) {
+    throw new RangeError('Barrier graphics require a positive track length')
+  }
+
+  const panelCount = samples
+  const faceInset = 0.008
+  const atlasInset = 1 / 1024
+  const parts = []
+
+  for (let panelIndex = 0; panelIndex < panelCount; panelIndex += 1) {
+    const startProgress = panelIndex / panelCount
+    const endProgress = (panelIndex + 1) / panelCount
+    for (const sideSign of [-1, 1]) {
+      const start = new THREE.Vector3()
+      const startTangent = new THREE.Vector3()
+      const startSide = new THREE.Vector3()
+      const end = new THREE.Vector3()
+      const endTangent = new THREE.Vector3()
+      const endSide = new THREE.Vector3()
+      getTrackFrame(curve, startProgress, start, startTangent, startSide)
+      getTrackFrame(curve, endProgress, end, endTangent, endSide)
+      const lateral = sideSign * (roadWidth / 2 - faceInset)
+      start.addScaledVector(startSide, lateral)
+      end.addScaledVector(endSide, lateral)
+
+      const startBottom = start.clone().addScaledVector(
+        WORLD_UP,
+        BARRIER_GRAPHICS_BOTTOM_OFFSET,
+      )
+      const endBottom = end.clone().addScaledVector(
+        WORLD_UP,
+        BARRIER_GRAPHICS_BOTTOM_OFFSET,
+      )
+      const startTop = startBottom.clone().addScaledVector(
+        WORLD_UP,
+        BARRIER_GRAPHICS_HEIGHT,
+      )
+      const endTop = endBottom.clone().addScaledVector(
+        WORLD_UP,
+        BARRIER_GRAPHICS_HEIGHT,
+      )
+      // Reversing the horizontal order on the left wall keeps both faces
+      // pointed toward the racing line. Endpoints are shared exactly with the
+      // next panel, preventing gaps on the outside of tight corners.
+      const [topLeft, topRight, bottomLeft, bottomRight] = sideSign > 0
+        ? [startTop, endTop, startBottom, endBottom]
+        : [endTop, startTop, endBottom, startBottom]
+      const geometry = new THREE.BufferGeometry()
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute([
+        topLeft.x, topLeft.y, topLeft.z,
+        topRight.x, topRight.y, topRight.z,
+        bottomLeft.x, bottomLeft.y, bottomLeft.z,
+        bottomRight.x, bottomRight.y, bottomRight.z,
+      ], 3))
+      geometry.setIndex([0, 2, 1, 2, 3, 1])
+
+      // Alternate both atlas halves and phase-shift the opposite wall so a
+      // chase camera never sees a mechanically mirrored pair.
+      const variant = (panelIndex + (sideSign > 0 ? 0 : 1)) % 2
+      const moduleMin = variant * 0.5 + atlasInset
+      const moduleMax = (variant + 1) * 0.5 - atlasInset
+      geometry.setAttribute('uv', new THREE.Float32BufferAttribute([
+        moduleMin, 1 - atlasInset,
+        moduleMax, 1 - atlasInset,
+        moduleMin, atlasInset,
+        moduleMax, atlasInset,
+      ], 2))
+      geometry.computeVertexNormals()
+      parts.push(geometry)
+    }
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
 function addVertexColor(geometry, color) {
   const rgb = new THREE.Color(color)
   const count = geometry.getAttribute('position').count
@@ -476,14 +717,6 @@ function pushTrackCone(parts, curve, progress, lateral, y, radius, height, color
     color,
     along,
   )
-}
-
-function pushTrackCanopy(parts, curve, progress, lateral, y, size, color, along = 0) {
-  // SphereGeometry stays indexed like the boxes/cones in the merged scenery;
-  // a PolyhedronGeometry is non-indexed and cannot share that draw call.
-  const geometry = new THREE.SphereGeometry(1, 7, 5)
-  geometry.scale(size[0], size[1], size[2])
-  pushTrackPrimitive(parts, curve, progress, lateral, y, geometry, color, along)
 }
 
 function pushTrackBoxBanked(parts, curve, progress, lateral, y, size, color, along, roll) {
@@ -1011,38 +1244,148 @@ function addGrandstand(parts, curve, {
   }
 }
 
-function addGrandstands(parts, curve) {
-  // Main-straight grandstand opposite the pit building. Its long roof and
-  // dense multicolour crowd are visible from the grid and through turn one.
-  addGrandstand(parts, curve, {
-    progress: PIT_STRAIGHT_PROGRESS,
-    side: 1,
-    tiers: 6,
-    length: 66,
-    seatStart: 15.5,
-    crowdSeats: 7,
-    crowdSpacing: 4.1,
-  })
+function addGrandstands(parts, curve, venue = 'apex') {
+  for (const layout of GRANDSTAND_LAYOUTS[venue] ?? GRANDSTAND_LAYOUTS.apex) {
+    addGrandstand(parts, curve, layout)
+  }
+}
 
-  // Two secondary stands keep the rest of the lap from feeling empty.
-  addGrandstand(parts, curve, {
-    progress: 0.2,
-    side: -1,
-    tiers: 5,
-    length: 28,
-    seatStart: 16,
-    crowdSeats: 6,
-    crowdSpacing: 2.05,
-  })
-  addGrandstand(parts, curve, {
-    progress: 0.75,
-    side: 1,
-    tiers: 5,
-    length: 28,
-    seatStart: 16,
-    crowdSeats: 6,
-    crowdSpacing: 2.05,
-  })
+export function createCrowdPanelGeometry(curve, venue = 'apex') {
+  const parts = []
+  const layouts = GRANDSTAND_LAYOUTS[venue] ?? GRANDSTAND_LAYOUTS.apex
+
+  for (const {
+    progress,
+    side: sideSign,
+    tiers,
+    length,
+    seatStart,
+    crowdSeats,
+    crowdSpacing,
+  } of layouts) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, progress, point, tangent, side)
+
+    const lower = point.clone()
+      .addScaledVector(side, sideSign * (seatStart - 1.1))
+      .addScaledVector(WORLD_UP, 0.84)
+    const upper = point.clone()
+      .addScaledVector(side, sideSign * (seatStart - 1.1 + (tiers - 1) * 1.16))
+      .addScaledVector(WORLD_UP, 1.27 + (tiers - 1) * 0.72)
+    const panelUp = upper.clone().sub(lower)
+    const panelHeight = panelUp.length()
+    panelUp.normalize()
+
+    // Orient the positive panel normal toward the circuit for both sides.
+    // This keeps the lit front face visible while preserving a right-handed
+    // transform and avoids relying on duplicated back-face geometry.
+    const panelAcross = tangent.clone().multiplyScalar(sideSign)
+    const panelNormal = new THREE.Vector3()
+      .crossVectors(panelAcross, panelUp)
+      .normalize()
+    const center = lower.clone()
+      .add(upper)
+      .multiplyScalar(0.5)
+      .addScaledVector(side, -sideSign * 0.16)
+    const panelWidth = Math.min(
+      length - 1,
+      crowdSeats * 2 * crowdSpacing + crowdSpacing * 0.55,
+    )
+    const geometry = new THREE.PlaneGeometry(panelWidth, panelHeight)
+    const matrix = new THREE.Matrix4().makeBasis(panelAcross, panelUp, panelNormal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+    parts.push(geometry)
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createPitGarageFacadeGeometry(curve, venue = 'apex') {
+  const layout = PIT_GARAGE_FACADE_LAYOUTS[venue] ?? PIT_GARAGE_FACADE_LAYOUTS.apex
+  const {
+    progress,
+    lateral,
+    centerY,
+    totalWidth,
+    height,
+    panelCount,
+    panelGap,
+  } = layout
+  const point = new THREE.Vector3()
+  const tangent = new THREE.Vector3()
+  const side = new THREE.Vector3()
+  getTrackFrame(curve, progress, point, tangent, side)
+
+  const sideSign = Math.sign(lateral) || -1
+  const panelAcross = tangent.clone().multiplyScalar(sideSign)
+  const panelNormal = new THREE.Vector3()
+    .crossVectors(panelAcross, WORLD_UP)
+    .normalize()
+  const panelWidth = (totalWidth - panelGap * (panelCount - 1)) / panelCount
+  const parts = []
+
+  for (let panel = 0; panel < panelCount; panel += 1) {
+    const along = (panel - (panelCount - 1) / 2) * (panelWidth + panelGap)
+    const center = point.clone()
+      .addScaledVector(side, lateral)
+      .addScaledVector(tangent, along)
+      .addScaledVector(WORLD_UP, centerY)
+    const geometry = new THREE.PlaneGeometry(panelWidth, height)
+    const matrix = new THREE.Matrix4().makeBasis(panelAcross, WORLD_UP, panelNormal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+    parts.push(geometry)
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createGantryDisplayGeometry(curve, venue = 'apex') {
+  const layouts = GANTRY_DISPLAY_LAYOUTS[venue] ?? GANTRY_DISPLAY_LAYOUTS.apex
+  const parts = []
+
+  for (const {
+    progress,
+    centerY,
+    width,
+    height,
+    approachOffset,
+  } of layouts) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, progress, point, tangent, side)
+
+    // Drivers approach each gantry along +tangent. Put the display just in
+    // front of the crossbar and orient its positive normal back toward them.
+    const panelAcross = side.clone().multiplyScalar(-1)
+    const panelNormal = tangent.clone().multiplyScalar(-1)
+    const center = point.clone()
+      .addScaledVector(tangent, approachOffset)
+      .addScaledVector(WORLD_UP, centerY)
+    const geometry = new THREE.PlaneGeometry(width, height)
+    const matrix = new THREE.Matrix4().makeBasis(panelAcross, WORLD_UP, panelNormal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+    parts.push(geometry)
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
 }
 
 function addPalm(parts, curve, progress, lateral, height = 6, along = 0) {
@@ -1089,6 +1432,488 @@ export function getHarbourTunnelLayout(curve) {
     panelSpacing,
     tunnelArcLength,
   }
+}
+
+export function createHarbourTunnelWallGeometry(curve, roadWidth = ROAD_WIDTH) {
+  if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
+    throw new RangeError('Harbour tunnel wall graphics require a usable road width')
+  }
+
+  const layout = getHarbourTunnelLayout(curve)
+  const wallHeight = HARBOUR_TUNNEL_ROOF_UNDERSIDE - 0.08
+  const wallCenterY = HARBOUR_TUNNEL_ROOF_UNDERSIDE / 2
+  const atlasInset = 1 / 1024
+  const parts = []
+
+  for (const [panelIndex, progress] of layout.progresses.entries()) {
+    for (const sideSign of [-1, 1]) {
+      const point = new THREE.Vector3()
+      const tangent = new THREE.Vector3()
+      const side = new THREE.Vector3()
+      getTrackFrame(curve, progress, point, tangent, side)
+
+      // Positive normals face the road on both tunnel walls. Reversing the
+      // across vector on the left wall keeps each transform right-handed.
+      const panelAcross = tangent.clone().multiplyScalar(sideSign)
+      const panelNormal = side.clone().multiplyScalar(-sideSign)
+      const center = point.clone()
+        .addScaledVector(
+          side,
+          sideSign * (roadWidth / 2 + HARBOUR_TUNNEL_LINER_INNER_OFFSET),
+        )
+        .addScaledVector(WORLD_UP, wallCenterY)
+      const geometry = new THREE.PlaneGeometry(
+        layout.panelLength,
+        wallHeight,
+      )
+      const matrix = new THREE.Matrix4().makeBasis(
+        panelAcross,
+        WORLD_UP,
+        panelNormal,
+      )
+      matrix.setPosition(center)
+      geometry.applyMatrix4(matrix)
+
+      // Alternate the two square atlas modules down the tunnel and offset the
+      // opposite wall so the driver's peripheral view never sees a mirrored
+      // pair. A one-texel inset prevents mip bleeding across the center split.
+      const variant = (panelIndex + (sideSign > 0 ? 0 : 1)) % 2
+      const moduleMin = variant * 0.5 + atlasInset
+      const moduleMax = (variant + 1) * 0.5 - atlasInset
+      const uvs = geometry.getAttribute('uv')
+      for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+        uvs.setX(vertex, THREE.MathUtils.lerp(
+          moduleMin,
+          moduleMax,
+          uvs.getX(vertex),
+        ))
+      }
+      uvs.needsUpdate = true
+      parts.push(geometry)
+    }
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createHarbourTunnelCeilingPortalGeometry(
+  curve,
+  roadWidth = ROAD_WIDTH,
+) {
+  if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
+    throw new RangeError('Harbour tunnel ceiling graphics require a usable road width')
+  }
+
+  const layout = getHarbourTunnelLayout(curve)
+  const atlasInset = 1 / 1024
+  const ceilingWidth = roadWidth - 1.58
+  const ceilingY = HARBOUR_TUNNEL_ROOF_UNDERSIDE - 0.012
+  const portalWallHeight = HARBOUR_TUNNEL_ROOF_UNDERSIDE - 0.08
+  const portalWallCenterY = HARBOUR_TUNNEL_ROOF_UNDERSIDE / 2
+  const portalFaceOffset = 0.018
+  const soffitRollRadians = 0.55
+  const soffitWidth = 2.8 - 0.06
+  const soffitThickness = 0.42
+  const parts = []
+
+  const addAtlasPlane = ({
+    width,
+    height,
+    center,
+    across,
+    vertical,
+    normal,
+    column,
+    row,
+    moduleCropX = 1,
+    moduleCropY = 1,
+  }) => {
+    const geometry = new THREE.PlaneGeometry(width, height)
+    const matrix = new THREE.Matrix4().makeBasis(across, vertical, normal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+
+    const moduleCenterU = column * 0.5 + 0.25
+    const moduleCenterV = row === 0 ? 0.75 : 0.25
+    const moduleSpanU = (0.5 - atlasInset * 2) * moduleCropX
+    const moduleSpanV = (0.5 - atlasInset * 2) * moduleCropY
+    const moduleMinU = moduleCenterU - moduleSpanU / 2
+    const moduleMaxU = moduleCenterU + moduleSpanU / 2
+    const moduleMinV = moduleCenterV - moduleSpanV / 2
+    const moduleMaxV = moduleCenterV + moduleSpanV / 2
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(moduleMinU, moduleMaxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(moduleMinV, moduleMaxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+    parts.push(geometry)
+  }
+
+  for (const [panelIndex, progress] of layout.progresses.entries()) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, progress, point, tangent, side)
+
+    addAtlasPlane({
+      width: ceilingWidth,
+      height: layout.panelLength,
+      center: point.clone().addScaledVector(WORLD_UP, ceilingY),
+      across: side,
+      vertical: tangent,
+      normal: WORLD_UP.clone().multiplyScalar(-1),
+      column: panelIndex % 2,
+      row: 0,
+    })
+
+    for (const sideSign of [-1, 1]) {
+      const roll = sideSign * -soffitRollRadians
+      const rotatedAcross = side.clone()
+        .multiplyScalar(Math.cos(roll))
+        .addScaledVector(WORLD_UP, Math.sin(roll))
+      const soffitNormal = side.clone()
+        .multiplyScalar(Math.sin(roll))
+        .addScaledVector(WORLD_UP, -Math.cos(roll))
+      const soffitCenter = point.clone()
+        .addScaledVector(side, sideSign * (roadWidth / 2 - 0.25))
+        .addScaledVector(
+          WORLD_UP,
+          HARBOUR_TUNNEL_ROOF_UNDERSIDE - soffitThickness,
+        )
+        .addScaledVector(
+          soffitNormal,
+          soffitThickness / 2 + portalFaceOffset,
+        )
+
+      addAtlasPlane({
+        width: soffitWidth,
+        height: layout.panelLength,
+        center: soffitCenter,
+        across: rotatedAcross,
+        vertical: tangent,
+        normal: soffitNormal,
+        column: (panelIndex + (sideSign > 0 ? 1 : 0)) % 2,
+        row: 0,
+      })
+
+      // Curved tangent boxes expose narrow end faces at each panel joint.
+      // Portal-casing center crops turn those former bright slivers into
+      // intentional structural ribs without introducing a new material.
+      for (const endSign of [-1, 1]) {
+        const pillarWidth = HARBOUR_TUNNEL_SIDE_WALL_WIDTH - 0.04
+        addAtlasPlane({
+          width: pillarWidth,
+          height: portalWallHeight,
+          center: point.clone()
+            .addScaledVector(
+              side,
+              sideSign * (
+                roadWidth / 2 + HARBOUR_TUNNEL_SIDE_WALL_CENTER_OFFSET
+              ),
+            )
+            .addScaledVector(
+              tangent,
+              endSign * (layout.panelLength / 2 + portalFaceOffset),
+            )
+            .addScaledVector(WORLD_UP, portalWallCenterY),
+          across: side.clone().multiplyScalar(endSign),
+          vertical: WORLD_UP,
+          normal: tangent.clone().multiplyScalar(endSign),
+          column: (
+            panelIndex
+            + (sideSign > 0 ? 1 : 0)
+            + (endSign > 0 ? 1 : 0)
+          ) % 2,
+          row: 1,
+          moduleCropX: pillarWidth / portalWallHeight,
+        })
+      }
+    }
+  }
+
+  // Cap the entrance and exit edges that remain visible before entering and
+  // after leaving the tunnel. Center crops preserve the portal material scale
+  // on the thin roof fascia and narrow structural side-wall ends.
+  for (const [endIndex, endSign] of [[0, -1], [1, 1]]) {
+    const progress = endIndex === 0
+      ? layout.progresses[0]
+      : layout.progresses.at(-1)
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, progress, point, tangent, side)
+    const endpoint = point.clone().addScaledVector(
+      tangent,
+      endSign * (layout.panelLength / 2 + portalFaceOffset),
+    )
+    const portalNormal = tangent.clone().multiplyScalar(endSign)
+    const portalAcross = side.clone().multiplyScalar(endSign)
+    const roofFasciaHeight = HARBOUR_TUNNEL_ROOF_HEIGHT - 0.04
+
+    addAtlasPlane({
+      width: ceilingWidth,
+      height: roofFasciaHeight,
+      center: endpoint.clone().addScaledVector(
+        WORLD_UP,
+        HARBOUR_TUNNEL_ROOF_CENTER_Y,
+      ),
+      across: portalAcross,
+      vertical: WORLD_UP,
+      normal: portalNormal,
+      column: endIndex,
+      row: 1,
+      moduleCropY: roofFasciaHeight / ceilingWidth,
+    })
+
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createHarbourBuildingFacadeGeometry(curve) {
+  const buildingLength = 13
+  const roadFacadeWidth = buildingLength - 0.45
+  const faceOffset = 0.025
+  const atlasInset = 1 / 1024
+  const parts = []
+
+  for (const [buildingIndex, building] of HARBOUR_BUILDINGS.entries()) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, building.progress, point, tangent, side)
+
+    const sideSign = Math.sign(building.lateral) || 1
+    const panelHeight = building.height - 0.3
+    const facadeCenter = point.clone()
+      .addScaledVector(
+        side,
+        building.lateral - sideSign * (building.width / 2 + faceOffset),
+      )
+      .addScaledVector(WORLD_UP, building.height / 2 + 0.03)
+
+    const addFacade = ({
+      width,
+      center,
+      across,
+      normal,
+      variant,
+    }) => {
+      const geometry = new THREE.PlaneGeometry(width, panelHeight)
+      const matrix = new THREE.Matrix4().makeBasis(across, WORLD_UP, normal)
+      matrix.setPosition(center)
+      geometry.applyMatrix4(matrix)
+
+      const moduleMin = variant * 0.25 + atlasInset
+      const moduleMax = (variant + 1) * 0.25 - atlasInset
+      const uvs = geometry.getAttribute('uv')
+      for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+        uvs.setX(vertex, THREE.MathUtils.lerp(
+          moduleMin,
+          moduleMax,
+          uvs.getX(vertex),
+        ))
+      }
+      uvs.needsUpdate = true
+      parts.push(geometry)
+    }
+
+    addFacade({
+      width: roadFacadeWidth,
+      center: facadeCenter,
+      across: tangent.clone().multiplyScalar(sideSign),
+      normal: side.clone().multiplyScalar(-sideSign),
+      variant: buildingIndex % 4,
+    })
+
+    // Tight street-circuit turns expose even the nominally outside face.
+    addFacade({
+      width: roadFacadeWidth,
+      center: point.clone()
+        .addScaledVector(
+          side,
+          building.lateral + sideSign * (building.width / 2 + faceOffset),
+        )
+        .addScaledVector(WORLD_UP, building.height / 2 + 0.03),
+      across: tangent.clone().multiplyScalar(-sideSign),
+      normal: side.clone().multiplyScalar(sideSign),
+      variant: (buildingIndex + 3) % 4,
+    })
+
+    // Both approach and departure views expose a tower's short end face.
+    for (const endSign of [-1, 1]) {
+      addFacade({
+        width: building.width - 0.15,
+        center: point.clone()
+          .addScaledVector(side, building.lateral)
+          .addScaledVector(
+            tangent,
+            endSign * (buildingLength / 2 + faceOffset),
+          )
+          .addScaledVector(WORLD_UP, building.height / 2 + 0.03),
+        across: side.clone().multiplyScalar(endSign),
+        normal: tangent.clone().multiplyScalar(endSign),
+        variant: (
+          buildingIndex + (endSign < 0 ? 1 : 2)
+        ) % 4,
+      })
+    }
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createHarbourRetainingWallFacadeGeometry(
+  curve,
+  roadWidth = ROAD_WIDTH,
+) {
+  if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
+    throw new RangeError('Harbour retaining-wall graphics require a usable road width')
+  }
+
+  const {
+    progresses,
+    lateralOffsetFromRoad,
+    centerY,
+    width,
+    height,
+    length,
+  } = HARBOUR_RETAINING_WALL_LAYOUT
+  const lateral = roadWidth / 2 + lateralOffsetFromRoad
+  const panelHeight = height - 0.08
+  const faceOffset = 0.018
+  const atlasInset = 1 / 1024
+  const parts = []
+
+  const addFacade = ({
+    facadeWidth,
+    facadeHeight = panelHeight,
+    center,
+    across,
+    normal,
+    variant,
+    moduleCrop = 1,
+  }) => {
+    const geometry = new THREE.PlaneGeometry(facadeWidth, facadeHeight)
+    const matrix = new THREE.Matrix4().makeBasis(across, WORLD_UP, normal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+
+    const moduleCenter = variant * 0.5 + 0.25
+    const moduleSpan = (0.5 - atlasInset * 2) * moduleCrop
+    const moduleMin = moduleCenter - moduleSpan / 2
+    const moduleMax = moduleCenter + moduleSpan / 2
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(moduleMin, moduleMax, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(atlasInset, 1 - atlasInset, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+    parts.push(geometry)
+  }
+
+  for (const [wallIndex, progress] of progresses.entries()) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, progress, point, tangent, side)
+
+    addFacade({
+      facadeWidth: length - 0.08,
+      center: point.clone()
+        .addScaledVector(side, lateral - width / 2 - faceOffset)
+        .addScaledVector(WORLD_UP, centerY),
+      across: tangent,
+      normal: side.clone().multiplyScalar(-1),
+      variant: wallIndex % 2,
+    })
+
+    // The hairpin and adjacent road branches expose the nominal rear face.
+    addFacade({
+      facadeWidth: length - 0.08,
+      center: point.clone()
+        .addScaledVector(side, lateral + width / 2 + faceOffset)
+        .addScaledVector(WORLD_UP, centerY),
+      across: tangent.clone().multiplyScalar(-1),
+      normal: side,
+      variant: (wallIndex + 1) % 2,
+    })
+
+    // Use only a narrow center slice of a module on each short end face. This
+    // preserves material scale instead of squeezing a square wall bay into a
+    // 0.7 m-wide column.
+    const endModuleCrop = (width - 0.08) / panelHeight
+    for (const endSign of [-1, 1]) {
+      addFacade({
+        facadeWidth: width - 0.08,
+        center: point.clone()
+          .addScaledVector(side, lateral)
+          .addScaledVector(tangent, endSign * (length / 2 + faceOffset))
+          .addScaledVector(WORLD_UP, centerY),
+        across: side.clone().multiplyScalar(endSign),
+        normal: tangent.clone().multiplyScalar(endSign),
+        variant: (wallIndex + (endSign > 0 ? 0 : 1)) % 2,
+        moduleCrop: endModuleCrop,
+      })
+    }
+  }
+
+  // These same structural boxes form the tunnel interior and a large exposed
+  // retaining wall beside the adjacent hairpin. Cover their outward faces so
+  // they do not remain an untextured strip in the player's chase-camera view.
+  const tunnelLayout = getHarbourTunnelLayout(curve)
+  const tunnelWallHeight = HARBOUR_TUNNEL_ROOF_UNDERSIDE - 0.08
+  const tunnelWallCenterY = HARBOUR_TUNNEL_ROOF_UNDERSIDE / 2
+  const tunnelOuterOffset = (
+    roadWidth / 2
+    + HARBOUR_TUNNEL_SIDE_WALL_CENTER_OFFSET
+    + HARBOUR_TUNNEL_SIDE_WALL_WIDTH / 2
+    + faceOffset
+  )
+  for (const [panelIndex, progress] of tunnelLayout.progresses.entries()) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, progress, point, tangent, side)
+
+    for (const sideSign of [-1, 1]) {
+      addFacade({
+        facadeWidth: tunnelLayout.panelLength,
+        facadeHeight: tunnelWallHeight,
+        center: point.clone()
+          .addScaledVector(side, sideSign * tunnelOuterOffset)
+          .addScaledVector(WORLD_UP, tunnelWallCenterY),
+        across: tangent.clone().multiplyScalar(-sideSign),
+        normal: side.clone().multiplyScalar(sideSign),
+        variant: (panelIndex + (sideSign > 0 ? 0 : 1)) % 2,
+      })
+    }
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
 }
 
 export function getHarbourTunnelLightingLayout(curve, roadWidth = ROAD_WIDTH) {
@@ -1210,9 +2035,15 @@ function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
         parts,
         curve,
         progress,
-        side * (roadWidth / 2 + 1.02),
+        side * (
+          roadWidth / 2 + HARBOUR_TUNNEL_SIDE_WALL_CENTER_OFFSET
+        ),
         HARBOUR_TUNNEL_ROOF_UNDERSIDE / 2,
-        [0.5, HARBOUR_TUNNEL_ROOF_UNDERSIDE, tunnelLayout.panelLength],
+        [
+          HARBOUR_TUNNEL_SIDE_WALL_WIDTH,
+          HARBOUR_TUNNEL_ROOF_UNDERSIDE,
+          tunnelLayout.panelLength,
+        ],
         COLORS.stone,
       )
       pushTrackBoxBanked(
@@ -1295,24 +2126,32 @@ function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
 
   // Retaining walls, road furniture and patched asphalt make the opening
   // sector read as a converted city street rather than a permanent circuit.
-  for (const [index, progress] of [0.045, 0.085, 0.125, 0.165, 0.205, 0.245].entries()) {
-    pushTrackBox(parts, curve, progress, roadWidth / 2 + 4.2, 2.3, [0.7, 4.6, 15], COLORS.stone)
-    pushTrackBox(parts, curve, progress, roadWidth / 2 + 3.78, 4.52, [0.16, 0.24, 14.5], index % 2 ? COLORS.red : COLORS.white)
+  for (const [index, progress] of HARBOUR_RETAINING_WALL_LAYOUT.progresses.entries()) {
+    const layout = HARBOUR_RETAINING_WALL_LAYOUT
+    pushTrackBox(
+      parts,
+      curve,
+      progress,
+      roadWidth / 2 + layout.lateralOffsetFromRoad,
+      layout.centerY,
+      [layout.width, layout.height, layout.length],
+      COLORS.stone,
+    )
+    pushTrackBox(
+      parts,
+      curve,
+      progress,
+      roadWidth / 2 + layout.capLateralOffsetFromRoad,
+      layout.capCenterY,
+      layout.capSize,
+      index % 2 ? COLORS.red : COLORS.white,
+    )
   }
   // Swimming Pool and compact harbour stands frame the final sector.
   for (const panel of HARBOUR_SWIMMING_POOL_PANELS) {
     pushWorldBox(parts, panel.size, panel.position, panel.color)
   }
-  addGrandstand(parts, curve, {
-    progress: 0.72,
-    side: 1,
-    tiers: 4,
-    length: 30,
-    seatStart: 15,
-    crowdSeats: 7,
-    crowdSpacing: 2,
-    accent: COLORS.red,
-  })
+  addGrandstands(parts, curve, 'harbour')
 
   // Short pit buildings avoid crossing the curving street-circuit start line.
   pushTrackBox(parts, curve, 0.985, -18, 3.4, [9, 6.8, 34], COLORS.cream)
@@ -1320,11 +2159,81 @@ function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
   pushTrackBox(parts, curve, 0.985, -17.8, 7.0, [10, 0.35, 35], COLORS.terracotta)
 }
 
-function addTempleTree(parts, curve, progress, lateral, height, along = 0) {
-  pushTrackCylinder(parts, curve, progress, lateral, height * 0.3, 0.3, height * 0.6, COLORS.desertRock, along, 7)
-  pushTrackCanopy(parts, curve, progress, lateral, height * 0.66, [height * 0.34, height * 0.3, height * 0.38], COLORS.forest, along)
-  pushTrackCanopy(parts, curve, progress, lateral + 0.65, height * 0.82, [height * 0.27, height * 0.24, height * 0.31], COLORS.hedge, along - 0.7)
-  pushTrackCanopy(parts, curve, progress, lateral - 0.72, height * 0.78, [height * 0.24, height * 0.22, height * 0.28], COLORS.grass, along + 0.85)
+export const TEMPLE_TREE_LAYOUT = Object.freeze(
+  Array.from({ length: 36 }, (_, index) => (
+    [-1, 1].flatMap(side => (
+      [0, 1].map(band => Object.freeze({
+        progress: (
+          (index + 0.5 + band * 0.46) / 36
+        ) % 1,
+        lateral: side * (18 + (index % 4) * 3.2 + band * 11),
+        height: 7.2 + (index % 6) * 1.05 - band * 0.55,
+        along: (
+          (index % 3 - 1) * 4.2
+          + band * (index % 2 === 0 ? -2.8 : 2.8)
+        ),
+        variant: (
+          index
+          + (side > 0 ? 0 : 1)
+          + band * 2
+        ) % 4,
+      }))
+    ))
+  )).flat(),
+)
+
+export function createTempleTreeBillboardGeometry(curve) {
+  if (!curve || typeof curve.getPointAt !== 'function') {
+    throw new TypeError('Temple tree graphics require a finite track curve')
+  }
+
+  const atlasInset = 1 / 1024
+  const parts = []
+  for (const tree of TEMPLE_TREE_LAYOUT) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, tree.progress, point, tangent, side)
+    const lateralSign = Math.sign(tree.lateral)
+    const billboardHeight = tree.height * 1.08
+    const billboardWidth = tree.height
+    const center = point.clone()
+      .addScaledVector(side, tree.lateral)
+      .addScaledVector(tangent, tree.along)
+      .addScaledVector(WORLD_UP, billboardHeight / 2 + 0.006)
+    const across = tangent.clone().multiplyScalar(lateralSign)
+    const normal = side.clone().multiplyScalar(-lateralSign)
+    const geometry = new THREE.PlaneGeometry(
+      billboardWidth,
+      billboardHeight,
+    )
+    const matrix = new THREE.Matrix4().makeBasis(across, WORLD_UP, normal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+
+    const column = tree.variant % 2
+    const row = Math.floor(tree.variant / 2)
+    const moduleMinU = column * 0.5 + atlasInset
+    const moduleMaxU = (column + 1) * 0.5 - atlasInset
+    const moduleMinV = row === 0 ? 0.5 + atlasInset : atlasInset
+    const moduleMaxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(moduleMinU, moduleMaxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(moduleMinV, moduleMaxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+    parts.push(geometry)
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
 }
 
 function addTempleSignature(parts, curve, roadWidth = ROAD_WIDTH) {
@@ -1338,14 +2247,6 @@ function addTempleSignature(parts, curve, roadWidth = ROAD_WIDTH) {
       color: COLORS.grass,
     }))
   }
-  for (let index = 0; index < 36; index += 1) {
-    const progress = (index + 0.5) / 36
-    for (const side of [-1, 1]) {
-      const lateral = side * (18 + (index % 4) * 3.2)
-      addTempleTree(parts, curve, progress, lateral, 7.2 + (index % 6) * 1.05, (index % 3 - 1) * 4.2)
-    }
-  }
-
   // Preserved oval banking crosses over the modern Serraglio run to Ascari.
   const banking = TEMPLE_BANKING_LAYOUT
   for (const side of [-1, 1]) {
@@ -1391,26 +2292,7 @@ function addTempleSignature(parts, curve, roadWidth = ROAD_WIDTH) {
     COLORS.steel,
   )
 
-  addGrandstand(parts, curve, {
-    progress: PIT_STRAIGHT_PROGRESS,
-    side: 1,
-    tiers: 6,
-    length: 64,
-    seatStart: 15.5,
-    crowdSeats: 9,
-    crowdSpacing: 3.2,
-    accent: COLORS.italianGreen,
-  })
-  addGrandstand(parts, curve, {
-    progress: 0.2,
-    side: -1,
-    tiers: 5,
-    length: 34,
-    seatStart: 17,
-    crowdSeats: 8,
-    crowdSpacing: 2.1,
-    accent: COLORS.red,
-  })
+  addGrandstands(parts, curve, 'temple')
 
   // Low, white pit building and red timing tower match the Monza straight.
   pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -22, 3.1, [10, 6.2, 58], COLORS.cream)

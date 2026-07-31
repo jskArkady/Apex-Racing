@@ -356,6 +356,896 @@
         "reviewedAt": null,
         "notes": "No external human or legal review has been claimed."
       }
+    },
+    {
+      "id": "facade.apex.crowd_panel",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external crowd, person, grandstand, circuit, brand, vehicle, team, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation strip of a dense, distant, simplified adult event crowd in six shallow rows for the fictional Apex night venue; intended for one clamped mapping across each existing low-poly grandstand.",
+      "promptConstraints": [
+        "Crowd and dark seating face only; no sky, architecture, track, identifiable faces, children, celebrities, flags, national symbols, banners, signs, text, logos, sponsor marks, branded clothing, watermark, UI, border, or perspective convergence.",
+        "Cool night floodlight ambience, uniform edge-to-edge density, no focal person, no baked cast shadows, glare, bloom, vignette, aisles, exits, stairways, or barriers.",
+        "The runtime derivative must remain opaque, power-of-two, legible after mipmapping, and use ClampToEdge without horizontal repetition."
+      ],
+      "sources": [
+        {
+          "role": "generated crowd facade master",
+          "dimensions": [1774, 887],
+          "bytes": 2224861,
+          "sha256": "0a9ce1fe088fd930b89f183d10a44ecc92a2c4cf0c44ba139ef0914714876b1a"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-night-crowd-panel-1024.webp",
+          "dimensions": [1024, 256],
+          "bytes": 42590,
+          "sha256": "74b0c37ac39617c47f512bc6d86e00170c49481aa39136d5ff818ad4ae8bbfde",
+          "encoding": "WebP quality 76, method 6",
+          "processing": "Cropped to the central 4:1 crowd strip at source box [0, 222, 1774, 665], downscaled with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 39.15,
+          "luminanceStdDev": 28.66,
+          "horizontalDetailMae": 7.64,
+          "verticalDetailMae": 7.15,
+          "leftRightEdgeMae": 14.51
+        },
+        "notes": "The decoded derivative and a 384x96 simulated-distance preview were inspected for identifiable faces, children, text, symbols, logos, focal figures, empty gaps, and compression artifacts. The non-periodic edges are intentionally hidden by clamping the single mapping to the existing stand frame."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "facade.harbour.crowd_panel",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external crowd, person, grandstand, city, circuit, brand, vehicle, team, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation strip of a dense, distant, simplified adult event crowd in six shallow rows for the fictional Harbour daytime venue; intended for one clamped mapping across its existing low-poly grandstand.",
+      "promptConstraints": [
+        "Crowd and dark seating face only; no sky, architecture, harbour, track, identifiable faces, children, celebrities, flags, national symbols, banners, signs, text, logos, sponsor marks, branded clothing, watermark, UI, border, or perspective convergence.",
+        "Bright soft coastal race-day light, uniform edge-to-edge density, no focal person, no baked cast shadows, glare, bloom, vignette, aisles, exits, stairways, or barriers.",
+        "The runtime derivative must remain opaque, power-of-two, legible after mipmapping, and use ClampToEdge without horizontal repetition."
+      ],
+      "sources": [
+        {
+          "role": "generated crowd facade master",
+          "dimensions": [1774, 887],
+          "bytes": 2633541,
+          "sha256": "beba0306adfe2908895c31cbcf05920dec6bbedc534dbc0c1f89595640ced16d"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-day-crowd-panel-1024.webp",
+          "dimensions": [1024, 256],
+          "bytes": 69842,
+          "sha256": "b73d7c4383054954d42e2b30dc561a28d805eda1a32d912183ff4f24845664cc",
+          "encoding": "WebP quality 76, method 6",
+          "processing": "Cropped to the central 4:1 crowd strip at source box [0, 222, 1774, 665], downscaled with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 87.67,
+          "luminanceStdDev": 61.29,
+          "horizontalDetailMae": 14.66,
+          "verticalDetailMae": 13.87,
+          "leftRightEdgeMae": 61.66
+        },
+        "notes": "The decoded derivative and a 384x96 simulated-distance preview were inspected for identifiable faces, children, text, symbols, logos, focal figures, empty gaps, and compression artifacts. The non-periodic edges are intentionally hidden by clamping the single mapping to the existing stand frame."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "facade.temple.crowd_panel",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external crowd, person, grandstand, park, forest, circuit, brand, vehicle, team, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation strip of a dense, distant, simplified adult event crowd in six shallow rows for the fictional Temple daytime venue; intended for one clamped mapping across each existing low-poly grandstand.",
+      "promptConstraints": [
+        "Crowd and dark seating face only; no sky, architecture, forest, track, identifiable faces, children, celebrities, flags, national symbols, banners, signs, text, logos, sponsor marks, branded clothing, watermark, UI, border, or perspective convergence.",
+        "Clear warm race-afternoon light, uniform edge-to-edge density, no focal person, no baked cast shadows, glare, bloom, vignette, aisles, exits, stairways, or barriers.",
+        "The runtime derivative must remain opaque, power-of-two, legible after mipmapping, and use ClampToEdge without horizontal repetition."
+      ],
+      "sources": [
+        {
+          "role": "generated crowd facade master",
+          "dimensions": [1774, 887],
+          "bytes": 2762439,
+          "sha256": "6e29a876a19d22bf221a04f168abbc40c554264606fe12f57fe5d4291b36fc82"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "temple-day-crowd-panel-1024.webp",
+          "dimensions": [1024, 256],
+          "bytes": 73206,
+          "sha256": "2d7a2e51ad495f900fb57ce96b6aecf4fb6abf93689b8752fe85af41bb6f85eb",
+          "encoding": "WebP quality 76, method 6",
+          "processing": "Cropped to the central 4:1 crowd strip at source box [0, 222, 1774, 665], downscaled with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 60.02,
+          "luminanceStdDev": 44.31,
+          "horizontalDetailMae": 15.25,
+          "verticalDetailMae": 13.79,
+          "leftRightEdgeMae": 28.09
+        },
+        "notes": "The decoded derivative and a 384x96 simulated-distance preview were inspected for identifiable faces, children, text, symbols, logos, focal figures, empty gaps, and compression artifacts. The non-periodic edges are intentionally hidden by clamping the single mapping to the existing stand frame."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "facade.apex.pit_garage",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external pit building, garage, crew, circuit, brand, vehicle, team, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation strip of professional open pit-garage bays with distant workshop activity for the fictional floodlit Apex venue; intended for clamped mappings over the existing low-poly pit building.",
+      "promptConstraints": [
+        "Facade and separate garage bays only; no sky, track, grandstand, exterior scene, visible cars, identifiable people, children, celebrities, flags, signs, text, letters, numbers, logos, sponsor marks, branded uniforms, watermark, UI, border, or perspective convergence.",
+        "Cool desert-night floodlight ambience with restrained warm work lights, readable deep interiors, consistent bay spacing, and no glare, bloom, lens flare, vignette, or external baked shadows.",
+        "The runtime derivative must remain opaque, power-of-two, legible after mipmapping, and use ClampToEdge on each facade section."
+      ],
+      "sources": [
+        {
+          "role": "generated pit-garage facade master",
+          "dimensions": [1774, 887],
+          "bytes": 1039742,
+          "sha256": "030519648eb04e94a9fbf626e75d3cacc6d2428f6e0c056381e0f9d272304a3c"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-night-pit-garage-facade-1024.webp",
+          "dimensions": [1024, 256],
+          "bytes": 26488,
+          "sha256": "2a68c7a38178a8fb5d817970933310c92353cc6bc8df4ac6a8ebf89c01a58e20",
+          "encoding": "WebP quality 78, method 6",
+          "processing": "Cropped to a clean 4:1 central facade at source box [313, 300, 1461, 587], removing the generated white surround; downscaled with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 41.22,
+          "luminanceStdDev": 30.94,
+          "horizontalDetailMae": 5.36,
+          "verticalDetailMae": 8.33,
+          "nearWhitePercent": 0.158,
+          "nearBlackPercent": 7.905
+        },
+        "notes": "The decoded derivative and a 512x128 simulated-distance preview were inspected for blank borders, visible cars, identifiable faces, children, text, symbols, logos, collapsed bays, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "facade.harbour.pit_garage",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external pit building, garage, crew, city, circuit, brand, vehicle, team, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation strip of compact professional open pit-garage bays with distant workshop activity for the fictional Harbour daytime venue; intended for clamped mappings over the existing low-poly pit building.",
+      "promptConstraints": [
+        "Facade and separate garage bays only; no sky, track, harbour, grandstand, exterior scene, visible cars, identifiable people, children, celebrities, flags, signs, text, letters, numbers, logos, sponsor marks, branded uniforms, watermark, UI, border, or perspective convergence.",
+        "Soft coastal race-day ambience with cool work lights, readable deep interiors, consistent bay spacing, and no glare, bloom, lens flare, vignette, or external baked shadows.",
+        "The runtime derivative must remain opaque, power-of-two, legible after mipmapping, and use ClampToEdge on each facade section."
+      ],
+      "sources": [
+        {
+          "role": "generated pit-garage facade master",
+          "dimensions": [1774, 887],
+          "bytes": 2234401,
+          "sha256": "f996579dd99a6d166d229abf5e5fe899cac76509638aa756951486dedc55091c"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-day-pit-garage-facade-1024.webp",
+          "dimensions": [1024, 256],
+          "bytes": 31614,
+          "sha256": "c3f7dcc9169895cb98a4af603573eef46753b0abac8a3c23427c54086b6dcbef",
+          "encoding": "WebP quality 78, method 6",
+          "processing": "Cropped to the active 4:1 facade at source box [1, 105, 1773, 548], excluding unrelated foreground; downscaled with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 46.92,
+          "luminanceStdDev": 38.05,
+          "horizontalDetailMae": 6.99,
+          "verticalDetailMae": 8.38,
+          "nearWhitePercent": 0.172,
+          "nearBlackPercent": 7.414
+        },
+        "notes": "The decoded derivative and a 512x128 simulated-distance preview were inspected for blank borders, visible cars, identifiable faces, children, text, symbols, logos, collapsed bays, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "facade.temple.pit_garage",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external pit building, garage, crew, park, circuit, brand, vehicle, team, F1, FIA, sponsor, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation strip of classic professional open pit-garage bays with distant workshop activity for the fictional Temple daytime venue; intended for clamped mappings over the existing low-poly pit building.",
+      "promptConstraints": [
+        "Facade and separate garage bays only; no sky, track, forest, grandstand, exterior scene, visible cars, identifiable people, children, celebrities, flags, signs, text, letters, numbers, logos, sponsor marks, branded uniforms, watermark, UI, border, or perspective convergence.",
+        "Warm race-afternoon ambience with neutral work lights, readable deep interiors, consistent bay spacing, and no glare, bloom, lens flare, vignette, or external baked shadows.",
+        "The runtime derivative must remain opaque, power-of-two, legible after mipmapping, and use ClampToEdge on each facade section."
+      ],
+      "sources": [
+        {
+          "role": "generated pit-garage facade master",
+          "dimensions": [1774, 887],
+          "bytes": 1920632,
+          "sha256": "d5ebc8ae27ee6d94dc40d683e0cda74bc7ac80eb21b01cf1b577d1be22130cdb"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "temple-day-pit-garage-facade-1024.webp",
+          "dimensions": [1024, 256],
+          "bytes": 29482,
+          "sha256": "8f6d8b08f753df8fce1db50ebfc348c9175ae796a1623b592ac21d19c95d4321",
+          "encoding": "WebP quality 78, method 6",
+          "processing": "Cropped to the active 4:1 facade at source box [1, 50, 1773, 493], excluding unrelated foreground; downscaled with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 69.19,
+          "luminanceStdDev": 56.16,
+          "horizontalDetailMae": 8.35,
+          "verticalDetailMae": 8.19,
+          "nearWhitePercent": 0.08,
+          "nearBlackPercent": 4.009
+        },
+        "notes": "The decoded derivative and a 512x128 simulated-distance preview were inspected for blank borders, visible cars, identifiable faces, children, text, symbols, logos, collapsed bays, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "display.apex.gantry",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external gantry, circuit, race-control graphic, brand, vehicle, F1, FIA, sponsor, flag, or stock photography was used as an image input.",
+      "promptIntent": "A strict straight-on abstract LED-matrix speed ribbon in the fictional Apex night palette; intended for the start gantry and repeated media bridges.",
+      "promptConstraints": [
+        "Opaque abstract display graphics only; no text, letters, numbers, words, logos, trademarks, sponsor marks, flags, track maps, cars, people, buildings, scenery, UI, watermark, or legible symbols.",
+        "Black and deep-navy face with warm-gold, acid-lime, white, and sparse red emissive geometry; no perspective, surrounding frame, supports, large empty center, or unrelated scene.",
+        "The runtime derivative must remain power-of-two, legible after mipmapping, and use ClampToEdge on the merged gantry display planes."
+      ],
+      "sources": [
+        {
+          "role": "generated gantry LED ribbon master",
+          "dimensions": [1986, 792],
+          "bytes": 1527777,
+          "sha256": "af8044950664598178b7c31f34c396c4f448a37a0a9d43409f81ef66fadadf00"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-night-gantry-display-1024.webp",
+          "dimensions": [1024, 128],
+          "bytes": 45570,
+          "sha256": "9f571c4dc64964c58b18a479d56dc522106a9cd143bd19c21a02a74b03636d00",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Selected the highest-energy 8:1 source window at [0, 243, 1986, 491], downscaled with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 44.69,
+          "luminanceStdDev": 64.38,
+          "horizontalDetailMae": 17.42,
+          "verticalDetailMae": 19,
+          "nearWhitePercent": 0.513,
+          "nearBlackPercent": 43.314
+        },
+        "notes": "The decoded derivative and a 512x64 simulated-distance preview were inspected for blank borders, text, numbers, symbols, logos, flag-like blocks, collapsed LED detail, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "display.harbour.gantry",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external gantry, waterfront, circuit, race-control graphic, brand, vehicle, F1, FIA, sponsor, flag, or stock photography was used as an image input.",
+      "promptIntent": "A strict straight-on abstract LED-matrix velocity ribbon in the fictional Harbour daytime palette; intended for the start gantry.",
+      "promptConstraints": [
+        "Opaque abstract display graphics only; no text, letters, numbers, words, logos, trademarks, sponsor marks, flags, track maps, cars, boats, people, buildings, scenery, UI, watermark, or legible symbols.",
+        "Charcoal and deep marine-blue face with coral-red, cyan, off-white, and sparse sand-gold geometry; no perspective, surrounding frame, supports, large empty center, or unrelated scene.",
+        "The runtime derivative must remain power-of-two, legible after mipmapping, and use ClampToEdge on the gantry display plane."
+      ],
+      "sources": [
+        {
+          "role": "generated gantry LED ribbon master",
+          "dimensions": [1981, 793],
+          "bytes": 2009359,
+          "sha256": "098b2bfafa07737c3e4e0bd292f67717aa24098720522b9f1e96e3d3aa9ac38d"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-day-gantry-display-1024.webp",
+          "dimensions": [1024, 128],
+          "bytes": 49058,
+          "sha256": "4576a2ca45237098ea1a1dfa343df77a5c068295c10b0064eea8590cccdc55e4",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Selected the highest-energy 8:1 source window at [0, 267, 1981, 514], downscaled with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 38.92,
+          "luminanceStdDev": 45.84,
+          "horizontalDetailMae": 26.95,
+          "verticalDetailMae": 27.5,
+          "nearWhitePercent": 0.263,
+          "nearBlackPercent": 29.424
+        },
+        "notes": "The decoded derivative and a 512x64 simulated-distance preview were inspected for blank borders, text, numbers, symbols, logos, flag-like blocks, collapsed LED detail, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "display.temple.gantry",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external gantry, heritage circuit, race-control graphic, brand, vehicle, F1, FIA, sponsor, flag, or stock photography was used as an image input.",
+      "promptIntent": "A strict straight-on abstract LED-matrix momentum ribbon in the fictional Temple daytime palette; intended for the start gantry.",
+      "promptConstraints": [
+        "Opaque abstract display graphics only; no text, letters, numbers, words, logos, trademarks, sponsor marks, flags, tricolor arrangements, track maps, cars, people, monuments, scenery, UI, watermark, or legible symbols.",
+        "Charcoal-black face with deep-green, racing-red, warm-cream, and sparse muted-gold geometry; no perspective, surrounding frame, supports, large empty center, or unrelated scene.",
+        "The runtime derivative must remain power-of-two, legible after mipmapping, and use ClampToEdge on the gantry display plane."
+      ],
+      "sources": [
+        {
+          "role": "generated gantry LED ribbon master",
+          "dimensions": [2172, 724],
+          "bytes": 1111598,
+          "sha256": "a782f810020095a5ea9997f63ed1cad0252fd3e816460e2e3546b6f24437b71f"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "temple-day-gantry-display-1024.webp",
+          "dimensions": [1024, 128],
+          "bytes": 30196,
+          "sha256": "64f7e39590fa9b6377fc53c788cecd2d0c53f02907c0b5a2f98c6babb9cc4672",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Selected the highest-energy 8:1 source window at [0, 227, 2172, 498], downscaled with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 25.22,
+          "luminanceStdDev": 31.84,
+          "horizontalDetailMae": 11.58,
+          "verticalDetailMae": 14.56,
+          "nearWhitePercent": 0.127,
+          "nearBlackPercent": 29.614
+        },
+        "notes": "The decoded derivative and a 512x64 simulated-distance preview were inspected for blank borders, text, numbers, symbols, logos, flag-like blocks, collapsed LED detail, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.tunnel_wall.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external road tunnel, circuit, city, race-control graphic, brand, vehicle, F1, FIA, sponsor, real-location image, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation two-module texture atlas of clean coastal race-tunnel service walls; intended for alternating clamped mappings along both sides of the fictional Harbour tunnel.",
+      "promptConstraints": [
+        "Exactly two equal wall modules with aligned horizontal boundaries; opaque flat wall surface only, with no road, floor, ceiling, tunnel opening, vehicle, person, surrounding scene, or large focal door.",
+        "No text, letters, numbers, arrows, icons, exit signs, logos, trademarks, sponsor marks, flags, advertisements, graffiti, posters, maps, UI, watermark, real-location identifiers, or recognizable Monaco imagery.",
+        "Neutral flat texture-reference lighting with restrained coastal wear; no perspective, cast shadows, bloom, glare, vignette, broken concrete, heavy grime, rust streaks, leaks, puddles, fire, smoke, or accident damage.",
+        "The runtime derivative must remain opaque and power-of-two; each square half must crop independently with one-texel UV insets preventing mip bleed across the center split."
+      ],
+      "sources": [
+        {
+          "role": "generated two-module tunnel-wall atlas master",
+          "dimensions": [1774, 887],
+          "bytes": 2322776,
+          "sha256": "231e2e23b93683310371b0d0fe204d556a22bee9f3c8dded2d89fa0d5fa013e1"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-tunnel-wall-atlas-1024.webp",
+          "dimensions": [1024, 512],
+          "bytes": 49480,
+          "sha256": "ef9a6fcb18aff9d3b1559a6580eb76a8e64ea5a4668c5f1dd7c5b0df1f008ddd",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Preserved the exact full-frame 2:1 atlas, downscaled from 1774x887 to 1024x512 with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 113.51,
+          "luminanceStdDev": 63.58,
+          "horizontalDetailMae": 5.02,
+          "verticalDetailMae": 11.7,
+          "nearWhitePercent": 0.363,
+          "nearBlackPercent": 1.675
+        },
+        "notes": "The decoded derivative and an A-B-A-B 192px-per-module simulated-distance strip were inspected for center-split drift, unmatched panel boundaries, blank borders, perspective, people, vehicles, text, symbols, logos, flag-like blocks, mip-risk detail, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "facade.harbour.apartment.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external apartment, tower, city, circuit, brand, vehicle, Monaco landmark, sponsor, real-location image, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation four-module atlas of fictional maintained coastal apartment façades in cream, salmon, sage-gray, and sand palettes; intended for clamped mappings over all four player-visible vertical sides of Harbour city towers.",
+      "promptConstraints": [
+        "Exactly four equal-width, full-height 1:2 façade modules in one 2:1 atlas; each quarter must crop independently with clean architectural edge seams and no surrounding environment or margin.",
+        "No sky, ground, road, tunnel, neighboring building, rooftop, vehicle, boat, person, silhouette, plant, laundry, flag, banner, awning, shopfront, text, letters, numbers, address plate, signs, arrows, icons, logos, trademarks, sponsor marks, advertisements, graffiti, posters, maps, UI, watermark, real-location identifiers, or recognizable Monaco landmarks.",
+        "Neutral soft daylight reference exposure with refined coastal materials; no perspective, cast shadows, flare, bloom, glare, vignette, broken windows, abandoned appearance, heavy grime, rust streaks, leaks, fire, smoke, or accident damage.",
+        "The runtime derivative must remain opaque and power-of-two; each quarter uses one-texel UV insets to prevent mip bleed."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module apartment facade atlas master",
+          "dimensions": [1774, 887],
+          "bytes": 2316942,
+          "sha256": "5f653d211a0382cb70aeafa2d0ee650708f7ddeb8fbb19e407c27ef56b98ac9d"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-apartment-facade-atlas-1024.webp",
+          "dimensions": [1024, 512],
+          "bytes": 74416,
+          "sha256": "f4d608253e1faf7aa35c5c323379f3dc751ab3ace63a7b2ba88146f756f547b5",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Preserved the exact full-frame 2:1 atlas, downscaled from 1774x887 to 1024x512 with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 139.6,
+          "luminanceStdDev": 48.57,
+          "horizontalDetailMae": 8.72,
+          "verticalDetailMae": 12.15,
+          "nearWhitePercent": 0,
+          "nearBlackPercent": 0.061
+        },
+        "notes": "The decoded derivative, four isolated 144x288 simulated-distance modules, and the final four-sided Casino WebGL capture were inspected for quarter-boundary drift, blank borders, perspective, people, vehicles, text, symbols, logos, flag-like blocks, collapsed balcony detail, untextured tower faces, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.apex.barrier.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external barrier, desert circuit, race-control graphic, brand, vehicle, F1, FIA, sponsor, real-location image, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation two-module atlas of warm ivory precast-concrete safety barriers with graphite rub bands and muted-gold reflectors; intended for alternating road-facing mappings around the fictional Apex night circuit.",
+      "promptConstraints": [
+        "Exactly two equal square barrier-face modules with aligned horizontal construction lines; opaque flat surface only, with no perspective, top surface, end cap, ground, track, fence, posts, or surrounding environment.",
+        "No text, letters, numbers, arrows, icons, chevrons, logos, trademarks, sponsor marks, flags, advertisements, racing-series marks, maps, UI, watermark, people, vehicles, buildings, floodlights, grandstands, desert vistas, or recognizable real-circuit imagery.",
+        "Neutral flat floodlit reference exposure with restrained sand wear; no red-white stripe sequence, checker pattern, cast shadows, bloom, glare, vignette, heavy grime, broken concrete, exposed rebar, rust, leaks, fire, smoke, or accident damage.",
+        "The runtime derivative must remain opaque and power-of-two; each half uses one-texel UV insets and alternates around both road-facing barrier walls."
+      ],
+      "sources": [
+        {
+          "role": "generated two-module Apex barrier atlas master",
+          "dimensions": [1774, 887],
+          "bytes": 3333092,
+          "sha256": "35ee481aded0e1790cdb82843b5dd898234af37a424f96ffb4272164659ef210"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-night-barrier-atlas-1024.webp",
+          "dimensions": [1024, 512],
+          "bytes": 123950,
+          "sha256": "7f00eb76efb81364bc0ed7eea2c597a1a84db320276a70c62b5ae03288b02abd",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Preserved the exact full-frame 2:1 atlas, downscaled from 1774x887 to 1024x512 with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 172.28,
+          "luminanceStdDev": 37.45,
+          "horizontalDetailMae": 8.78,
+          "verticalDetailMae": 11.16,
+          "nearWhitePercent": 0,
+          "nearBlackPercent": 0
+        },
+        "notes": "The decoded derivative and a six-module A-B repetition preview at approximate chase-camera aspect were inspected for split drift, blank borders, text, symbols, logos, flag-like blocks, collapsed reflectors, repetition seams, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.barrier.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external Armco, city circuit, harbour, race-control graphic, brand, vehicle, F1, FIA, sponsor, Monaco image, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation two-module atlas of galvanized triple-beam Armco with graphite channels and sparse marine-blue and safety-red reflectors; intended for alternating road-facing mappings around the fictional Harbour street circuit.",
+      "promptConstraints": [
+        "Exactly two equal square Armco-face modules with all three horizontal rails aligned; opaque flat surface only, with no perspective, posts, top surface, end cap, ground, road, fence, building, tunnel, harbour, or surrounding environment.",
+        "No text, letters, numbers, arrows, icons, chevrons, logos, trademarks, sponsor marks, flags, advertisements, racing-series marks, maps, UI, watermark, people, vehicles, apartments, skylines, boats, water, or recognizable Monaco imagery.",
+        "Neutral flat daylight reference exposure with restrained salt-air wear; no red-white stripe sequence, checker pattern, reflections, cast shadows, bloom, glare, vignette, heavy grime, dents, torn metal, strong rust, leaks, fire, smoke, or accident damage.",
+        "The runtime derivative must remain opaque and power-of-two; each half uses one-texel UV insets and alternates around both road-facing barrier walls."
+      ],
+      "sources": [
+        {
+          "role": "generated two-module Harbour Armco atlas master",
+          "dimensions": [1774, 887],
+          "bytes": 2302134,
+          "sha256": "929b10ed96a9d1976b829b0c137b3cd19510bfe130aa1ab95cab406ca7a6eea6"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-day-barrier-atlas-1024.webp",
+          "dimensions": [1024, 512],
+          "bytes": 36172,
+          "sha256": "d80f47b8c56dea9c9395ecc92f85bec5574eeaf4ad6e85f3a25091bb50de9748",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Preserved the exact full-frame 2:1 atlas, downscaled from 1774x887 to 1024x512 with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 128.92,
+          "luminanceStdDev": 56.21,
+          "horizontalDetailMae": 1.81,
+          "verticalDetailMae": 5.48,
+          "nearWhitePercent": 0.004,
+          "nearBlackPercent": 0.069
+        },
+        "notes": "The decoded derivative and a six-module A-B repetition preview at approximate chase-camera aspect were inspected for rail misalignment, split drift, blank borders, text, symbols, logos, flag-like blocks, collapsed reflectors, repetition seams, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.temple.barrier.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external guardrail, parkland circuit, race-control graphic, brand, vehicle, F1, FIA, sponsor, Monza image, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation two-module atlas of galvanized double-wave guardrails over warm-gray concrete with forest-green backing and muted-red reflectors; intended for alternating road-facing mappings around the fictional Temple parkland circuit.",
+      "promptConstraints": [
+        "Exactly two equal square barrier-face modules with aligned rails and plinth boundaries; opaque flat surface only, with no perspective, protruding posts, top surface, end cap, ground, road, fence, vegetation, building, or surrounding environment.",
+        "No text, letters, numbers, arrows, icons, chevrons, logos, trademarks, sponsor marks, flags, advertisements, racing-series marks, maps, UI, watermark, people, vehicles, foliage, skylines, monuments, towers, or recognizable Monza imagery.",
+        "Neutral flat clear-day reference exposure with restrained dust and rubber wear; no green-white-red stripe sequence, checker pattern, reflections, cast shadows, bloom, glare, vignette, heavy grime, dents, torn metal, broken concrete, strong rust, leaks, fire, smoke, or accident damage.",
+        "The runtime derivative must remain opaque and power-of-two; each half uses one-texel UV insets and alternates around both road-facing barrier walls."
+      ],
+      "sources": [
+        {
+          "role": "generated two-module Temple guardrail atlas master",
+          "dimensions": [1774, 887],
+          "bytes": 2750620,
+          "sha256": "fd60d2624d3489738c05944bfccfa0a1374e6bde2d495f0b77a68eea8ab03f55"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "temple-day-barrier-atlas-1024.webp",
+          "dimensions": [1024, 512],
+          "bytes": 68756,
+          "sha256": "5e789e110ef80346dec0ca0bcaea9fc10e23b773e4cfc7d8542069bf076af291",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Preserved the exact full-frame 2:1 atlas, downscaled from 1774x887 to 1024x512 with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 103.01,
+          "luminanceStdDev": 50.94,
+          "horizontalDetailMae": 4.4,
+          "verticalDetailMae": 7.99,
+          "nearWhitePercent": 0,
+          "nearBlackPercent": 0.453
+        },
+        "notes": "The decoded derivative and a six-module A-B repetition preview at approximate chase-camera aspect were inspected for rail/plinth misalignment, split drift, blank borders, text, symbols, logos, flag-like blocks, collapsed reflectors, repetition seams, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.retaining_wall.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external retaining wall, city circuit, coastal infrastructure, brand, vehicle, F1, FIA, sponsor, Monaco image, or stock photography was used as an image input.",
+      "promptIntent": "A strict front-elevation two-module atlas of maintained coastal limestone and architectural-concrete retaining walls with restrained service details; intended for every vertical face of the fictional Harbour opening-sector wall structures and the exposed exterior faces of the tunnel side walls.",
+      "promptConstraints": [
+        "Exactly two equal square wall-face modules with aligned horizontal courses; opaque flat surface only, with no perspective, wall top, end cap, ground, road, fence, building, skyline, tunnel, harbour, or surrounding environment.",
+        "No doors, windows, shopfronts, railings, stairs, plants, people, vehicles, text, letters, numbers, arrows, icons, hazard stripes, chevrons, logos, trademarks, sponsor marks, flags, advertisements, racing-series marks, maps, posters, graffiti, UI, watermark, real-location identifiers, or recognizable Monaco imagery.",
+        "Neutral flat soft-daylight reference exposure with restrained salt-air wear; no red-white stripe sequence, checker pattern, cast shadows, reflections, bloom, glare, vignette, heavy grime, structural cracks, broken concrete, exposed rebar, strong rust, leaks, puddles, fire, smoke, or accident damage.",
+        "The runtime derivative must remain opaque and power-of-two; opening-sector broad faces and exposed tunnel exterior panels alternate both atlas halves with one-texel UV insets, while narrow end faces crop a scale-preserving center strip from one module."
+      ],
+      "sources": [
+        {
+          "role": "generated two-module Harbour retaining-wall atlas master",
+          "dimensions": [1774, 887],
+          "bytes": 2861881,
+          "sha256": "3eabaac11e3ed65336b6cfa0e0883ff1c2e11f1b93ecc3901bef9d7310472862"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-day-retaining-wall-atlas-1024.webp",
+          "dimensions": [1024, 512],
+          "bytes": 73140,
+          "sha256": "2b586680cbe4422821ae242c510850d225e97eeb3ad0e4145ebd208f928fd711",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Preserved the exact full-frame 2:1 atlas, downscaled from 1774x887 to 1024x512 with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 165.1,
+          "luminanceStdDev": 36.23,
+          "horizontalDetailMae": 4.86,
+          "verticalDetailMae": 10.71,
+          "nearWhitePercent": 0.001,
+          "nearBlackPercent": 0.584
+        },
+        "notes": "The decoded derivative, two opposing four-module simulated 3.3:1 wall strips, and WebGL runtime captures of the opening sector and adjacent hairpin/tunnel exterior were inspected for course misalignment, split drift, blank borders, text, symbols, logos, flag-like blocks, collapsed service details, repetition seams, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.tunnel_ceiling_portal.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external tunnel ceiling, portal, city circuit, coastal infrastructure, brand, vehicle, F1, FIA, sponsor, Monaco image, or stock photography was used as an image input.",
+      "promptIntent": "A strict 2-by-2 atlas containing two dark graphite tunnel-ceiling modules and two pale-stone/graphite portal-casing modules; intended for the full visible underside, sloped soffits, curved-panel joint ends, and entrance/exit fascia of the fictional Harbour tunnel.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid with independent clean crops and exact center splits; opaque flat surface only, with no perspective, visible thickness, ceiling edge, wall edge, tunnel opening, floor, road, kerb, barrier, building, skyline, vehicle, or surrounding environment.",
+        "The top row contains coordinated dark ceiling cladding without baked lamps or emitted light; the bottom row contains coordinated architectural portal casing suitable for scale-preserving horizontal and vertical center crops.",
+        "No people, vehicles, text, letters, numbers, arrows, icons, hazard stripes, chevrons, checker patterns, logos, trademarks, sponsor marks, flags, advertisements, racing-series marks, maps, posters, graffiti, UI, watermark, real-location identifiers, or recognizable Monaco imagery.",
+        "Neutral flat reference lighting with readable dark midtones and restrained salt-air wear; no red-white stripe sequence, cast shadows, scenery reflections, bloom, glare, vignette, heavy grime, large cracks, broken panels, exposed rebar, strong rust, leaks, puddles, fire, smoke, or accident damage.",
+        "The runtime derivative must remain opaque and power-of-two; flat ceiling panels and sloped soffits alternate the two upper modules, while curved-wall joint ends and both portal fascias use the lower modules with one-texel UV insets and scale-preserving crops."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Harbour tunnel ceiling and portal atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2694024,
+          "sha256": "9cae21af0b451b1a4ed52b4d89257e7a65c2e2e139012134550d943ec14acc67"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-tunnel-ceiling-portal-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 134066,
+          "sha256": "7fd6357bddab08c36f37eacc465743735fd3dc524e2bdd4b67558ff363a23b83",
+          "encoding": "WebP quality 82, method 6",
+          "processing": "Preserved the exact full-frame 2-by-2 atlas, downscaled from 1254x1254 to 1024x1024 with Lanczos, encoded as opaque WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "meanLuminance": 89.06,
+          "luminanceStdDev": 52.27,
+          "horizontalDetailMae": 6.81,
+          "verticalDetailMae": 7.4,
+          "nearWhitePercent": 0,
+          "nearBlackPercent": 1.467
+        },
+        "notes": "The decoded derivative, a composite preview of six alternating stretched ceiling bays, four portal fascia bays, eight scale-preserving narrow pillar crops, and a WebGL chase-camera capture of the flat ceiling, sloped soffits, joint ends, and exit opening were inspected for center-split drift, blank borders, UV inversion, text, symbols, logos, flag-like blocks, collapsed dark detail, repetition seams, and compression artifacts. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "sprite.temple.parkland_tree.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-07-31",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external tree, forest, parkland circuit, brand, vehicle, F1, FIA, sponsor, Monza image, or stock photography was used as an image input.",
+      "promptIntent": "A precise 2-by-2 chroma-key sprite atlas containing four complete stylized-realistic deciduous parkland trees; intended as alpha-tested road-facing billboards distributed in two staggered rows of 144 trees around the fictional Temple circuit.",
+      "promptConstraints": [
+        "Exactly four complete isolated trees, one centered within each equal square quadrant of a 2-by-2 atlas, with no tree crossing a center split and all trunks and canopies fully visible.",
+        "A perfectly flat uniform magenta chroma-key background with no ground, grass, shadow, sky, cloud, landscape, forest backdrop, fence, road, building, sign, person, animal, vehicle, or surrounding environment.",
+        "No text, letters, numbers, icons, logos, trademarks, flags, advertisements, racing-series marks, maps, UI, watermark, real-location identifiers, or recognizable Monza imagery.",
+        "Neutral soft reference lighting and broad readable foliage clusters; no cast shadow, contact shadow, glow, bloom, rim halo, fog, motion blur, depth of field, noisy photoreal leaf fringe, or magenta inside the intended tree silhouettes.",
+        "The runtime derivative must use an alpha channel, preserve four independently cropped quadrants with one-texel UV insets, pass transparent-corner and chroma-residue checks, and render with alpha testing rather than sorted transparency."
+      ],
+      "sources": [
+        {
+          "role": "generated four-tree Temple chroma-key sprite atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2248116,
+          "sha256": "287501047a76831618cd4a80ea601a5a6a57cf75e68cfc68354a211bd030995c"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "temple-tree-sprite-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 312202,
+          "sha256": "b7cf7cdd5fedb279b8074efb617208557fc640e0df7e43207f604e1d5303c584",
+          "encoding": "RGBA WebP quality 88, alpha quality 100, method 6",
+          "processing": "Removed the automatically sampled #f802ea border key with the installed imagegen helper using soft matte, despill, and a one-pixel edge contraction; resized premultiplied RGBA from 1254x1254 to 1024x1024 with Lanczos; encoded with exact RGB preservation under transparent pixels and decoded again for QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-07-31",
+        "metrics": {
+          "transparentPercent": 59.883,
+          "partiallyTransparentPercent": 6.974,
+          "opaquePercent": 33.143,
+          "alphaBoundingBox": [28, 10, 923, 1011],
+          "chromaResidualPixels": 0
+        },
+        "notes": "The decoded derivative was inspected on a high-contrast checker background and in WebGL chase-camera captures at Lesmo, the historic banking, and Ascari. All four quadrants contain one complete tree, every sampled tile corner is fully transparent, no blocking magenta fringe or residual chroma pixel remains, the two staggered rows remain road-facing without edge-on collapse, and trunks and foliage retain readable silhouettes after the 1024-pixel downscale."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
     }
   ]
 }

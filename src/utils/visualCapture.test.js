@@ -45,6 +45,21 @@ describe('development visual capture requests', () => {
       targetLateral: 0,
       targetHeight: 1,
     })
+    for (const track of TRACK_PRESETS) {
+      const request = parseVisualCaptureRequest(
+        `?visualCapture=1&track=${track.id}&view=gantry`,
+      )
+      expect(request).toEqual({
+        trackId: track.id,
+        view: 'gantry',
+        captureProgress: expect.any(Number),
+        targetProgress: START_FINISH_PROGRESS,
+        targetLateral: 0,
+        targetHeight: 5.8,
+      })
+      expect(request.captureProgress).toBeGreaterThan(0.9)
+      expect(request.captureProgress).toBeLessThan(1)
+    }
     expect(parseVisualCaptureRequest('?visualCapture=1&track=unknown&view=start')).toBeNull()
     expect(parseVisualCaptureRequest('?visualCapture=1&track=apex_gp&view=unknown')).toBeNull()
     expect(parseVisualCaptureRequest('?visualCapture=0&track=apex_gp&view=start')).toBeNull()

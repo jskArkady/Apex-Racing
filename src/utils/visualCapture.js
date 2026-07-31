@@ -1,5 +1,7 @@
-import { isTrackId, START_FINISH_PROGRESS } from './trackData'
+import { getTrackPreset, isTrackId, START_FINISH_PROGRESS } from './trackData'
 import { getTrackVisualCue } from './trackVisualCues'
+
+const GANTRY_CAPTURE_DISTANCE = 28
 
 export function parseVisualCaptureRequest(search, enabled = true) {
   if (!enabled || typeof search !== 'string') return null
@@ -29,6 +31,20 @@ export function parseVisualCaptureRequest(search, enabled = true) {
       targetProgress: 0.015,
       targetLateral: 0,
       targetHeight: 1,
+    })
+  }
+
+  if (view === 'gantry') {
+    const track = getTrackPreset(trackId)
+    return Object.freeze({
+      trackId,
+      view,
+      captureProgress: (
+        (START_FINISH_PROGRESS - GANTRY_CAPTURE_DISTANCE / track.length) % 1 + 1
+      ) % 1,
+      targetProgress: START_FINISH_PROGRESS,
+      targetLateral: 0,
+      targetHeight: 5.8,
     })
   }
 
