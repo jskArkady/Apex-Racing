@@ -14,9 +14,11 @@ import {
   createCrowdPanelGeometry,
   createGantryDisplayGeometry,
   createHarbourBuildingFacadeGeometry,
+  createHarbourMarinaSurfaceGeometry,
   createHarbourRetainingWallFacadeGeometry,
   createHarbourTunnelCeilingPortalGeometry,
   createHarbourTunnelWallGeometry,
+  createHarbourYachtFacadeGeometry,
   createPitGarageFacadeGeometry,
   createRoadColliderGeometry,
   createRoadGeometry,
@@ -37,6 +39,7 @@ import {
   getHarbourTunnelLightingLayout,
   GRANDSTAND_LAYOUTS,
   HARBOUR_BUILDINGS,
+  HARBOUR_MARINA_LAYOUT,
   HARBOUR_RETAINING_WALL_LAYOUT,
   HARBOUR_SWIMMING_POOL_PANELS,
   HARBOUR_TUNNEL_END_PROGRESS,
@@ -50,6 +53,7 @@ import {
   HARBOUR_TUNNEL_START_PROGRESS,
   HARBOUR_WATER,
   HARBOUR_WATER_SURFACE_Y,
+  HARBOUR_YACHT_LAYOUT,
   PIT_GARAGE_FACADE_LAYOUTS,
   ROAD_SEGMENTS,
   ROAD_WIDTH,
@@ -93,6 +97,7 @@ describe('circuit visual geometry', () => {
               preset.curve,
               preset.roadWidth,
             ),
+            createHarbourYachtFacadeGeometry(),
           ]
           : []),
         ...(preset.venue === 'temple'
@@ -966,6 +971,135 @@ describe('circuit visual geometry', () => {
         expect(Math.max(...moduleUvs)).toBeLessThan(
           (expectedVariant + 1) * 0.5,
         )
+      }
+    }
+
+    geometry.dispose()
+  })
+
+  it('tiles the Harbour quay front, cap, and road-clear promenade from one atlas', () => {
+    const harbour = TRACK_PRESETS.find(track => track.venue === 'harbour')
+    const geometry = createHarbourMarinaSurfaceGeometry()
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const { quay, promenade } = HARBOUR_MARINA_LAYOUT
+    const panelCount = Math.ceil(quay.size[0] / quay.panelWidth)
+    const quadCount = panelCount * (promenade.rows + 2)
+
+    expect(positions.count).toBe(quadCount * 4)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(geometry.getIndex().count).toBe(quadCount * 6)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value > 0 && value < 1
+    ))).toBe(true)
+    expect(geometry.boundingBox.min.x).toBeCloseTo(promenade.minX, 3)
+    expect(geometry.boundingBox.max.x).toBeCloseTo(promenade.maxX, 3)
+    expect(geometry.boundingBox.min.z).toBeCloseTo(promenade.minZ, 3)
+    expect(geometry.boundingBox.max.z).toBeCloseTo(
+      quay.position[2] + quay.size[2] / 2,
+      3,
+    )
+
+    const facadeNormal = new THREE.Vector3().fromBufferAttribute(normals, 0)
+    const facadeV = Array.from({ length: 4 }, (_, index) => uvs.getY(index))
+    expect(facadeNormal.z).toBeLessThan(-0.99)
+    expect(Math.min(...facadeV)).toBeGreaterThan(0.5)
+    expect(Math.max(...facadeV)).toBeLessThan(1)
+
+    const firstPromenadeVertex = 4
+    const promenadeNormal = new THREE.Vector3().fromBufferAttribute(
+      normals,
+      firstPromenadeVertex,
+    )
+    const promenadeV = Array.from(
+      { length: 4 },
+      (_, index) => uvs.getY(firstPromenadeVertex + index),
+    )
+    expect(promenadeNormal.y).toBeGreaterThan(0.99)
+    expect(Math.min(...promenadeV)).toBeGreaterThan(0)
+    expect(Math.max(...promenadeV)).toBeLessThan(0.5)
+
+    let minimumRoadEdgeGap = Infinity
+    for (let sample = 0; sample < 16_384; sample += 1) {
+      const point = harbour.curve.getPointAt(sample / 16_384)
+      const deltaX = Math.max(
+        promenade.minX - point.x,
+        0,
+        point.x - promenade.maxX,
+      )
+      const deltaZ = Math.max(
+        promenade.minZ - point.z,
+        0,
+        point.z - promenade.maxZ,
+      )
+      minimumRoadEdgeGap = Math.min(
+        minimumRoadEdgeGap,
+        Math.hypot(deltaX, deltaZ) - harbour.roadWidth / 2,
+      )
+    }
+    expect(minimumRoadEdgeGap).toBeGreaterThan(1)
+
+    geometry.dispose()
+  })
+
+  it('maps all four yacht facade projections onto both sides of every boat', () => {
+    const geometry = createHarbourYachtFacadeGeometry()
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const facadesPerYacht = 8
+    const facadeCount = HARBOUR_YACHT_LAYOUT.boats.length * facadesPerYacht
+
+    expect(positions.count).toBe(facadeCount * 4)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(geometry.getIndex().count).toBe(facadeCount * 6)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value > 0 && value < 1
+    ))).toBe(true)
+    expect(geometry.boundingBox.min.y).toBeGreaterThan(0.14)
+    expect(geometry.boundingBox.max.y).toBeLessThan(1.96)
+
+    for (const [yachtIndex, yacht] of HARBOUR_YACHT_LAYOUT.boats.entries()) {
+      const yachtVertex = yachtIndex * facadesPerYacht * 4
+      const right = new THREE.Vector3(
+        Math.cos(yacht.yaw),
+        0,
+        -Math.sin(yacht.yaw),
+      )
+      const forward = new THREE.Vector3(
+        Math.sin(yacht.yaw),
+        0,
+        Math.cos(yacht.yaw),
+      )
+      const faces = [
+        { offset: 0, expectedNormal: right.clone().multiplyScalar(-1), column: 0, row: 1 },
+        { offset: 1, expectedNormal: right, column: 0, row: 1 },
+        { offset: 2, expectedNormal: forward.clone().multiplyScalar(-1), column: 1, row: 1 },
+        { offset: 3, expectedNormal: forward, column: 1, row: 1 },
+        { offset: 4, expectedNormal: right.clone().multiplyScalar(-1), column: 0, row: 0 },
+        { offset: 5, expectedNormal: right, column: 0, row: 0 },
+        { offset: 6, expectedNormal: forward.clone().multiplyScalar(-1), column: 1, row: 0 },
+        { offset: 7, expectedNormal: forward, column: 1, row: 0 },
+      ]
+
+      for (const face of faces) {
+        const vertex = yachtVertex + face.offset * 4
+        const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+        const faceU = Array.from({ length: 4 }, (_, index) => uvs.getX(vertex + index))
+        const faceV = Array.from({ length: 4 }, (_, index) => uvs.getY(vertex + index))
+
+        expect(normal.dot(face.expectedNormal)).toBeGreaterThan(0.99)
+        expect(Math.min(...faceU)).toBeGreaterThan(face.column * 0.5)
+        expect(Math.max(...faceU)).toBeLessThan((face.column + 1) * 0.5)
+        expect(Math.min(...faceV)).toBeGreaterThan(face.row * 0.5)
+        expect(Math.max(...faceV)).toBeLessThan((face.row + 1) * 0.5)
       }
     }
 

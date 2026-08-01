@@ -1246,6 +1246,112 @@
         "reviewedAt": null,
         "notes": "No external human or legal review has been claimed."
       }
+    },
+    {
+      "id": "surface.harbour.marina_quay_promenade.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-01",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external quay, promenade, marina, city circuit, brand, vehicle, F1, FIA, sponsor, Monaco image, or stock photography was used as an image input.",
+      "promptIntent": "A strict 2-by-2 atlas containing two straight-on pale-stone harbour-quay wall modules and two top-down marina-promenade paving modules; intended for the full road-facing quay facade, quay cap, and a modular road-clear promenade beside the fictional Harbour circuit.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid with hard quadrant boundaries and no element crossing a center split; the top row is perfectly straight-on quay-wall elevation and the bottom row is perfectly top-down promenade paving.",
+        "No perspective, cast shadows, baked highlights, people, vehicles, text, letters, numbers, arrows, logos, trademarks, sponsor marks, flags, UI, watermark, real-location identifiers, or recognizable Monaco imagery.",
+        "Coordinated warm pale limestone and architectural concrete with restrained salt-air wear, dark rubber fenders, mooring/service details, slab joints, drainage slots, and flush utility covers.",
+        "The runtime derivative must remain opaque and power-of-two; every six-metre quay bay and promenade slab module uses one atlas quadrant with one-texel UV insets and alternates variants without stretching the complete texture."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Harbour quay and promenade atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 3200391,
+          "sha256": "75be078f428d7c23c98130b687acd65d119f897f3e51529ba81776a353aa5845"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-marina-quay-promenade-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 306376,
+          "sha256": "40a0a17edc0b8cc4d9f1b3376eeb95d5023ac7fb7fe4e9f5404824aec3e1a234",
+          "encoding": "Opaque WebP quality 88, method 6",
+          "processing": "Preserved the exact full-frame 2-by-2 atlas, converted the RGB master to opaque RGB, downscaled from 1254x1254 to 1024x1024 with Lanczos, encoded as WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-01",
+        "metrics": {
+          "meanLuminance": 166.39,
+          "luminanceStdDev": 34.57,
+          "horizontalDetailMae": 9.3,
+          "verticalDetailMae": 10.03,
+          "nearWhitePercent": 0,
+          "nearBlackPercent": 0.152
+        },
+        "notes": "The decoded derivative was inspected for exact quadrant separation, projection consistency, blank borders, text, symbols, logos, collapsed service details, unintended transparency, and compression artifacts. WSL2 WebGL captures of both Harbour and Yachts landmark views confirmed readable alternating promenade slabs, quay-wall service details, one active canvas, a visible target, and zero runtime exceptions. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.yacht_facade.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-01",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external yacht, marina, city circuit, brand, vehicle, F1, FIA, sponsor, Monaco image, or stock photography was used as an image input.",
+      "promptIntent": "A strict 2-by-2 atlas containing orthographic yacht hull-side, hull-end, cabin-side, and cabin-end facade projections; intended for both opposing faces of all nine low-poly decorative yachts in the fictional Harbour circuit.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid with hard quadrant boundaries and no element crossing a center split; every projection fills its quadrant edge-to-edge as a flat facade material.",
+        "The top row contains coordinated hull side and hull end projections; the bottom row contains coordinated cabin side and cabin end projections with dark blue-gray glazing and restrained navigation-light accents.",
+        "No perspective except the hull-end module's symmetric structural V pattern, no deck tops, surrounding water, marina, sea, sky, floor, people, text, letters, numbers, logos, trademarks, sponsor marks, flags, UI, or watermark.",
+        "The runtime derivative must remain opaque and power-of-two; every opposing hull and cabin face uses one quadrant with one-texel UV insets over the existing low-poly boxes."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Harbour yacht facade atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 1604817,
+          "sha256": "2ad4a052680dce9425b7b4a764e006fc3f41ed688b1b95b199a27c30a7cd2e34"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-yacht-facade-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 51444,
+          "sha256": "b9eb586ba4bc5cd21988379aecb37514acb1287ad97ad8800d789fc0dd9b6db8",
+          "encoding": "Opaque WebP quality 88, method 6",
+          "processing": "Preserved the exact full-frame 2-by-2 atlas, converted the RGB master to opaque RGB, downscaled from 1254x1254 to 1024x1024 with Lanczos, encoded as WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-01",
+        "metrics": {
+          "meanLuminance": 180.98,
+          "luminanceStdDev": 70.2,
+          "horizontalDetailMae": 1.65,
+          "verticalDetailMae": 4.88,
+          "nearWhitePercent": 0.183,
+          "nearBlackPercent": 0.029
+        },
+        "notes": "The decoded derivative was inspected for exact quadrant separation, projection readability, blank borders, text, symbols, logos, unintended transparency, collapsed glazing detail, and compression artifacts. WSL2 WebGL captures of both Yachts and Harbour landmark views confirmed readable dark glazing, hull bands, and end-face structure across multiple boats, one active canvas, a visible target, and zero runtime exceptions. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
     }
   ]
 }

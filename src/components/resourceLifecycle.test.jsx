@@ -47,9 +47,9 @@ describe('owned Three.js resource lifecycle', () => {
 
     view.unmount()
 
-    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(14)
-    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(14)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(12)
+    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(16)
+    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(16)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(14)
   })
 
   it.each([
@@ -60,6 +60,8 @@ describe('owned Three.js resource lifecycle', () => {
       'apex-night-crowd-panel-1024.webp',
       'apex-night-pit-garage-facade-1024.webp',
       'apex-night-gantry-display-1024.webp',
+      null,
+      null,
       null,
       null,
       null,
@@ -77,6 +79,8 @@ describe('owned Three.js resource lifecycle', () => {
       'harbour-tunnel-ceiling-portal-atlas-1024.webp',
       'harbour-apartment-facade-atlas-1024.webp',
       'harbour-day-retaining-wall-atlas-1024.webp',
+      'harbour-marina-quay-promenade-atlas-1024.webp',
+      'harbour-yacht-facade-atlas-1024.webp',
       null,
     ],
     [
@@ -86,6 +90,8 @@ describe('owned Three.js resource lifecycle', () => {
       'temple-day-crowd-panel-1024.webp',
       'temple-day-pit-garage-facade-1024.webp',
       'temple-day-gantry-display-1024.webp',
+      null,
+      null,
       null,
       null,
       null,
@@ -103,6 +109,8 @@ describe('owned Three.js resource lifecycle', () => {
     tunnelCeilingPortalFile,
     buildingFacadeFile,
     retainingWallFacadeFile,
+    marinaSurfaceFile,
+    yachtFacadeFile,
     treeBillboardFile,
   ) => {
     const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
@@ -114,6 +122,8 @@ describe('owned Three.js resource lifecycle', () => {
         + Number(Boolean(tunnelCeilingPortalFile))
         + Number(Boolean(buildingFacadeFile))
         + Number(Boolean(retainingWallFacadeFile))
+        + Number(Boolean(marinaSurfaceFile))
+        + Number(Boolean(yachtFacadeFile))
         + Number(Boolean(treeBillboardFile)),
     )
     expect(textureLoad).toHaveBeenCalledWith(
@@ -159,6 +169,30 @@ describe('owned Three.js resource lifecycle', () => {
     } else {
       expect(
         view.container.querySelector('[name="track-harbour-retaining-wall-facades"]'),
+      ).toBeNull()
+    }
+    if (marinaSurfaceFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(marinaSurfaceFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-harbour-marina-surfaces"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-harbour-marina-surfaces"]'),
+      ).toBeNull()
+    }
+    if (yachtFacadeFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(yachtFacadeFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-harbour-yacht-facades"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-harbour-yacht-facades"]'),
       ).toBeNull()
     }
     if (treeBillboardFile) {

@@ -12,10 +12,12 @@ import harbourGantryDisplayUrl from '../assets/textures/harbour-day-gantry-displ
 import harbourInfieldAlbedoUrl from '../assets/textures/harbour-concrete-infield-albedo-512.webp'
 import harbourApartmentFacadeAtlasUrl from '../assets/textures/harbour-apartment-facade-atlas-1024.webp'
 import harbourBarrierAtlasUrl from '../assets/textures/harbour-day-barrier-atlas-1024.webp'
+import harbourMarinaAtlasUrl from '../assets/textures/harbour-marina-quay-promenade-atlas-1024.webp'
 import harbourPitGarageFacadeUrl from '../assets/textures/harbour-day-pit-garage-facade-1024.webp'
 import harbourRetainingWallAtlasUrl from '../assets/textures/harbour-day-retaining-wall-atlas-1024.webp'
 import harbourTunnelCeilingPortalAtlasUrl from '../assets/textures/harbour-tunnel-ceiling-portal-atlas-1024.webp'
 import harbourTunnelWallAtlasUrl from '../assets/textures/harbour-tunnel-wall-atlas-1024.webp'
+import harbourYachtFacadeAtlasUrl from '../assets/textures/harbour-yacht-facade-atlas-1024.webp'
 import templeCrowdPanelUrl from '../assets/textures/temple-day-crowd-panel-1024.webp'
 import templeBarrierAtlasUrl from '../assets/textures/temple-day-barrier-atlas-1024.webp'
 import templeGantryDisplayUrl from '../assets/textures/temple-day-gantry-display-1024.webp'
@@ -34,9 +36,11 @@ import {
   createCrowdPanelGeometry,
   createGantryDisplayGeometry,
   createHarbourBuildingFacadeGeometry,
+  createHarbourMarinaSurfaceGeometry,
   createHarbourRetainingWallFacadeGeometry,
   createHarbourTunnelCeilingPortalGeometry,
   createHarbourTunnelWallGeometry,
+  createHarbourYachtFacadeGeometry,
   createPitGarageFacadeGeometry,
   createRoadColliderGeometry,
   createRoadGeometry,
@@ -168,6 +172,12 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       : null
     const retainingWallFacadeGeometry = activeTrack.venue === 'harbour'
       ? createHarbourRetainingWallFacadeGeometry(trackCurve, roadWidth)
+      : null
+    const marinaSurfaceGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourMarinaSurfaceGeometry()
+      : null
+    const yachtFacadeGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourYachtFacadeGeometry()
       : null
     const treeBillboardGeometry = activeTrack.venue === 'temple'
       ? createTempleTreeBillboardGeometry(trackCurve)
@@ -311,6 +321,32 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       retainingWallFacadeTexture.generateMipmaps = true
       retainingWallFacadeTexture.anisotropy = 4
     }
+    const marinaSurfaceTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourMarinaAtlasUrl)
+      : null
+    if (marinaSurfaceTexture) {
+      marinaSurfaceTexture.name = 'generated-harbour-marina-surface-atlas'
+      marinaSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      marinaSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      marinaSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      marinaSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      marinaSurfaceTexture.magFilter = THREE.LinearFilter
+      marinaSurfaceTexture.generateMipmaps = true
+      marinaSurfaceTexture.anisotropy = 4
+    }
+    const yachtFacadeTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourYachtFacadeAtlasUrl)
+      : null
+    if (yachtFacadeTexture) {
+      yachtFacadeTexture.name = 'generated-harbour-yacht-facade-atlas'
+      yachtFacadeTexture.colorSpace = THREE.SRGBColorSpace
+      yachtFacadeTexture.wrapS = THREE.ClampToEdgeWrapping
+      yachtFacadeTexture.wrapT = THREE.ClampToEdgeWrapping
+      yachtFacadeTexture.minFilter = THREE.LinearMipmapLinearFilter
+      yachtFacadeTexture.magFilter = THREE.LinearFilter
+      yachtFacadeTexture.generateMipmaps = true
+      yachtFacadeTexture.anisotropy = 4
+    }
     const treeBillboardTexture = activeTrack.venue === 'temple'
       ? new THREE.TextureLoader().load(templeTreeSpriteAtlasUrl)
       : null
@@ -342,6 +378,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       tunnelCeilingPortalGeometry,
       buildingFacadeGeometry,
       retainingWallFacadeGeometry,
+      marinaSurfaceGeometry,
+      yachtFacadeGeometry,
       treeBillboardGeometry,
       glowGeometry,
       catchFenceGeometry,
@@ -355,6 +393,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       tunnelCeilingPortalTexture,
       buildingFacadeTexture,
       retainingWallFacadeTexture,
+      marinaSurfaceTexture,
+      yachtFacadeTexture,
       treeBillboardTexture,
       asphaltTexture,
       terrainTexture,
@@ -459,6 +499,22 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           metalness: 0.04,
         })
         : null,
+      marinaSurfaceMaterial: marinaSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: marinaSurfaceTexture,
+          roughness: 0.9,
+          metalness: 0.02,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      yachtFacadeMaterial: yachtFacadeTexture
+        ? new THREE.MeshStandardMaterial({
+          map: yachtFacadeTexture,
+          roughness: 0.64,
+          metalness: 0.05,
+          side: THREE.DoubleSide,
+        })
+        : null,
       treeBillboardMaterial: treeBillboardTexture
         ? new THREE.MeshStandardMaterial({
           map: treeBillboardTexture,
@@ -511,6 +567,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.tunnelCeilingPortalGeometry,
       assets.buildingFacadeGeometry,
       assets.retainingWallFacadeGeometry,
+      assets.marinaSurfaceGeometry,
+      assets.yachtFacadeGeometry,
       assets.treeBillboardGeometry,
       assets.glowGeometry,
       assets.catchFenceGeometry,
@@ -524,6 +582,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.tunnelCeilingPortalTexture,
       assets.buildingFacadeTexture,
       assets.retainingWallFacadeTexture,
+      assets.marinaSurfaceTexture,
+      assets.yachtFacadeTexture,
       assets.treeBillboardTexture,
       assets.asphaltTexture,
       assets.terrainTexture,
@@ -538,6 +598,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.tunnelCeilingPortalMaterial,
       assets.buildingFacadeMaterial,
       assets.retainingWallFacadeMaterial,
+      assets.marinaSurfaceMaterial,
+      assets.yachtFacadeMaterial,
       assets.treeBillboardMaterial,
       assets.fenceMaterial,
       assets.glowMaterial,
@@ -670,6 +732,22 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           name="track-harbour-retaining-wall-facades"
           geometry={assets.retainingWallFacadeGeometry}
           material={assets.retainingWallFacadeMaterial}
+        />
+      )}
+      {assets.marinaSurfaceMaterial && (
+        <mesh
+          name="track-harbour-marina-surfaces"
+          geometry={assets.marinaSurfaceGeometry}
+          material={assets.marinaSurfaceMaterial}
+          receiveShadow
+        />
+      )}
+      {assets.yachtFacadeMaterial && (
+        <mesh
+          name="track-harbour-yacht-facades"
+          geometry={assets.yachtFacadeGeometry}
+          material={assets.yachtFacadeMaterial}
+          receiveShadow
         />
       )}
       {assets.treeBillboardMaterial && (

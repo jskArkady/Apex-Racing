@@ -51,6 +51,42 @@ export const HARBOUR_WATER = Object.freeze({
 export const HARBOUR_WATER_SURFACE_Y = (
   HARBOUR_WATER.position[1] + HARBOUR_WATER.size[1] / 2
 )
+export const HARBOUR_MARINA_LAYOUT = Object.freeze({
+  quay: Object.freeze({
+    size: Object.freeze([300, 1.1, 0.7]),
+    position: Object.freeze([20, 0.55, 82]),
+    panelWidth: 6,
+  }),
+  promenade: Object.freeze({
+    minX: -130,
+    maxX: 170,
+    minZ: 66,
+    maxZ: 81.64,
+    surfaceY: 0.16,
+    rows: 3,
+  }),
+})
+export const HARBOUR_YACHT_LAYOUT = Object.freeze({
+  hull: Object.freeze({
+    size: Object.freeze([3.2, 0.7, 9.5]),
+    centerY: 0.48,
+    zOffset: 0,
+  }),
+  cabin: Object.freeze({
+    size: Object.freeze([2.15, 1.35, 4.5]),
+    centerY: 1.28,
+    zOffset: -0.2,
+  }),
+  boats: Object.freeze(
+    [-112, -82, -48, -12, 24, 61, 98, 132, 162].map((x, index) => (
+      Object.freeze({
+        x,
+        z: 102 + (index % 3) * 13,
+        yaw: index % 2 === 0 ? 0.08 : -0.12,
+      })
+    )),
+  ),
+})
 export const TEMPLE_BANKING_LAYOUT = Object.freeze({
   progress: 0.665,
   supportCenterLateral: 12.5,
@@ -1916,6 +1952,205 @@ export function createHarbourRetainingWallFacadeGeometry(
   return merged
 }
 
+export function createHarbourMarinaSurfaceGeometry() {
+  const { quay, promenade } = HARBOUR_MARINA_LAYOUT
+  const [quayWidth, quayHeight, quayDepth] = quay.size
+  const [quayCenterX, quayCenterY, quayCenterZ] = quay.position
+  const quayMinX = quayCenterX - quayWidth / 2
+  const quayMaxX = quayCenterX + quayWidth / 2
+  const promenadeWidth = promenade.maxX - promenade.minX
+  if (
+    Math.abs(quayMinX - promenade.minX) > 0.001
+    || Math.abs(quayMaxX - promenade.maxX) > 0.001
+  ) {
+    throw new RangeError('Harbour promenade must span the complete quay')
+  }
+  const panelCount = Math.ceil(promenadeWidth / quay.panelWidth)
+  const panelWidth = promenadeWidth / panelCount
+  const promenadeDepth = promenade.maxZ - promenade.minZ
+  const promenadeRowDepth = promenadeDepth / promenade.rows
+  const atlasInset = 1 / 1024
+  const parts = []
+
+  const remapAtlasQuadrant = (geometry, column, row) => {
+    const minU = column * 0.5 + atlasInset
+    const maxU = (column + 1) * 0.5 - atlasInset
+    const minV = row * 0.5 + atlasInset
+    const maxV = (row + 1) * 0.5 - atlasInset
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+  }
+
+  const addVerticalPanel = (panelIndex) => {
+    const center = new THREE.Vector3(
+      quayMinX + (panelIndex + 0.5) * panelWidth,
+      quayCenterY,
+      quayCenterZ - quayDepth / 2 - 0.012,
+    )
+    const geometry = new THREE.PlaneGeometry(panelWidth, quayHeight - 0.04)
+    const matrix = new THREE.Matrix4().makeBasis(
+      new THREE.Vector3(-1, 0, 0),
+      WORLD_UP,
+      new THREE.Vector3(0, 0, -1),
+    )
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+    remapAtlasQuadrant(geometry, panelIndex % 2, 1)
+    parts.push(geometry)
+  }
+
+  const addHorizontalPanel = ({
+    centerX,
+    centerZ,
+    depth,
+    surfaceY,
+    variant,
+  }) => {
+    const geometry = new THREE.PlaneGeometry(panelWidth, depth)
+    const matrix = new THREE.Matrix4().makeBasis(
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(0, 0, -1),
+      WORLD_UP,
+    )
+    matrix.setPosition(centerX, surfaceY, centerZ)
+    geometry.applyMatrix4(matrix)
+    remapAtlasQuadrant(geometry, variant, 0)
+    parts.push(geometry)
+  }
+
+  for (let panelIndex = 0; panelIndex < panelCount; panelIndex += 1) {
+    const centerX = quayMinX + (panelIndex + 0.5) * panelWidth
+    addVerticalPanel(panelIndex)
+
+    for (let row = 0; row < promenade.rows; row += 1) {
+      addHorizontalPanel({
+        centerX,
+        centerZ: promenade.minZ + (row + 0.5) * promenadeRowDepth,
+        depth: promenadeRowDepth,
+        surfaceY: promenade.surfaceY,
+        variant: (panelIndex + row) % 2,
+      })
+    }
+
+    addHorizontalPanel({
+      centerX,
+      centerZ: quayCenterZ,
+      depth: quayDepth,
+      surfaceY: quayCenterY + quayHeight / 2 + 0.012,
+      variant: (panelIndex + 1) % 2,
+    })
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createHarbourYachtFacadeGeometry() {
+  const atlasInset = 1 / 1024
+  const faceOffset = 0.012
+  const parts = []
+
+  const addFace = ({
+    center,
+    across,
+    normal,
+    width,
+    height,
+    column,
+    row,
+  }) => {
+    const geometry = new THREE.PlaneGeometry(width, height)
+    const matrix = new THREE.Matrix4().makeBasis(across, WORLD_UP, normal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+
+    const minU = column * 0.5 + atlasInset
+    const maxU = (column + 1) * 0.5 - atlasInset
+    const minV = row * 0.5 + atlasInset
+    const maxV = (row + 1) * 0.5 - atlasInset
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+    parts.push(geometry)
+  }
+
+  const addBoxFacades = ({ yacht, box, row }) => {
+    const [width, height, length] = box.size
+    const localRight = new THREE.Vector3(
+      Math.cos(yacht.yaw),
+      0,
+      -Math.sin(yacht.yaw),
+    )
+    const localForward = new THREE.Vector3(
+      Math.sin(yacht.yaw),
+      0,
+      Math.cos(yacht.yaw),
+    )
+    const boxCenter = new THREE.Vector3(
+      yacht.x,
+      box.centerY,
+      yacht.z + box.zOffset,
+    )
+
+    for (const sideSign of [-1, 1]) {
+      addFace({
+        center: boxCenter.clone().addScaledVector(
+          localRight,
+          sideSign * (width / 2 + faceOffset),
+        ),
+        across: localForward.clone().multiplyScalar(-sideSign),
+        normal: localRight.clone().multiplyScalar(sideSign),
+        width: length - 0.05,
+        height: height - 0.04,
+        column: 0,
+        row,
+      })
+    }
+
+    for (const endSign of [-1, 1]) {
+      addFace({
+        center: boxCenter.clone().addScaledVector(
+          localForward,
+          endSign * (length / 2 + faceOffset),
+        ),
+        across: localRight.clone().multiplyScalar(endSign),
+        normal: localForward.clone().multiplyScalar(endSign),
+        width: width - 0.05,
+        height: height - 0.04,
+        column: 1,
+        row,
+      })
+    }
+  }
+
+  for (const yacht of HARBOUR_YACHT_LAYOUT.boats) {
+    addBoxFacades({ yacht, box: HARBOUR_YACHT_LAYOUT.hull, row: 1 })
+    addBoxFacades({ yacht, box: HARBOUR_YACHT_LAYOUT.cabin, row: 0 })
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
 export function getHarbourTunnelLightingLayout(curve, roadWidth = ROAD_WIDTH) {
   if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
     throw new RangeError('Harbour tunnel lighting requires a usable road width')
@@ -2093,15 +2328,20 @@ function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
     [HARBOUR_WATER.position[0], 0.025, HARBOUR_WATER.position[2]],
     COLORS.marina,
   )
-  pushWorldBox(parts, [300, 1.1, 0.7], [20, 0.55, 82], COLORS.stone)
-  for (const [index, x] of [-112, -82, -48, -12, 24, 61, 98, 132, 162].entries()) {
-    const z = 102 + (index % 3) * 13
-    const yaw = index % 2 === 0 ? 0.08 : -0.12
+  pushWorldBox(
+    parts,
+    HARBOUR_MARINA_LAYOUT.quay.size,
+    HARBOUR_MARINA_LAYOUT.quay.position,
+    COLORS.stone,
+  )
+  for (const [index, yacht] of HARBOUR_YACHT_LAYOUT.boats.entries()) {
+    const { x, z, yaw } = yacht
+    const { hull, cabin } = HARBOUR_YACHT_LAYOUT
     // Monaco's harbour is read from behind the Armco. Give the yachts a
     // proper raised superstructure and mast so they remain identifiable from
     // the chase camera instead of reducing to sub-pixel hulls behind the quay.
-    pushWorldBox(parts, [3.2, 0.7, 9.5], [x, 0.48, z], COLORS.white, yaw)
-    pushWorldBox(parts, [2.15, 1.35, 4.5], [x, 1.28, z - 0.2], COLORS.white, yaw)
+    pushWorldBox(parts, hull.size, [x, hull.centerY, z + hull.zOffset], COLORS.white, yaw)
+    pushWorldBox(parts, cabin.size, [x, cabin.centerY, z + cabin.zOffset], COLORS.white, yaw)
     pushWorldBox(parts, [1.72, 0.5, 2.8], [x, 2.08, z - 0.45], index % 2 === 0 ? COLORS.red : COLORS.marinaLight, yaw)
     pushWorldCylinder(parts, 0.08, 6.6, [x, 4.35, z + 0.4], COLORS.steel, 6)
     pushWorldBox(parts, [0.12, 0.12, 4.4], [x, 4.55, z + 0.1], COLORS.steel, yaw)
