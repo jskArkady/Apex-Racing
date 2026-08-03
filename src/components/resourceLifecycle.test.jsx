@@ -47,9 +47,9 @@ describe('owned Three.js resource lifecycle', () => {
 
     view.unmount()
 
-    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(16)
-    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(16)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(14)
+    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(22)
+    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(22)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(20)
   })
 
   it.each([
@@ -58,14 +58,22 @@ describe('owned Three.js resource lifecycle', () => {
       'apex-desert-infield-albedo-512.webp',
       'apex-night-barrier-atlas-1024.webp',
       'apex-night-crowd-panel-1024.webp',
+      'grandstand-structure-surface-atlas-1024.webp',
+      'pit-complex-structure-surface-atlas-1024.webp',
       'apex-night-pit-garage-facade-1024.webp',
       'apex-night-gantry-display-1024.webp',
+      'apex-night-tower-hospitality-atlas-1024.webp',
+      'apex-pit-lane-staff-sprite-atlas-1024.webp',
+      'apex-tent-canopy-surface-atlas-1024.webp',
       null,
       null,
       null,
       null,
       null,
       null,
+      null,
+      null,
+      'shared-palm-tree-sprite-atlas-1024.webp',
       null,
     ],
     [
@@ -73,14 +81,22 @@ describe('owned Three.js resource lifecycle', () => {
       'harbour-concrete-infield-albedo-512.webp',
       'harbour-day-barrier-atlas-1024.webp',
       'harbour-day-crowd-panel-1024.webp',
+      'grandstand-structure-surface-atlas-1024.webp',
+      'pit-complex-structure-surface-atlas-1024.webp',
       'harbour-day-pit-garage-facade-1024.webp',
       'harbour-day-gantry-display-1024.webp',
+      null,
+      null,
+      null,
+      null,
       'harbour-tunnel-wall-atlas-1024.webp',
       'harbour-tunnel-ceiling-portal-atlas-1024.webp',
       'harbour-apartment-facade-atlas-1024.webp',
       'harbour-day-retaining-wall-atlas-1024.webp',
       'harbour-marina-quay-promenade-atlas-1024.webp',
+      'harbour-swimming-pool-surface-atlas-1024.webp',
       'harbour-yacht-facade-atlas-1024.webp',
+      'shared-palm-tree-sprite-atlas-1024.webp',
       null,
     ],
     [
@@ -88,8 +104,16 @@ describe('owned Three.js resource lifecycle', () => {
       'temple-turf-infield-albedo-512.webp',
       'temple-day-barrier-atlas-1024.webp',
       'temple-day-crowd-panel-1024.webp',
+      'grandstand-structure-surface-atlas-1024.webp',
+      'pit-complex-structure-surface-atlas-1024.webp',
       'temple-day-pit-garage-facade-1024.webp',
       'temple-day-gantry-display-1024.webp',
+      null,
+      null,
+      null,
+      'temple-day-banking-timing-atlas-1024.webp',
+      null,
+      null,
       null,
       null,
       null,
@@ -103,38 +127,124 @@ describe('owned Three.js resource lifecycle', () => {
     infieldFile,
     barrierAtlasFile,
     crowdPanelFile,
+    grandstandStructureFile,
+    pitComplexStructureFile,
     pitGarageFacadeFile,
     gantryDisplayFile,
+    apexVenueFacadeFile,
+    apexPitStaffBillboardFile,
+    apexTentCanopyFile,
+    templeVenueFacadeFile,
     tunnelWallFile,
     tunnelCeilingPortalFile,
     buildingFacadeFile,
     retainingWallFacadeFile,
     marinaSurfaceFile,
+    swimmingPoolSurfaceFile,
     yachtFacadeFile,
+    palmTreeBillboardFile,
     treeBillboardFile,
   ) => {
     const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
     const view = render(<Track track={getTrackPreset(trackId)} />)
 
     expect(textureLoad).toHaveBeenCalledTimes(
-      6
+      10
         + Number(Boolean(tunnelWallFile))
+        + Number(Boolean(apexVenueFacadeFile))
+        + Number(Boolean(apexPitStaffBillboardFile))
+        + Number(Boolean(apexTentCanopyFile))
+        + Number(Boolean(templeVenueFacadeFile))
         + Number(Boolean(tunnelCeilingPortalFile))
         + Number(Boolean(buildingFacadeFile))
         + Number(Boolean(retainingWallFacadeFile))
         + Number(Boolean(marinaSurfaceFile))
+        + Number(Boolean(swimmingPoolSurfaceFile))
         + Number(Boolean(yachtFacadeFile))
+        + Number(Boolean(palmTreeBillboardFile))
         + Number(Boolean(treeBillboardFile)),
     )
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining('track-asphalt-albedo-512.webp'),
     )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('shared-braking-distance-board-atlas-1024.webp'),
+    )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('shared-trackside-operations-atlas-1024.webp'),
+    )
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(infieldFile))
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(barrierAtlasFile))
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(crowdPanelFile))
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining(grandstandStructureFile),
+    )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining(pitComplexStructureFile),
+    )
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(pitGarageFacadeFile))
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(gantryDisplayFile))
     expect(view.container.querySelector('[name="track-barrier-graphics"]')).toBeTruthy()
+    expect(
+      view.container.querySelector('[name="track-braking-distance-boards"]'),
+    ).toBeTruthy()
+    expect(
+      view.container.querySelector('[name="trackside-operations-graphics"]'),
+    ).toBeTruthy()
+    expect(
+      view.container.querySelector('[name="track-grandstand-structure-surfaces"]'),
+    ).toBeTruthy()
+    expect(
+      view.container.querySelector('[name="track-pit-complex-structure-surfaces"]'),
+    ).toBeTruthy()
+    if (apexVenueFacadeFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(apexVenueFacadeFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-apex-venue-facades"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-apex-venue-facades"]'),
+      ).toBeNull()
+    }
+    if (apexPitStaffBillboardFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(apexPitStaffBillboardFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-apex-pit-lane-staff-billboards"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-apex-pit-lane-staff-billboards"]'),
+      ).toBeNull()
+    }
+    if (apexTentCanopyFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(apexTentCanopyFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-apex-tent-canopies"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-apex-tent-canopies"]'),
+      ).toBeNull()
+    }
+    if (templeVenueFacadeFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(templeVenueFacadeFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-temple-venue-facades"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-temple-venue-facades"]'),
+      ).toBeNull()
+    }
     if (tunnelWallFile) {
       expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(tunnelWallFile))
       expect(view.container.querySelector('[name="track-harbour-tunnel-walls"]')).toBeTruthy()
@@ -183,6 +293,18 @@ describe('owned Three.js resource lifecycle', () => {
         view.container.querySelector('[name="track-harbour-marina-surfaces"]'),
       ).toBeNull()
     }
+    if (swimmingPoolSurfaceFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(swimmingPoolSurfaceFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-harbour-swimming-pool-surfaces"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-harbour-swimming-pool-surfaces"]'),
+      ).toBeNull()
+    }
     if (yachtFacadeFile) {
       expect(textureLoad).toHaveBeenCalledWith(
         expect.stringContaining(yachtFacadeFile),
@@ -205,6 +327,18 @@ describe('owned Three.js resource lifecycle', () => {
     } else {
       expect(
         view.container.querySelector('[name="track-temple-tree-billboards"]'),
+      ).toBeNull()
+    }
+    if (palmTreeBillboardFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(palmTreeBillboardFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-palm-tree-billboards"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-palm-tree-billboards"]'),
       ).toBeNull()
     }
     view.unmount()

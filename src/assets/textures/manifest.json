@@ -1352,6 +1352,546 @@
         "reviewedAt": null,
         "notes": "No external human or legal review has been claimed."
       }
+    },
+    {
+      "id": "facade.apex.tower_hospitality.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external tower, hospitality building, desert circuit, brand, vehicle, F1, FIA, sponsor, Bahrain, Sakhir, real-location image, or stock photography was used as an image input.",
+      "promptIntent": "A strict 2-by-2 atlas containing two straight-on fictional night VIP-tower facade modules and two straight-on low desert-hospitality pavilion facade modules; intended for every player-visible side of the Apex tower and all four surrounding hospitality buildings.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid with hard center boundaries and no element crossing a split; the top row contains coordinated navy/graphite tower facades and the bottom row contains coordinated warm-stone pavilion facades.",
+        "Every module is a flat orthographic front elevation filled edge-to-edge with straight architectural lines, consistent within-row scale, dark glazing, restrained warm interior light, and sparse cyan or amber accents.",
+        "No perspective, sky, ground, road, dunes, neighboring buildings, rooftop view, vehicles, people, silhouettes, plants, flags, text, letters, numbers, symbols, arrows, logos, trademarks, sponsor marks, advertisements, UI, watermark, or recognizable real-world landmark.",
+        "The runtime derivative must remain opaque and power-of-two; eight tangent tower faces use the top quadrants and all sixteen vertical hospitality-building faces use the bottom quadrants with one-texel UV insets."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Apex tower and hospitality facade atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2141596,
+          "sha256": "e51b022243d1791b7d6cd9c0174cef03888a8f0d9bfd4a4981822db4e971328b"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-night-tower-hospitality-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 135788,
+          "sha256": "cdd5c2129cf84247b072b475054976aad9279cafea684c966ad3a150df4ad6ba",
+          "encoding": "Opaque WebP quality 88, method 6",
+          "processing": "Preserved the exact full-frame 2-by-2 atlas, converted the RGB master to opaque RGB, downscaled from 1254x1254 to 1024x1024 with Lanczos, encoded as WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "meanLuminance": 75.49,
+          "luminanceStdDev": 57.86,
+          "horizontalDetailMae": 6.61,
+          "verticalDetailMae": 7.64,
+          "nearWhitePercent": 0,
+          "nearBlackPercent": 2.827
+        },
+        "notes": "The decoded derivative was inspected for exact quadrant separation, straight projection, blank borders, text, symbols, logos, unintended transparency, collapsed window detail, and compression artifacts. Headless WebGL captures of the Apex Tower and Turn 8 landmark views confirmed readable alternating cyan/amber tower faces, warm pavilion glazing, one active 1440x900 canvas, visible capture targets, and zero page exceptions. Geometry tests independently verified all eight tower faces and all sixteen pavilion faces use the intended atlas rows with one-texel insets. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.temple.banking_timing.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external banking, timing tower, parkland circuit, brand, vehicle, F1, FIA, sponsor, Monza, real-location image, or stock photography was used as an image input.",
+      "promptIntent": "A strict 2-by-2 atlas containing a straight-on historic concrete banking fascia/pier module, an orthographic concrete soffit module, and two straight-on red/cream timing-tower facade modules; intended for every player-visible surface of the fictional Temple banking flyover and all four sides of its timing tower.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid with hard center boundaries and no element crossing a split; the top-left is a warm-gray concrete fascia/pier elevation, the top-right is a coordinated coffered soffit, and the bottom row contains two red/cream timing-tower facade variants.",
+        "Every module fills its quadrant edge-to-edge with exact straight-on or orthographic projection, maintained materials, precise formwork seams, restrained joint moss, dark graphite-green glazing, and no surrounding environment.",
+        "No perspective, sky, ground, road, racetrack, forest, neighboring structures, rooftop view, vehicles, people, silhouettes, flags, text, letters, numbers, symbols, arrows, logos, trademarks, sponsor marks, advertisements, UI, watermark, or recognizable real-world landmark.",
+        "The runtime derivative must remain opaque and power-of-two; twenty-six banking faces use the top atlas row and all four timing-tower sides use the bottom row with one-texel UV insets."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Temple banking and timing-tower atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2312324,
+          "sha256": "e53e35642e36463026431fde065b1c513e4e3ff959b6a235c0295e896333637a"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "temple-day-banking-timing-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 134564,
+          "sha256": "92a8d8a02d0f9d9155519f07faba120cf9559f6c441e601380d5732f7e49904f",
+          "encoding": "Opaque WebP quality 88, method 6",
+          "processing": "Preserved the exact full-frame 2-by-2 atlas, converted the RGB master to opaque RGB, downscaled from 1254x1254 to 1024x1024 with Lanczos, encoded as WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "meanLuminance": 111.8,
+          "luminanceStdDev": 50.22,
+          "horizontalDetailMae": 4.79,
+          "verticalDetailMae": 7.03,
+          "nearWhitePercent": 0,
+          "nearBlackPercent": 0.114
+        },
+        "notes": "The decoded derivative was inspected for exact quadrant separation, projection consistency, blank borders, text, symbols, logos, unintended transparency, collapsed coffer/window detail, and compression artifacts. Headless WebGL captures of the Temple Banking and Start landmark views confirmed concrete fascia, coffer and support detail plus red/cream timing-tower glazing, one active 1440x900 canvas, visible capture targets, and zero page exceptions. Geometry tests independently verified all twenty-six banking surfaces and four timing-tower sides use the intended atlas rows and soffit columns with one-texel insets. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.swimming_pool.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external swimming pool, harbour circuit, brand, vehicle, F1, FIA, sponsor, Monaco, real-location image, or stock photography was used as an image input. The existing generated harbour marina atlas was inspected only as a local project style reference and was not supplied to the image model.",
+      "promptIntent": "A strict 2-by-2 atlas containing two orthographic turquoise swimming-pool water modules, one orthographic limestone coping/deck module, and one straight-on shallow pool-rim fascia module; intended for every player-visible top and perimeter side of the fictional Harbour Swimming Pool landmark.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid with hard center boundaries and no element crossing a split; the top row contains coordinated light and deep turquoise pool-water surfaces, the bottom-left contains warm ivory coping/deck tile and drainage, and the bottom-right contains a straight-on pool-rim fascia.",
+        "Every module fills its quadrant edge-to-edge with orthographic or exact front projection, even neutral daylight, maintained submerged ceramic tile, restrained caustic ripples, limestone pores, precise joints, and drainage detail.",
+        "No perspective, pool scene, sky, horizon, architecture, people, swimmers, furniture, ladders, lane equipment, plants, boats, vehicles, flags, text, letters, numbers, symbols, arrows, logos, trademarks, sponsor marks, advertisements, UI, watermark, or recognizable real-world location.",
+        "The runtime derivative must remain opaque and power-of-two; thirteen tiled top faces use the water and deck quadrants and twenty-four segmented perimeter faces use the fascia quadrant with one-texel UV insets."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Harbour Swimming Pool surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2673750,
+          "sha256": "5493bafe394dff241fe35fe4a4784767e59809ed927f84307348a723a045cb90"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-swimming-pool-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 214740,
+          "sha256": "57203ae3a8aeded94420471135431733fd69a0f690a1765a2c8355b0b46431df",
+          "encoding": "Opaque WebP quality 88, method 6",
+          "processing": "Preserved the exact full-frame 2-by-2 atlas, converted the RGB master to opaque RGB, downscaled from 1254x1254 to 1024x1024 with Lanczos, encoded as WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "meanLuminance": 152.48,
+          "luminanceStdDev": 48.53,
+          "horizontalDetailMae": 5.91,
+          "verticalDetailMae": 6.13,
+          "nearWhitePercent": 0.002,
+          "nearBlackPercent": 0.175
+        },
+        "notes": "The decoded derivative was inspected for exact quadrant separation, orthographic projection, blank borders, text, symbols, logos, unintended transparency, collapsed tile detail, and compression artifacts. Geometry tests verified thirteen top surfaces and all twenty-four segmented perimeter faces use the intended atlas quadrants with one-texel insets and remain more than 16 m clear of the road edge. WSL2 headless Chrome WebGL captures of the Harbour and Yachts landmark views at 1440x900 plus a Harbour capture at 3840x2160 confirmed alternating light/deep turquoise water tiles and the ivory drainage deck from the player-side track view, one active canvas, visible capture targets, and zero page exceptions. The only console warning was the unrelated development-server favicon 404. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.shared.grandstand_structure.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external grandstand, stadium, race circuit, brand, vehicle, F1, FIA, sponsor, real-location image, or stock photography was used as an image input.",
+      "promptIntent": "A strict 2-by-2 common material atlas containing an orthographic dark seat-step surface, a straight-on modular riser/undercroft fascia, an orthographic concrete canopy roof, and an orthographic ribbed-metal canopy underside; intended for every major exposed face of all six grandstands across the three fictional circuits.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid with hard center boundaries and no element crossing a split; the top row contains seat-step and riser/undercroft modules while the bottom row contains canopy-top and canopy-underside modules.",
+        "Every module fills its quadrant edge-to-edge with orthographic or exact front projection, straight axis-aligned structural lines, even neutral diffuse light, realistic graphite polymer, charcoal concrete, galvanized steel, pale concrete, perforated metal, and ribbed cassettes.",
+        "No perspective, stadium scene, racetrack, sky, ground, neighboring architecture, people, spectators, silhouettes, crowd, flags, banners, vehicles, plants, text, letters, numbers, symbols, arrows, logos, trademarks, sponsor marks, advertisements, UI, watermark, or recognizable real-world venue.",
+        "The runtime derivative must remain opaque and power-of-two; all 222 top, bottom, front, rear, and end faces across the six grandstands use their role-specific quadrant with one-texel UV insets."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared grandstand structure atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2925900,
+          "sha256": "1503af12ce6a7812b33410df5cf7aca28de05a464c66c49bed43a4f79585b3a1"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "grandstand-structure-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 247274,
+          "sha256": "6bc64c4d92a31e84dfe188872bab7d2456c5fc5b9c80930e2b4039d136b382de",
+          "encoding": "Opaque WebP quality 88, method 6",
+          "processing": "Preserved the exact full-frame 2-by-2 atlas, converted the RGB master to opaque RGB, downscaled from 1254x1254 to 1024x1024 with Lanczos, encoded as WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "meanLuminance": 108.25,
+          "luminanceStdDev": 58.29,
+          "horizontalDetailMae": 9.22,
+          "verticalDetailMae": 11.22,
+          "nearWhitePercent": 0.047,
+          "nearBlackPercent": 1.455
+        },
+        "notes": "The decoded derivative was inspected for exact quadrant separation, projection, blank borders, people, text, symbols, logos, unintended transparency, collapsed structural detail, and compression artifacts. Geometry tests verified all 222 major exposed faces across six grandstands use their intended atlas quadrants. WSL2 headless Chrome WebGL captures of Apex Pit, a temporary Harbour grandstand QA view, and Temple Start at 1440x900 confirmed seat tops, undercroft facades, canopy roof and underside, and crowd panels coexist, with one active canvas, visible targets, and zero console, page, or network failures. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.shared.pit_complex_structure.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external pit building, race circuit, brand, vehicle, F1, FIA, sponsor, team, real-location image, or stock photography was used as an image input. The final master was produced by editing only the immediately preceding generated atlas to correct its bottom-row roof projections.",
+      "promptIntent": "A strict 2-by-2 common material atlas containing a straight-on dark pit-building service facade, a straight-on pale concrete end-wall and pit-wall fascia, an orthographic roof top, and an orthographic ribbed-metal canopy underside; intended for every major non-ground-facing structural surface of the three fictional pit complexes and the Apex pit wall.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid with hard center boundaries and no element crossing a split; the top row contains service-facade and concrete end-wall modules while the bottom row contains roof-top and canopy-underside modules.",
+        "Every module fills its quadrant edge-to-edge with exact straight-on or orthographic projection, straight axis-aligned seams, even neutral diffuse light, graphite modular cladding, warm-gray concrete, galvanized joints, roof membrane, drainage channels, ribbed metal soffit, and shallow beams.",
+        "No perspective, stadium or paddock scene, racetrack, sky, ground, people, pit crew, drivers, silhouettes, vehicles, tools, furniture, flags, screens, numbers, text, letters, symbols, arrows, logos, trademarks, sponsor marks, advertisements, UI, watermark, or recognizable real-world team or venue.",
+        "The runtime derivative must remain opaque and power-of-two; segmented long faces preserve material scale and all 140 major exposed building, roof, soffit, end-wall, rear-wall, and Apex pit-wall faces use role-specific quadrants with one-texel UV insets."
+      ],
+      "sources": [
+        {
+          "role": "generated and corrected four-module shared pit-complex structure atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2128586,
+          "sha256": "786ccb0be44f06b86246975d1de8fd9e437905aa4bc2cef3eec7fd4458ce857e"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "pit-complex-structure-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 104980,
+          "sha256": "9ebc59d452c01c23183077ed22059c7587fa5488e5188fb10887d9fa2a55772f",
+          "encoding": "Opaque WebP quality 88, method 6",
+          "processing": "Preserved the exact full-frame 2-by-2 atlas, converted the RGB master to opaque RGB, downscaled from 1254x1254 to 1024x1024 with Lanczos, encoded as WebP, and decoded again for final QA."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "meanLuminance": 136.11,
+          "luminanceStdDev": 58.62,
+          "horizontalDetailMae": 7.62,
+          "verticalDetailMae": 6.21,
+          "nearWhitePercent": 0,
+          "nearBlackPercent": 0.226
+        },
+        "notes": "The decoded derivative was inspected for exact quadrant separation, orthographic and front projection, blank borders, doors or shutters in the roof modules, people, text, symbols, logos, unintended transparency, collapsed structural detail, and compression artifacts. Geometry tests verified all 140 major non-ground-facing pit-building, roof, soffit, end-wall, rear-wall, and Apex pit-wall faces use their role-specific atlas quadrants with one-texel UV insets and segmented long spans. WSL2 headless Chrome WebGL captures of all three pit complexes plus a low-angle Harbour soffit view at 1440x900 confirmed the new roof, ribbed underside, end-wall, facade and pit-wall materials coexist with the existing garage fronts, with one active canvas, visible targets, and zero console, page, or network failures. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "sprite.shared.palm_tree.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external palm-tree, race circuit, real-location, brand, vehicle, sponsor, or stock-photography image was used as an image input. The final master was produced by editing only the immediately preceding generated atlas to remove its center divider lines.",
+      "promptIntent": "A strict 2-by-2 transparent sprite atlas containing four complete stylized-realistic palm-tree silhouettes for road-facing billboards at the fictional Apex desert-night and Harbour coastal-day circuits.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid, each containing one complete palm from trunk base to highest frond with clear padding and nothing crossing a center boundary.",
+        "The four variants are a tall date palm, shorter coastal fan palm, slender wind-shaped desert palm, and compact ornamental palm, using readable broad foliage clusters and warm textured trunks under neutral reference lighting.",
+        "No ground, environment, shadows, detached foliage, people, animals, vehicles, buildings, racetrack, text, letters, numbers, symbols, logos, trademarks, sponsor marks, UI, watermark, perspective, depth of field, or motion blur.",
+        "The corrected master uses a seamless flat chroma-key background; the runtime derivative must be power-of-two RGBA with transparent quadrant corners, fully transparent center seams, despilled edges, and no chroma-colored pixel surviving the runtime alpha-test threshold."
+      ],
+      "sources": [
+        {
+          "role": "generated and center-divider-corrected four-module palm-tree chroma-key atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 1873057,
+          "sha256": "2cc328d1262344e5829403cc6199f58f6199c6cfefec9914129fba3005376cc3"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-palm-tree-sprite-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 229050,
+          "sha256": "8f07e1f0a53b891676c874b98c0e11ed7d533fbb88e1d67f005da8df7c8c01ca",
+          "encoding": "RGBA WebP quality 88, alpha quality 100, method 6, exact mode",
+          "processing": "Removed the auto-detected #ef0ceb border key with a soft matte, 12/96 transparency thresholds, despill, and one-pixel edge contraction; then premultiplied-alpha downscaled from 1254x1254 to 1024x1024 with Lanczos and encoded as exact RGBA WebP."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "transparentPercent": 77.253,
+          "partiallyTransparentPercent": 8.038,
+          "opaquePercent": 14.709,
+          "alphaBoundingBox": [75, 13, 936, 1003],
+          "verticalCenterSeamMaxAlpha": 0,
+          "horizontalCenterSeamMaxAlpha": 0,
+          "chromaResidualPixels": 7,
+          "alphaTestResidualPixels": 0
+        },
+        "notes": "The decoded derivative was inspected for four complete silhouettes, transparent quadrant corners, exact transparent center seams, residual divider lines, detached foliage, text, symbols, logos, and compression artifacts. All seven residual chroma-colored pixels have alpha below the runtime alphaTest value of 0.42, so none survive rendering. Geometry tests verified all six Apex and Harbour palms use one atlas quadrant apiece with one-texel UV insets and face the track approach. WSL2 headless Chrome WebGL captures of both Apex palm clusters and both sides of the Harbour hairpin at 1440x900 confirmed readable foliage, clean transparent edges, no magenta fringe, a shortened 3D trunk that does not pierce the crown, one active canvas, visible capture targets, and zero console, page, or network failures. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "sprite.apex.pit_lane_staff.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external race staff, marshal, pit crew, team, circuit, driver, brand, vehicle, sponsor, real-person, real-location, or stock-photography image was used as an image input.",
+      "promptIntent": "A strict 2-by-2 transparent sprite atlas containing four complete fictional race-event staff figures for repeated approach-facing billboards along the Apex pit lane.",
+      "promptConstraints": [
+        "Exactly four equal square modules in a 2-by-2 grid, each containing one complete upright staff figure from boot soles to helmet or head top with clear padding and nothing crossing a center boundary.",
+        "The four variants are a charcoal-and-lime pit mechanic, red-suited marshal with a folded plain yellow flag, navy pit engineer with a blank clipboard and headset, and graphite camera operator with an unmarked shoulder camera.",
+        "Neutral orthographic full-body sprite presentation, opaque technical fabrics and protective equipment, professional poses, no exposed recognizable faces, no ground, environment, shadow, vehicles, pit garage, racetrack, logos, brands, team liveries, sponsor marks, text, letters, numbers, symbols, UI, or watermark.",
+        "The runtime derivative must be power-of-two RGBA with transparent quadrant corners, fully transparent center seams, despilled edges, and no chroma-colored pixel surviving the runtime alpha-test threshold; all ten former box-built staff positions must use one sprite quadrant apiece."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Apex pit-lane staff chroma-key atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 1391758,
+          "sha256": "7ba0201ec382795d1cbcba31357dd1cc750874a07b585c5c0c15c5add2c54790"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-pit-lane-staff-sprite-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 87202,
+          "sha256": "82b6b8fda982115f78501a5acdcd74437130eaafb529ce9236096305f9096da0",
+          "encoding": "RGBA WebP quality 88, alpha quality 100, method 6, exact mode",
+          "processing": "Removed the auto-detected #fb03f9 border key with a soft matte, 12/220 transparency thresholds, despill, and one-pixel edge contraction; then premultiplied-alpha downscaled from 1254x1254 to 1024x1024 with Lanczos and encoded as exact RGBA WebP."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "transparentPercent": 81.565,
+          "partiallyTransparentPercent": 2.581,
+          "opaquePercent": 15.855,
+          "alphaBoundingBox": [167, 16, 851, 994],
+          "verticalCenterSeamMaxAlpha": 0,
+          "horizontalCenterSeamMaxAlpha": 0,
+          "chromaResidualPixels": 2,
+          "alphaTestResidualPixels": 0
+        },
+        "notes": "The decoded derivative was inspected over a checkerboard for four complete figures, coherent anatomy, intact equipment, transparent quadrant corners, exact transparent center seams, residual divider lines, text, logos, trademarks, and compression artifacts. Both residual chroma-colored pixels have alpha below the runtime alphaTest value of 0.42, so neither survives rendering. Geometry tests verified all ten former box-built staff positions use one atlas quadrant apiece with one-texel UV insets and face the pit-straight approach. WSL2 headless Chrome WebGL captures of the Apex pit approach, close pass, and reverse view at 1440x900 confirmed realistic scale, readable silhouettes above the pit wall, clean transparent edges, no magenta fringe, one active canvas, visible capture targets, and zero console errors, page exceptions, or network failures. Existing Three.js and Rapier deprecation warnings remain unrelated. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.apex.tent_canopy.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external tent, canopy, racing team, circuit, vehicle, sponsor, brand, real-location, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque fabric surface atlas for the nine repeated square-pyramid hospitality tent canopies beside the Apex main straight.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules in a 2-by-2 grid, presented as flat orthographic material samples rather than tent objects or a scene.",
+        "The modules are warm ivory canvas with graphite seams, midnight-navy canvas with restrained gold piping, crimson-and-ivory broad panels, and off-white canvas with graphite support-tape bands and restrained gold accents.",
+        "Matte weather-resistant tension fabric with readable straight bands, subtle weave and stitching, even neutral reference lighting, and no transparency, borders, gutters, padding, perspective, radial folds, converging lines, objects, logos, brands, sponsor marks, text, symbols, UI, or watermark.",
+        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 atlas module so mip-safe UV insets cannot sample an adjacent design; all nine former solid-colour pyramid roofs must use one atlas quadrant apiece."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Apex tent-canopy fabric surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 3568427,
+          "sha256": "33a496632a0a9382860ad4464e0f4182e5f606bff2381a7e14bbc3be083a5fc6"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-tent-canopy-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 353188,
+          "sha256": "a2d00d77e4a84293d3b663b27a39af60fbabca2d68712280daf65dc515181f5d",
+          "encoding": "RGB WebP quality 88, method 6",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with Lanczos; assembled an exact 1024x1024 atlas and encoded it as RGB WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [220.842, 205.377, 178.081],
+            [28.952, 39.481, 55.942],
+            [179.619, 117.699, 105.224],
+            [160.037, 152.987, 137.071]
+          ],
+          "quadrantMaxChannelStddev": [22.304, 22.628, 87.729, 81.505]
+        },
+        "notes": "The decoded RGB derivative was inspected for exact quadrant boundaries, four distinct edge-to-edge fabric designs, straight material-detail alignment, adequate mid-scale contrast, text, logos, trademarks, unwanted objects, perspective, gutters, and compression artifacts. Geometry tests verified all nine former solid-colour four-sided canopy roofs preserve their positions and dimensions while using one atlas quadrant apiece with one-texel UV insets. WSL2 headless Chrome WebGL captures of the full canopy row, close pass, reverse view, and the standard player chase composition at 1440x900 confirmed readable fabric patterns, natural night brightness, coherent roofline repetition, no adjacent-module bleed, one active canvas, visible capture targets, and zero console errors, page exceptions, or network failures. Existing Three.js and Rapier deprecation warnings remain unrelated. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "display.shared.braking_distance_board.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external braking board, racing series, circuit, vehicle, sponsor, brand, real-location, sign-system, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque trackside braking-distance sign atlas shared by all major braking zones on the three playable circuits.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square sign-face modules in a 2-by-2 grid, presented as flat orthographic printed artwork rather than physical sign objects or a scene.",
+        "The top-left module contains exactly 150, the top-right exactly 100, the bottom-left exactly 50, and the bottom-right contains only broad restrained red-and-graphite diagonal safety stripes without text or symbols.",
+        "Large centered black condensed sans-serif digits, warm-white retroreflective backing, evenly inset narrow safety-red border, strong at-speed contrast, subtle laminate grain, and no extra characters, units, letters, punctuation, logos, brands, sponsor marks, emblems, perspective, bevels, shadows, background scene, UI, or watermark.",
+        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 module; the 150, 100, and 50 modules must appear 48, 32, and 16 world metres before every configured major corner, preserving the existing board bodies and posts."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared braking-distance board atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2634784,
+          "sha256": "6b47d7099f17b453d1a4e7abf55e9ff5e297eb3361988dd90c78fc7e6a7cf9c1"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-braking-distance-board-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 187800,
+          "sha256": "e8c183f7a558d9b323dd2eb327e11728235c9b4ffd3aab7580263988da98fae0",
+          "encoding": "RGB WebP quality 88, method 6",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with Lanczos; assembled an exact 1024x1024 atlas and encoded it as RGB WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [190.936, 171.123, 159.854],
+            [189.0, 169.181, 158.18],
+            [199.098, 178.893, 166.918],
+            [134.177, 48.496, 46.255]
+          ],
+          "quadrantMaxChannelStddev": [100.797, 101.235, 97.239, 72.636]
+        },
+        "notes": "The decoded RGB derivative was inspected for exact 150, 100, and 50 digit sequences, one occurrence per numbered module, correct module placement, clear condensed numeral forms, centered alignment, intact red borders, exact quadrant boundaries, strong contrast, extra characters, text in the safety-stripe module, logos, trademarks, unwanted objects, perspective, gutters, and compression artifacts. Geometry tests verified all 54 boards across the three venues use 150, 100, and 50 modules in order, sit 48, 32, and 16 world metres before each configured major corner, use one-texel UV insets, and face approaching drivers. WSL2 headless Chrome WebGL captures of representative Apex, Harbour, and Temple braking approaches plus an Apex reverse view at 1440x900 confirmed readable at-speed order, strong day/night contrast, no adjacent-module bleed, plain non-mirrored rear faces, one active canvas, visible capture targets, and zero console errors, page exceptions, or network failures. Existing Three.js and Rapier deprecation warnings remain unrelated. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.shared.trackside_operations.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-03",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external marshal post, broadcast camera, pit-wall display, equipment cabinet, racing series, circuit, vehicle, sponsor, brand, real-location, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque trackside-operations surface atlas shared by marshal posts, broadcast equipment, and pit-wall displays across the three playable circuits.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square front-face modules in a 2-by-2 grid, presented as flat orthographic surface artwork rather than complete physical objects or a scene.",
+        "The modules are an observation-window marshal-post facade, a centered broadcast-camera lens, a nonverbal illuminated telemetry display, and a vented broadcast-equipment cabinet face.",
+        "Graphite, near-black, warm off-white, signal red, cyan, muted gold, and small amber accents with readable medium-scale detail, restrained wear, and no letters, numbers, words, punctuation, pseudo-text, logos, brands, sponsor marks, flags, emblems, hazard icons, people, vehicles, perspective, shadows, background scene, UI chrome, or watermark.",
+        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 module; one-texel UV insets must map 43 driver-facing surfaces comprising five Apex marshal-post facades, twelve shared broadcast-camera lenses, fourteen Apex pit-wall displays, and twelve shared broadcast cabinets."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared trackside-operations surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2422612,
+          "sha256": "1052511e0cb680acf3b0b77b07b9285825752e4d29145ca7627300520822384c"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-trackside-operations-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 133894,
+          "sha256": "5c1f210325bc4f3fc66f111652cbd80b42c238b9a8e4d65eec20c29a10e188b5",
+          "encoding": "Opaque browser-canvas WebP quality 0.88",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 in a browser canvas; assembled an exact 1024x1024 atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-03",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [106.964, 77.976, 71.276],
+            [35.49, 36.273, 40.716],
+            [13.904, 26.358, 33.531],
+            [47.721, 42.423, 43.493]
+          ],
+          "quadrantMaxChannelStddev": [92.289, 25.059, 42.321, 36.64]
+        },
+        "notes": "The decoded derivative was inspected for exact quadrant boundaries, the four requested equipment faces, module isolation, readable medium-scale contrast, text, logos, trademarks, unwanted objects, perspective, gutters, and compression artifacts. Geometry tests verified 43 driver-facing panels across the three venues: five Apex marshal-post facades, twelve shared broadcast-camera lenses, fourteen Apex pit-wall telemetry displays, and twelve shared broadcast cabinets, all with one-texel UV insets and normals facing the circuit. WSL2 headless Chrome WebGL captures of the Apex pit wall, marshal post, and broadcast equipment plus representative Harbour and Temple broadcast equipment and an Apex reverse pass at 1440x900 confirmed readable night/day contrast, telemetry detail after removal of five obsolete overlapping glow faces, no adjacent-module bleed, one active canvas, visible capture targets, and zero console errors, page exceptions, or network failures. Existing Three.js and Rapier deprecation warnings remain unrelated. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
     }
   ]
 }
