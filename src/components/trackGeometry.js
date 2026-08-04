@@ -29,6 +29,12 @@ export const START_GANTRY_PROGRESS = START_FINISH_PROGRESS
 export const START_LIGHT_LATERALS = Object.freeze([-5, -2.5, 0, 2.5, 5])
 export const START_LIGHT_ROW_LEVELS = Object.freeze([6.56, 6.9])
 export const BROADCAST_CAMERA_PROGRESS = Object.freeze([0.075, 0.285, 0.515, 0.815])
+export const TRACK_LIGHTING_GRAPHICS_VARIANTS = Object.freeze({
+  floodlightFront: 0,
+  startSignal: 1,
+  tunnelLuminaire: 2,
+  floodlightRear: 3,
+})
 export const TRACKSIDE_OPERATIONS_VARIANTS = Object.freeze({
   marshalPost: 0,
   broadcastLens: 1,
@@ -110,6 +116,13 @@ export const APEX_VENUE_FACADE_LAYOUT = Object.freeze({
     })),
   ),
 })
+export const APEX_RACE_CONTROL_LAYOUT = Object.freeze({
+  progress: 0.35,
+  lateralOffsetFromRoad: 15,
+  centerY: 5.1,
+  size: Object.freeze([5.8, 10.2, 4.4]),
+  floors: 4,
+})
 export const TEMPLE_BANKING_LAYOUT = Object.freeze({
   progress: 0.665,
   supportCenterLateral: 12.5,
@@ -183,7 +196,7 @@ export const APEX_PIT_WALL_DISPLAY_LAYOUT = Object.freeze([
   })),
 ])
 const BARRIER_POST_COUNT = 48
-const FLOODLIGHT_COUNT = 14
+export const FLOODLIGHT_COUNT = 14
 export const SURFACE_LEVELS = Object.freeze({
   tyreTrace: 0.094,
   shoulder: 0.096,
@@ -1174,11 +1187,16 @@ function addCircuitLandmarks(parts, curve, venue, roadWidth = ROAD_WIDTH) {
   if (venue !== 'apex') return
 
   // Sakhir's timing structures are concentrated around the pit complex.
-  pushTrackBox(parts, curve, 0.35, roadWidth / 2 + 15, 5.1, [5.8, 10.2, 4.4], COLORS.dark)
-  pushTrackBox(parts, curve, 0.35, roadWidth / 2 + 12.75, 5.4, [0.34, 7.8, 3.4], COLORS.glass)
-  for (let floor = 0; floor < 4; floor += 1) {
-    pushTrackBox(parts, curve, 0.35, roadWidth / 2 + 12.52, 2.25 + floor * 1.75, [0.16, 0.12, 3], COLORS.gold)
-  }
+  const raceControl = APEX_RACE_CONTROL_LAYOUT
+  pushTrackBox(
+    parts,
+    curve,
+    raceControl.progress,
+    roadWidth / 2 + raceControl.lateralOffsetFromRoad,
+    raceControl.centerY,
+    raceControl.size,
+    COLORS.dark,
+  )
 
   pushTrackBox(parts, curve, 0.69, -roadWidth / 2 - 17, 8.5, [0.3, 17, 0.3], COLORS.steel)
   pushTrackBox(parts, curve, 0.69, -roadWidth / 2 - 17, 17.2, [4.2, 0.25, 0.25], COLORS.warm)
@@ -1423,19 +1441,6 @@ function addTracksideInfrastructure(parts, curve, venue, roadWidth = ROAD_WIDTH)
     const lateral = (i % 2 === 0 ? -1 : 1) * (roadWidth / 2 + 3.5)
     pushTrackBox(parts, curve, progress, lateral, 3.7, [0.2, 7.4, 0.2], COLORS.steel)
     pushTrackBox(parts, curve, progress, lateral, 7.25, [3.1, 2.0, 0.18], COLORS.dark)
-    for (let row = 0; row < 3; row += 1) {
-      for (let column = 0; column < 5; column += 1) {
-        pushTrackBox(
-          parts,
-          curve,
-          progress,
-          lateral - 1.12 + column * 0.56,
-          6.62 + row * 0.62,
-          [0.38, 0.38, 0.22],
-          COLORS.warm,
-        )
-      }
-    }
   }
 }
 
@@ -1608,6 +1613,144 @@ export function createTracksideOperationsGraphicsGeometry(
       .addScaledVector(WORLD_UP, panel.centerY)
     const geometry = new THREE.PlaneGeometry(panel.width, panel.height)
     const matrix = new THREE.Matrix4().makeBasis(across, WORLD_UP, normal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+
+    const column = panel.variant % 2
+    const row = Math.floor(panel.variant / 2)
+    const moduleMinU = column * 0.5 + atlasInset
+    const moduleMaxU = (column + 1) * 0.5 - atlasInset
+    const moduleMinV = row === 0 ? 0.5 + atlasInset : atlasInset
+    const moduleMaxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(moduleMinU, moduleMaxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(moduleMinV, moduleMaxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+    parts.push(geometry)
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function getTrackLightingGraphicsLayout(
+  curve,
+  venue = 'apex',
+  roadWidth = ROAD_WIDTH,
+) {
+  if (
+    !curve
+    || typeof curve.getPointAt !== 'function'
+    || typeof curve.getTangentAt !== 'function'
+  ) {
+    throw new TypeError('Track-lighting graphics require a finite track curve')
+  }
+
+  const faceOffset = 0.012
+  const layout = []
+
+  for (const lateral of START_LIGHT_LATERALS) {
+    for (const centerY of START_LIGHT_ROW_LEVELS) {
+      layout.push(Object.freeze({
+        kind: 'startSignal',
+        progress: START_GANTRY_PROGRESS,
+        lateral,
+        along: -(0.78 / 2 + faceOffset),
+        centerY,
+        width: 0.18,
+        height: 0.18,
+        orientation: 'vertical',
+        normalTangentSign: -1,
+        variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.startSignal,
+      }))
+    }
+  }
+
+  if (venue === 'apex') {
+    for (let index = 0; index < FLOODLIGHT_COUNT; index += 1) {
+      const progress = index / FLOODLIGHT_COUNT + 0.018
+      const lateral = (index % 2 === 0 ? -1 : 1) * (roadWidth / 2 + 3.5)
+      for (const face of [
+        {
+          kind: 'floodlightFront',
+          along: -(0.18 / 2 + faceOffset),
+          normalTangentSign: -1,
+          variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.floodlightFront,
+        },
+        {
+          kind: 'floodlightRear',
+          along: 0.18 / 2 + faceOffset,
+          normalTangentSign: 1,
+          variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.floodlightRear,
+        },
+      ]) {
+        layout.push(Object.freeze({
+          ...face,
+          progress,
+          lateral,
+          centerY: 7.25,
+          width: 3.1,
+          height: 2,
+          orientation: 'vertical',
+        }))
+      }
+    }
+  } else if (venue === 'harbour') {
+    const tunnelLighting = getHarbourTunnelLightingLayout(curve, roadWidth)
+    for (const progress of tunnelLighting.progresses) {
+      for (const sideSign of [-1, 1]) {
+        layout.push(Object.freeze({
+          kind: 'tunnelLuminaire',
+          progress,
+          lateral: sideSign * tunnelLighting.fixtureLateral,
+          along: 0,
+          centerY: HARBOUR_TUNNEL_ROOF_UNDERSIDE - faceOffset,
+          width: 1.22,
+          height: 0.97,
+          orientation: 'down',
+          normalTangentSign: 0,
+          variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.tunnelLuminaire,
+        }))
+      }
+    }
+  }
+
+  return Object.freeze(layout)
+}
+
+export function createTrackLightingGraphicsGeometry(
+  curve,
+  venue = 'apex',
+  roadWidth = ROAD_WIDTH,
+) {
+  const atlasInset = 1 / 1024
+  const parts = []
+
+  for (const panel of getTrackLightingGraphicsLayout(curve, venue, roadWidth)) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, panel.progress, point, tangent, side)
+    const center = point.clone()
+      .addScaledVector(side, panel.lateral)
+      .addScaledVector(tangent, panel.along)
+      .addScaledVector(WORLD_UP, panel.centerY)
+    const geometry = new THREE.PlaneGeometry(panel.width, panel.height)
+    const matrix = panel.orientation === 'down'
+      ? new THREE.Matrix4().makeBasis(side, tangent, WORLD_UP.clone().negate())
+      : new THREE.Matrix4().makeBasis(
+        side.clone().multiplyScalar(panel.normalTangentSign),
+        WORLD_UP,
+        tangent.clone().multiplyScalar(panel.normalTangentSign),
+      )
     matrix.setPosition(center)
     geometry.applyMatrix4(matrix)
 
@@ -2716,6 +2859,112 @@ export function createHarbourBuildingFacadeGeometry(curve) {
         ) % 4,
       })
     }
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function getApexRaceControlFacadeLayout(roadWidth = ROAD_WIDTH) {
+  if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
+    throw new RangeError('Apex race-control graphics require a usable road width')
+  }
+
+  const structure = APEX_RACE_CONTROL_LAYOUT
+  const [structureWidth, structureHeight, structureLength] = structure.size
+  const floorHeight = structureHeight / structure.floors
+  const faceOffset = 0.012
+  const centerLateral = roadWidth / 2 + structure.lateralOffsetFromRoad
+  const layout = []
+
+  for (let floor = 0; floor < structure.floors; floor += 1) {
+    const centerY = floorHeight * (floor + 0.5)
+    for (const faceSign of [-1, 1]) {
+      layout.push(Object.freeze({
+        kind: faceSign < 0 ? 'trackFacingFloor' : 'outerServiceFloor',
+        progress: structure.progress,
+        faceAxis: 'side',
+        faceSign,
+        lateral: centerLateral + faceSign * (structureWidth / 2 + faceOffset),
+        along: 0,
+        centerY,
+        width: structureLength - 0.08,
+        height: floorHeight - 0.06,
+        variant: faceSign < 0 ? floor % 2 : 2 + floor % 2,
+      }))
+    }
+    for (const endSign of [-1, 1]) {
+      layout.push(Object.freeze({
+        kind: endSign < 0 ? 'approachEndFloor' : 'departureEndFloor',
+        progress: structure.progress,
+        faceAxis: 'end',
+        faceSign: endSign,
+        lateral: centerLateral,
+        along: endSign * (structureLength / 2 + faceOffset),
+        centerY,
+        width: structureWidth - 0.08,
+        height: floorHeight - 0.06,
+        variant: 2 + ((floor + (endSign > 0 ? 1 : 0)) % 2),
+      }))
+    }
+  }
+
+  return Object.freeze(layout)
+}
+
+export function createApexRaceControlFacadeGeometry(
+  curve,
+  roadWidth = ROAD_WIDTH,
+) {
+  if (
+    !curve
+    || typeof curve.getPointAt !== 'function'
+    || typeof curve.getTangentAt !== 'function'
+  ) {
+    throw new TypeError('Apex race-control graphics require a finite track curve')
+  }
+
+  const atlasInset = 1 / 1024
+  const parts = []
+  for (const panel of getApexRaceControlFacadeLayout(roadWidth)) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, panel.progress, point, tangent, side)
+    const normal = panel.faceAxis === 'side'
+      ? side.clone().multiplyScalar(panel.faceSign)
+      : tangent.clone().multiplyScalar(panel.faceSign)
+    const across = panel.faceAxis === 'side'
+      ? tangent.clone().multiplyScalar(-panel.faceSign)
+      : side.clone().multiplyScalar(panel.faceSign)
+    const center = point.clone()
+      .addScaledVector(side, panel.lateral)
+      .addScaledVector(tangent, panel.along)
+      .addScaledVector(WORLD_UP, panel.centerY)
+    const geometry = new THREE.PlaneGeometry(panel.width, panel.height)
+    const matrix = new THREE.Matrix4().makeBasis(across, WORLD_UP, normal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+
+    const column = panel.variant % 2
+    const row = Math.floor(panel.variant / 2)
+    const moduleMinU = column * 0.5 + atlasInset
+    const moduleMaxU = (column + 1) * 0.5 - atlasInset
+    const moduleMinV = row === 0 ? 0.5 + atlasInset : atlasInset
+    const moduleMaxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(moduleMinU, moduleMaxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(moduleMinV, moduleMaxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+    parts.push(geometry)
   }
 
   const merged = mergeGeometries(parts)
@@ -4131,23 +4380,6 @@ export function createCircuitGlowGeometry(curve, venue = 'apex', roadWidth = ROA
   }
 
   if (venue === 'apex') {
-    for (let index = 0; index < FLOODLIGHT_COUNT; index += 1) {
-      const progress = index / FLOODLIGHT_COUNT + 0.018
-      const lateral = (index % 2 === 0 ? -1 : 1) * (ROAD_WIDTH / 2 + 3.5)
-      for (let row = 0; row < 3; row += 1) {
-        for (let column = 0; column < 5; column += 1) {
-          pushTrackBox(
-            parts,
-            curve,
-            progress,
-            lateral - 1.12 + column * 0.56,
-            6.62 + row * 0.62,
-            [0.3, 0.3, 0.24],
-            COLORS.warm,
-          )
-        }
-      }
-    }
     for (const bay of PIT_BAYS) {
       pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -17.05, 2.78, [0.12, 0.12, 3.4], COLORS.warm, bay * 4.8)
     }
@@ -4159,7 +4391,6 @@ export function createCircuitGlowGeometry(curve, venue = 'apex', roadWidth = ROA
     }
   } else if (venue === 'harbour') {
     const tunnelLayout = getHarbourTunnelLayout(curve)
-    const tunnelLighting = getHarbourTunnelLightingLayout(curve, roadWidth)
     // Continuous side service strips give the eye a direction line through the
     // bend without adding another transparent material or draw call.
     for (const progress of tunnelLayout.progresses) {
@@ -4171,21 +4402,6 @@ export function createCircuitGlowGeometry(curve, venue = 'apex', roadWidth = ROA
           side * (roadWidth / 2 - 0.72),
           3.82,
           [0.1, 0.1, tunnelLayout.panelLength],
-          COLORS.warm,
-        )
-      }
-    }
-    // Paired ceiling fixtures remain visible from the chase camera while six
-    // alternating real lights supply the illumination in Track.jsx.
-    for (const progress of tunnelLighting.progresses) {
-      for (const side of [-1, 1]) {
-        pushTrackBox(
-          parts,
-          curve,
-          progress,
-          side * tunnelLighting.fixtureLateral,
-          HARBOUR_TUNNEL_ROOF_UNDERSIDE - 0.01,
-          [1.04, 0.06, 0.78],
           COLORS.warm,
         )
       }

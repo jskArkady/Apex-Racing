@@ -47,9 +47,9 @@ describe('owned Three.js resource lifecycle', () => {
 
     view.unmount()
 
-    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(22)
-    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(22)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(20)
+    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(23)
+    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(23)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(21)
   })
 
   it.each([
@@ -149,8 +149,9 @@ describe('owned Three.js resource lifecycle', () => {
     const view = render(<Track track={getTrackPreset(trackId)} />)
 
     expect(textureLoad).toHaveBeenCalledTimes(
-      10
+      11
         + Number(Boolean(tunnelWallFile))
+        + Number(Boolean(apexVenueFacadeFile))
         + Number(Boolean(apexVenueFacadeFile))
         + Number(Boolean(apexPitStaffBillboardFile))
         + Number(Boolean(apexTentCanopyFile))
@@ -173,6 +174,9 @@ describe('owned Three.js resource lifecycle', () => {
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining('shared-trackside-operations-atlas-1024.webp'),
     )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('shared-track-lighting-signal-atlas-1024.webp'),
+    )
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(infieldFile))
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(barrierAtlasFile))
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(crowdPanelFile))
@@ -192,6 +196,9 @@ describe('owned Three.js resource lifecycle', () => {
       view.container.querySelector('[name="trackside-operations-graphics"]'),
     ).toBeTruthy()
     expect(
+      view.container.querySelector('[name="track-lighting-signal-graphics"]'),
+    ).toBeTruthy()
+    expect(
       view.container.querySelector('[name="track-grandstand-structure-surfaces"]'),
     ).toBeTruthy()
     expect(
@@ -204,9 +211,18 @@ describe('owned Three.js resource lifecycle', () => {
       expect(
         view.container.querySelector('[name="track-apex-venue-facades"]'),
       ).toBeTruthy()
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining('apex-night-race-control-facade-atlas-1024.webp'),
+      )
+      expect(
+        view.container.querySelector('[name="track-apex-race-control-facades"]'),
+      ).toBeTruthy()
     } else {
       expect(
         view.container.querySelector('[name="track-apex-venue-facades"]'),
+      ).toBeNull()
+      expect(
+        view.container.querySelector('[name="track-apex-race-control-facades"]'),
       ).toBeNull()
     }
     if (apexPitStaffBillboardFile) {

@@ -1892,6 +1892,116 @@
         "reviewedAt": null,
         "notes": "No external human or legal review has been claimed."
       }
+    },
+    {
+      "id": "surface.shared.track_lighting_signal.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-04",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external floodlight, signal lens, tunnel luminaire, circuit, racing series, vehicle, sponsor, brand, real-location, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque lighting-and-signal surface atlas shared by floodlight arrays, start gantries, and tunnel ceiling luminaires across the three playable circuits.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square front-face modules in a 2-by-2 grid, presented as flat orthographic surface artwork rather than complete objects or a scene.",
+        "The modules are a 5-by-3 warm-white floodlight reflector panel, one centered red Fresnel start-signal lens, two parallel cool-white tunnel LED bars, and a dark floodlight rear service panel.",
+        "Graphite, near-black, warm white, deep safety red, cool white, brushed silver, and a small amber accent with medium-scale detail and no text, pseudo-text, logos, brands, sponsor marks, people, vehicles, track, perspective, shadows, background scene, UI, or watermark.",
+        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 module; one-texel UV insets must map 70 lighting surfaces across the three venues."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared track-lighting and signal surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2690349,
+          "sha256": "df0408c118b2a9d66e0f820ddf873f97d937b800079ad134f3db0d42d3b12692"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-track-lighting-signal-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 186052,
+          "sha256": "3aacdb6336ae4a57b3336baabd0e3bf53f3a6263cca8de62170454042ed8941e",
+          "encoding": "Opaque browser-canvas WebP quality 0.88",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 in a browser canvas; assembled an exact 1024x1024 atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-04",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [81.834, 77.571, 71.179],
+            [74.644, 21.257, 20.981],
+            [122.743, 123.611, 125.797],
+            [36.475, 37.103, 37.507]
+          ],
+          "quadrantMaxChannelStddev": [78.929, 60.788, 63.95, 19.3]
+        },
+        "notes": "The decoded derivative was inspected for exact quadrant boundaries, correct reflector and light-bar counts, the single centered signal lens, module isolation, readable contrast, text, logos, perspective, gutters, and compression artifacts. Geometry tests verified 70 mapped surfaces across the three venues: fourteen Apex floodlight fronts, fourteen rear service panels, thirty shared start-signal lenses, and twelve Harbour tunnel luminaires, all with one-texel UV insets and correct front, rear, or downward normals. WSL2 headless Chrome WebGL captures of the Apex pit straight and start gantry, Harbour tunnel and start gantry, and Temple start gantry at 1440x900 confirmed readable day/night lighting, no obsolete bulb-box overlap, one active canvas, visible capture targets, positive render calls, zero page exceptions, zero request failures, and zero HTTP error responses. Chrome emitted one first-page generic resource 404 console line without a matching failed request or error response; it did not recur and no application resource failure was observed. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "facade.apex.race_control.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-04",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external race-control building, timing structure, circuit, racing series, vehicle, sponsor, brand, real-location, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque floor-facade atlas for every vertical face of the fictional Apex race-control and timing building.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square facade modules in a 2-by-2 grid with hard center boundaries, flat straight-on orthographic projection, and no complete building or surrounding scene.",
+        "The top row contains a five-bay race-control operations floor and a four-bay alternate timing floor; the bottom row contains a secure technical-service floor and an illuminated stair-core floor.",
+        "Deep navy-black glazing, graphite metal, warm pale limestone, muted amber, sparse cyan and cool-white accents with medium-scale architectural detail and no text, pseudo-text, logos, brands, sponsor marks, flags, people, vehicles, track, perspective, shadows, UI, or watermark.",
+        "The runtime derivative must be opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; sixteen floor panels cover all four building faces with one-texel UV insets."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Apex race-control floor-facade atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 1934673,
+          "sha256": "849db613f17c90ae369a3f5101a4eb2626870a9c5cc6d7f16da756431ed09aa7"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-night-race-control-facade-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 81516,
+          "sha256": "b93629fc1caf0619461ed89fb856460d551d582c6c0a514cbc707747b992263d",
+          "encoding": "Opaque browser-canvas WebP quality 0.88",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 in a browser canvas; assembled an exact 1024x1024 atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-04",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [67.82, 65.781, 63.864],
+            [47.106, 46.811, 47.209],
+            [32.034, 32.284, 33.337],
+            [72.919, 70.428, 68.498]
+          ],
+          "quadrantMaxChannelStddev": [77.23, 64.075, 29.293, 77.462]
+        },
+        "notes": "The source and decoded derivative were inspected for exact quadrant boundaries, five- and four-bay top modules, service and stair-core bottom modules, opaque output, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry tests verified sixteen floor panels across all four race-control building faces, one-texel UV insets, exact module quadrants, finite bounds, floor heights, and outward normals. WSL2 headless Chrome WebGL captures of the Apex switchbacks approach and sector entry at 1440x900 confirmed readable glazing, service and stair-core bands, no obsolete glass or gold-box overlap, one active canvas, visible capture targets, positive render calls, zero page exceptions, zero request failures, and zero HTTP error responses. Chrome emitted one first-page generic resource 404 console line without a matching failed request or error response; it did not recur and no application resource failure was observed. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
     }
   ]
 }

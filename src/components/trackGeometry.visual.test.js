@@ -13,9 +13,11 @@ import {
   APEX_PIT_STAFF_LAYOUT,
   APEX_PALM_TREE_LAYOUT,
   APEX_PIT_WALL_DISPLAY_LAYOUT,
+  APEX_RACE_CONTROL_LAYOUT,
   APEX_TENT_CANOPY_LAYOUT,
   BROADCAST_CAMERA_PROGRESS,
   createApexPitStaffBillboardGeometry,
+  createApexRaceControlFacadeGeometry,
   createApexTentCanopyGeometry,
   createApexVenueFacadeGeometry,
   createBarrierGraphicsGeometry,
@@ -41,6 +43,7 @@ import {
   createRoadGeometry,
   createTempleTreeBillboardGeometry,
   createTempleVenueFacadeGeometry,
+  createTrackLightingGraphicsGeometry,
   createTracksideOperationsGraphicsGeometry,
   APEX_VENUE_FACADE_LAYOUT,
   CHEVRON_LANE_CENTERS,
@@ -59,6 +62,8 @@ import {
   getHarbourTunnelLayout,
   getHarbourTunnelLightingLayout,
   getPalmTreeLayout,
+  getApexRaceControlFacadeLayout,
+  getTrackLightingGraphicsLayout,
   getTracksideOperationsGraphicsLayout,
   GRANDSTAND_LAYOUTS,
   HARBOUR_BUILDINGS,
@@ -94,6 +99,7 @@ import {
   TEMPLE_BANKING_LAYOUT,
   TEMPLE_TIMING_TOWER_LAYOUT,
   TEMPLE_TREE_LAYOUT,
+  TRACK_LIGHTING_GRAPHICS_VARIANTS,
   TRACKSIDE_OPERATIONS_VARIANTS,
 } from './trackGeometry'
 
@@ -119,6 +125,11 @@ describe('circuit visual geometry', () => {
           preset.venue,
           preset.roadWidth,
         ),
+        createTrackLightingGraphicsGeometry(
+          preset.curve,
+          preset.venue,
+          preset.roadWidth,
+        ),
         createCircuitSceneryGeometry(preset.curve, preset.venue, preset.roadWidth),
         createCrowdPanelGeometry(preset.curve, preset.venue),
         createGrandstandStructureGeometry(preset.curve, preset.venue),
@@ -128,6 +139,7 @@ describe('circuit visual geometry', () => {
         ...(preset.venue === 'apex'
           ? [
             createApexVenueFacadeGeometry(preset.curve),
+            createApexRaceControlFacadeGeometry(preset.curve, preset.roadWidth),
             createApexPitStaffBillboardGeometry(preset.curve),
             createApexTentCanopyGeometry(preset.curve),
           ]
@@ -284,6 +296,88 @@ describe('circuit visual geometry', () => {
       expect(Math.abs(normalA.dot(normalC))).toBeLessThan(0.01)
     }
 
+    geometry.dispose()
+  })
+
+  it('covers every Apex race-control floor face with isolated atlas modules', () => {
+    const apex = TRACK_PRESETS.find(track => track.venue === 'apex')
+    const layout = getApexRaceControlFacadeLayout(apex.roadWidth)
+    const geometry = createApexRaceControlFacadeGeometry(
+      apex.curve,
+      apex.roadWidth,
+    )
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const kindCounts = {
+      trackFacingFloor: 0,
+      outerServiceFloor: 0,
+      approachEndFloor: 0,
+      departureEndFloor: 0,
+    }
+
+    expect(Object.isFrozen(APEX_RACE_CONTROL_LAYOUT)).toBe(true)
+    expect(Object.isFrozen(APEX_RACE_CONTROL_LAYOUT.size)).toBe(true)
+    expect(Object.isFrozen(layout)).toBe(true)
+    expect(layout.every(Object.isFrozen)).toBe(true)
+    expect(layout).toHaveLength(APEX_RACE_CONTROL_LAYOUT.floors * 4)
+    expect(positions.count).toBe(layout.length * 4)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(geometry.getIndex().count).toBe(layout.length * 6)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value > 0 && value < 1
+    ))).toBe(true)
+
+    const tangent = apex.curve
+      .getTangentAt(APEX_RACE_CONTROL_LAYOUT.progress)
+      .normalize()
+    const side = new THREE.Vector3().crossVectors(
+      new THREE.Vector3(0, 1, 0),
+      tangent,
+    ).normalize()
+
+    for (let index = 0; index < layout.length; index += 1) {
+      const panel = layout[index]
+      const vertex = index * 4
+      const actualNormal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+      const expectedNormal = (panel.faceAxis === 'side' ? side : tangent)
+        .clone()
+        .multiplyScalar(panel.faceSign)
+      const expectedColumn = panel.variant % 2
+      const expectedAtlasRow = Math.floor(panel.variant / 2)
+      const faceU = Array.from(
+        { length: 4 },
+        (_, offset) => uvs.getX(vertex + offset),
+      )
+      const faceV = Array.from(
+        { length: 4 },
+        (_, offset) => uvs.getY(vertex + offset),
+      )
+
+      expect(actualNormal.dot(expectedNormal)).toBeGreaterThan(0.99)
+      expect(Math.min(...faceU)).toBeGreaterThan(expectedColumn * 0.5)
+      expect(Math.max(...faceU)).toBeLessThan((expectedColumn + 1) * 0.5)
+      if (expectedAtlasRow === 0) {
+        expect(Math.min(...faceV)).toBeGreaterThan(0.5)
+      } else {
+        expect(Math.max(...faceV)).toBeLessThan(0.5)
+      }
+      expect(Math.min(...Array.from(
+        { length: 4 },
+        (_, offset) => positions.getY(vertex + offset),
+      ))).toBeCloseTo(panel.centerY - panel.height / 2, 5)
+      kindCounts[panel.kind] += 1
+    }
+
+    expect(kindCounts).toEqual({
+      trackFacingFloor: 4,
+      outerServiceFloor: 4,
+      approachEndFloor: 4,
+      departureEndFloor: 4,
+    })
     geometry.dispose()
   })
 
@@ -1013,6 +1107,99 @@ describe('circuit visual geometry', () => {
       broadcastLens: 12,
       pitWallDisplay: 14,
       broadcastCabinet: 12,
+    })
+  })
+
+  it('maps all start signals, floodlight faces, and tunnel luminaires to one atlas', () => {
+    const expectedPanelCounts = { apex: 38, harbour: 22, temple: 10 }
+    const totalKindCounts = {
+      floodlightFront: 0,
+      startSignal: 0,
+      tunnelLuminaire: 0,
+      floodlightRear: 0,
+    }
+
+    expect(Object.isFrozen(TRACK_LIGHTING_GRAPHICS_VARIANTS)).toBe(true)
+
+    for (const preset of TRACK_PRESETS) {
+      const layout = getTrackLightingGraphicsLayout(
+        preset.curve,
+        preset.venue,
+        preset.roadWidth,
+      )
+      const geometry = createTrackLightingGraphicsGeometry(
+        preset.curve,
+        preset.venue,
+        preset.roadWidth,
+      )
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+
+      expect(Object.isFrozen(layout)).toBe(true)
+      expect(layout).toHaveLength(expectedPanelCounts[preset.venue])
+      expect(layout.every(Object.isFrozen)).toBe(true)
+      expect(positions.count).toBe(layout.length * 4)
+      expect(normals.count).toBe(positions.count)
+      expect(uvs.count).toBe(positions.count)
+      expect(geometry.getIndex().count).toBe(layout.length * 6)
+      expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(uvs.array).every(value => (
+        Number.isFinite(value) && value > 0 && value < 1
+      ))).toBe(true)
+
+      for (let index = 0; index < layout.length; index += 1) {
+        const panel = layout[index]
+        const vertex = index * 4
+        const expectedColumn = panel.variant % 2
+        const expectedAtlasRow = Math.floor(panel.variant / 2)
+        const faceU = Array.from(
+          { length: 4 },
+          (_, offset) => uvs.getX(vertex + offset),
+        )
+        const faceV = Array.from(
+          { length: 4 },
+          (_, offset) => uvs.getY(vertex + offset),
+        )
+        const actualNormal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+        const expectedNormal = panel.orientation === 'down'
+          ? new THREE.Vector3(0, -1, 0)
+          : preset.curve.getTangentAt(panel.progress)
+            .normalize()
+            .multiplyScalar(panel.normalTangentSign)
+
+        expect(panel.variant).toBe(TRACK_LIGHTING_GRAPHICS_VARIANTS[panel.kind])
+        expect(Math.min(...faceU)).toBeGreaterThan(expectedColumn * 0.5)
+        expect(Math.max(...faceU)).toBeLessThan((expectedColumn + 1) * 0.5)
+        if (expectedAtlasRow === 0) {
+          expect(Math.min(...faceV)).toBeGreaterThan(0.5)
+        } else {
+          expect(Math.max(...faceV)).toBeLessThan(0.5)
+        }
+        expect(actualNormal.dot(expectedNormal)).toBeGreaterThan(0.99)
+        if (panel.orientation === 'down') {
+          expect(Array.from(
+            { length: 4 },
+            (_, offset) => positions.getY(vertex + offset),
+          ).every(y => Math.abs(y - panel.centerY) < 0.00001)).toBe(true)
+        } else {
+          expect(Math.min(...Array.from(
+            { length: 4 },
+            (_, offset) => positions.getY(vertex + offset),
+          ))).toBeCloseTo(panel.centerY - panel.height / 2, 5)
+        }
+        totalKindCounts[panel.kind] += 1
+      }
+
+      geometry.dispose()
+    }
+
+    expect(totalKindCounts).toEqual({
+      floodlightFront: 14,
+      startSignal: 30,
+      tunnelLuminaire: 12,
+      floodlightRear: 14,
     })
   })
 
