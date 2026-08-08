@@ -2002,6 +2002,118 @@
         "reviewedAt": null,
         "notes": "No external human or legal review has been claimed."
       }
+    },
+    {
+      "id": "surface.player_formula.livery.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-08",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, or stock texture was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque surface atlas for the always-visible rear-wing, central spine, and mirrored sidepod upper surfaces of the fictional player formula car.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules in a 2-by-2 grid with hard center boundaries, flat orthographic surface artwork, uniform neutral exposure, and no complete car, component mockup, scene, perspective, gutter, border, or shadow.",
+        "The top row contains a symmetric rear-wing rear-face chevron and a symmetric longitudinal rear-wing top design; the bottom row contains a central crimson engine-cover spine and a mirror-safe graphite sidepod airflow design.",
+        "Crimson #ef3157, warm off-white #f4f6ef, deep graphite carbon, restrained silver, and sparse electric lime #bfff35 with no letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, people, wheels, track, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; five merged player-only overlay panels use one-texel UV insets and a mirrored U mapping on the right sidepod."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module player formula-car livery surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2501222,
+          "sha256": "75ca1f9c9907d2861740f990cfa734ec55a53ab579996c343145a01b731cf0f7"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "player-formula-livery-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 192050,
+          "sha256": "8fbce907c3563a7a713904fa78895cac2b57e24c8a29c1882ce3094437606364",
+          "encoding": "Opaque browser-canvas WebP quality 0.92",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 in a browser canvas; assembled an exact 1024x1024 atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-08",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [99.12, 81.71, 80.36],
+            [142.58, 97.46, 95.2],
+            [138.15, 38.23, 49.47],
+            [85.31, 41.47, 45.72]
+          ],
+          "quadrantMaxChannelStddev": [93.2, 95.63, 76.87, 81.77]
+        },
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, module isolation, readable contrast, text, logos, perspective, gutters, and compression artifacts. Geometry and lifecycle tests verified five panels merged into one 20-vertex, 30-index draw surface, isolated one-texel-inset UV quadrants, explicit mirrored right-sidepod U coordinates, outward unit normals and finite bounds, player-only LOD gating, one texture load, and explicit geometry, material, and texture disposal, including both allocations in React StrictMode's setup-cleanup-setup effect cycle. WSL2 headless Chrome WebGL captures of the Apex night, Harbour day, and Temple day start-gantry views at 1440x900 plus native-scale car crops confirmed a crisp rear chevron, longitudinal top stripe, balanced mirrored sidepod artwork, consistent exposure, and no visible UV bleed, surface penetration, z-fighting, or clipping. Every capture had one active WebGL canvas, a visible landmark target, positive render calls, zero page exceptions, zero request failures, and zero HTTP error responses. The capture helper's car-origin heuristic reported false because the rigid-body origin projected just beyond its conservative -0.9 NDC threshold, while the rendered car visibly occupied the lower viewport and crop in every screenshot. Chrome emitted one first-page generic resource 404 console line without a matching failed request or error response; it did not recur. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.open_water.ripple_height",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-08",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external sea, harbour, marina, pool, water, wave, weather, location, game, brand, or stock-texture image was used as an image input.",
+      "promptIntent": "A seamless, fully opaque, monochrome scalar height-and-roughness source texture for the large fictional Harbour open-water surface.",
+      "promptConstraints": [
+        "One exact square full-bleed raw material-data texture in strict top-down orthographic projection, with no perspective, horizon, shoreline, border, vignette, or focal object.",
+        "Dense restrained overlapping wind ripples with short irregular wavelets, balanced broad undulations and capillary detail, no dominant bands, radial centre, wake, foam, whitecaps, splash, debris, boats, docks, pool tiles, grid, or concentric rings.",
+        "Neutral grayscale only, pale crests and darker troughs with smooth low-to-moderate scalar contrast; no baked lighting, shadows, reflections, glare, sky, color cast, text, logos, watermark, UI, or transparency.",
+        "The runtime derivative must be power-of-two and periodic: a normalized 512-by-512 source cell mirrored horizontally and vertically into a 1024-by-1024 tile, then repeated at a world-square 4-by-1 ratio over the 300-by-76-metre Harbour water box."
+      ],
+      "sources": [
+        {
+          "role": "generated monochrome sheltered-water ripple scalar master",
+          "dimensions": [1254, 1254],
+          "bytes": 2511189,
+          "sha256": "00c57eb53594a6bd2620adb6e1ac8f3013894c45183fb25a407020d78b7c559c"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-open-water-ripple-height-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 357788,
+          "sha256": "25b65b9e61910f4b3259fe81b1f23b93446f0ef2f416ebac3a92c54c72a495f3",
+          "encoding": "Opaque browser-canvas WebP quality 0.90",
+          "processing": "Downscaled the 1254x1254 source to a 512x512 cell, converted RGB to luminance, normalized it to mean 154 and standard deviation 22 with restrained scalar clipping, mirrored the cell horizontally and vertically into an exact periodic 1024x1024 tile, and encoded it as opaque WebP."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-08",
+        "metrics": {
+          "sourceMeanLuminance": 126.941,
+          "sourceLuminanceStddev": 14.204,
+          "meanLuminance": 154.048,
+          "luminanceStddev": 21.626,
+          "minimumLuminance": 90,
+          "maximumLuminance": 232,
+          "leftRightEdgeMae": 1.806,
+          "topBottomEdgeMae": 1.819,
+          "verticalCenterMae": 1.75,
+          "horizontalCenterMae": 1.869
+        },
+        "notes": "The generated source, decoded derivative, and 3-by-3 tiled preview were inspected for opacity, grayscale neutrality, continuous density, ripple scale, edge and centre seams, large directional bands, text, objects, reflections, and compression artifacts. Component tests verify Harbour-only loading, NoColorSpace scalar configuration, RepeatWrapping, world-square repeat and offset, trilinear mipmaps, anisotropy, one additional owned texture, one reused water mesh, and shared albedo-modulation, bump, roughness, and clearcoat-roughness material wiring. The full 554-test regression suite, lint, production build, and final 1440-by-900 WSL2 Chrome WebGL captures of both the Harbour waterfront and yacht views passed. The captures showed restrained visible ripples without obvious seams, repetition, noise, or glare; each had one active WebGL canvas, a visible landmark target, positive render calls, the expected one-texture increase, zero page exceptions, zero request failures, and zero HTTP error responses. Chrome emitted one first-page generic resource 404 console line without a matching failed request or error response; it did not recur."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
     }
   ]
 }

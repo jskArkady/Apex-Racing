@@ -18,6 +18,7 @@ import harbourInfieldAlbedoUrl from '../assets/textures/harbour-concrete-infield
 import harbourApartmentFacadeAtlasUrl from '../assets/textures/harbour-apartment-facade-atlas-1024.webp'
 import harbourBarrierAtlasUrl from '../assets/textures/harbour-day-barrier-atlas-1024.webp'
 import harbourMarinaAtlasUrl from '../assets/textures/harbour-marina-quay-promenade-atlas-1024.webp'
+import harbourOpenWaterRippleHeightUrl from '../assets/textures/harbour-open-water-ripple-height-1024.webp'
 import harbourPitGarageFacadeUrl from '../assets/textures/harbour-day-pit-garage-facade-1024.webp'
 import harbourRetainingWallAtlasUrl from '../assets/textures/harbour-day-retaining-wall-atlas-1024.webp'
 import harbourSwimmingPoolAtlasUrl from '../assets/textures/harbour-swimming-pool-surface-atlas-1024.webp'
@@ -522,6 +523,21 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       swimmingPoolSurfaceTexture.generateMipmaps = true
       swimmingPoolSurfaceTexture.anisotropy = 4
     }
+    const openWaterRippleTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourOpenWaterRippleHeightUrl)
+      : null
+    if (openWaterRippleTexture) {
+      openWaterRippleTexture.name = 'generated-harbour-open-water-ripple-height'
+      openWaterRippleTexture.colorSpace = THREE.NoColorSpace
+      openWaterRippleTexture.wrapS = THREE.RepeatWrapping
+      openWaterRippleTexture.wrapT = THREE.RepeatWrapping
+      openWaterRippleTexture.minFilter = THREE.LinearMipmapLinearFilter
+      openWaterRippleTexture.magFilter = THREE.LinearFilter
+      openWaterRippleTexture.generateMipmaps = true
+      openWaterRippleTexture.anisotropy = 4
+      openWaterRippleTexture.repeat.set(4, 1)
+      openWaterRippleTexture.offset.set(0.17, 0.29)
+    }
     const yachtFacadeTexture = activeTrack.venue === 'harbour'
       ? new THREE.TextureLoader().load(harbourYachtFacadeAtlasUrl)
       : null
@@ -578,6 +594,25 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
     asphaltTexture.repeat.set(7, 110)
     const terrainTexture = createSurfaceTexture(96, 0.8)
     terrainTexture.repeat.set(70, 70)
+    const waterMaterial = activeTrack.venue === 'harbour'
+      ? new THREE.MeshPhysicalMaterial({
+        color: '#168da8',
+        map: openWaterRippleTexture,
+        bumpMap: openWaterRippleTexture,
+        bumpScale: 0.045,
+        roughnessMap: openWaterRippleTexture,
+        emissive: '#06384a',
+        emissiveIntensity: 0.24,
+        roughness: 0.34,
+        metalness: 0.02,
+        clearcoat: 1,
+        clearcoatRoughness: 0.2,
+        clearcoatRoughnessMap: openWaterRippleTexture,
+        transparent: true,
+        opacity: 0.94,
+      })
+      : null
+    if (waterMaterial) waterMaterial.name = 'harbour-open-water-material'
 
     return {
       roadGeometry,
@@ -630,6 +665,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       retainingWallFacadeTexture,
       marinaSurfaceTexture,
       swimmingPoolSurfaceTexture,
+      openWaterRippleTexture,
       yachtFacadeTexture,
       treeBillboardTexture,
       palmTreeBillboardTexture,
@@ -880,19 +916,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
         transparent: true,
         opacity: 0.76,
       }),
-      waterMaterial: activeTrack.venue === 'harbour'
-        ? new THREE.MeshPhysicalMaterial({
-          color: '#0b718b',
-          emissive: '#06384a',
-          emissiveIntensity: 0.28,
-          roughness: 0.18,
-          metalness: 0.24,
-          clearcoat: 1,
-          clearcoatRoughness: 0.12,
-          transparent: true,
-          opacity: 0.92,
-        })
-        : null,
+      waterMaterial,
     }
   }, [activeTrack, roadWidth, trackCurve])
   useEffect(() => () => {
@@ -950,6 +974,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.retainingWallFacadeTexture,
       assets.marinaSurfaceTexture,
       assets.swimmingPoolSurfaceTexture,
+      assets.openWaterRippleTexture,
       assets.yachtFacadeTexture,
       assets.treeBillboardTexture,
       assets.palmTreeBillboardTexture,
@@ -1227,7 +1252,12 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       <mesh geometry={assets.glowGeometry} material={assets.glowMaterial} />
 
       {assets.waterMaterial && (
-        <mesh position={HARBOUR_WATER.position} material={assets.waterMaterial} receiveShadow>
+        <mesh
+          name="track-harbour-open-water"
+          position={HARBOUR_WATER.position}
+          material={assets.waterMaterial}
+          receiveShadow
+        >
           <boxGeometry args={HARBOUR_WATER.size} />
         </mesh>
       )}

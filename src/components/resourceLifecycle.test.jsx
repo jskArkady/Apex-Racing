@@ -49,7 +49,7 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(23)
     expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(23)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(21)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(22)
   })
 
   it.each([
@@ -65,6 +65,7 @@ describe('owned Three.js resource lifecycle', () => {
       'apex-night-tower-hospitality-atlas-1024.webp',
       'apex-pit-lane-staff-sprite-atlas-1024.webp',
       'apex-tent-canopy-surface-atlas-1024.webp',
+      null,
       null,
       null,
       null,
@@ -95,6 +96,7 @@ describe('owned Three.js resource lifecycle', () => {
       'harbour-day-retaining-wall-atlas-1024.webp',
       'harbour-marina-quay-promenade-atlas-1024.webp',
       'harbour-swimming-pool-surface-atlas-1024.webp',
+      'harbour-open-water-ripple-height-1024.webp',
       'harbour-yacht-facade-atlas-1024.webp',
       'shared-palm-tree-sprite-atlas-1024.webp',
       null,
@@ -112,6 +114,7 @@ describe('owned Three.js resource lifecycle', () => {
       null,
       null,
       'temple-day-banking-timing-atlas-1024.webp',
+      null,
       null,
       null,
       null,
@@ -141,6 +144,7 @@ describe('owned Three.js resource lifecycle', () => {
     retainingWallFacadeFile,
     marinaSurfaceFile,
     swimmingPoolSurfaceFile,
+    openWaterRippleFile,
     yachtFacadeFile,
     palmTreeBillboardFile,
     treeBillboardFile,
@@ -161,6 +165,7 @@ describe('owned Three.js resource lifecycle', () => {
         + Number(Boolean(retainingWallFacadeFile))
         + Number(Boolean(marinaSurfaceFile))
         + Number(Boolean(swimmingPoolSurfaceFile))
+        + Number(Boolean(openWaterRippleFile))
         + Number(Boolean(yachtFacadeFile))
         + Number(Boolean(palmTreeBillboardFile))
         + Number(Boolean(treeBillboardFile)),
@@ -321,6 +326,18 @@ describe('owned Three.js resource lifecycle', () => {
         view.container.querySelector('[name="track-harbour-swimming-pool-surfaces"]'),
       ).toBeNull()
     }
+    if (openWaterRippleFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(openWaterRippleFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-harbour-open-water"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-harbour-open-water"]'),
+      ).toBeNull()
+    }
     if (yachtFacadeFile) {
       expect(textureLoad).toHaveBeenCalledWith(
         expect.stringContaining(yachtFacadeFile),
@@ -360,6 +377,43 @@ describe('owned Three.js resource lifecycle', () => {
     view.unmount()
   })
 
+  it('configures the Harbour open-water image as a repeating scalar map', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
+    const waterLoadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('harbour-open-water-ripple-height-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[waterLoadIndex]?.value
+
+    expect(waterLoadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-harbour-open-water-ripple-height')
+    expect(texture.colorSpace).toBe(THREE.NoColorSpace)
+    expect(texture.wrapS).toBe(THREE.RepeatWrapping)
+    expect(texture.wrapT).toBe(THREE.RepeatWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(texture.repeat.toArray()).toEqual([4, 1])
+    expect(texture.offset.toArray()).toEqual([0.17, 0.29])
+    expect(
+      view.container.querySelector('[name="track-harbour-open-water"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate?.name === 'harbour-open-water-material'
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshPhysicalMaterial)
+    expect(material.map).toBe(texture)
+    expect(material.bumpMap).toBe(texture)
+    expect(material.roughnessMap).toBe(texture)
+    expect(material.clearcoatRoughnessMap).toBe(texture)
+    expect(material.bumpScale).toBe(0.045)
+  })
+
   it.each([
     ['apex_gp', 'apex-night-sky-panorama-1024.webp'],
     ['harbour_street', 'harbour-day-sky-panorama-1024.webp'],
@@ -391,5 +445,63 @@ describe('owned Three.js resource lifecycle', () => {
     view.unmount()
 
     expect(geometryDispose.mock.calls.length - disposalsBeforeUnmount).toBe(5)
+  })
+
+  it('loads and disposes the player-only livery geometry, material, and texture', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const geometryDispose = vi.spyOn(THREE.BufferGeometry.prototype, 'dispose')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const textureDispose = vi.spyOn(THREE.Texture.prototype, 'dispose')
+    const view = render(<FormulaCar isPlayer />)
+
+    expect(textureLoad).toHaveBeenCalledOnce()
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('player-formula-livery-surface-atlas-1024.webp'),
+    )
+    expect(
+      view.container.querySelector('[name="player-formula-livery-graphics"]'),
+    ).toBeTruthy()
+
+    const geometryDisposalsBeforeUnmount = geometryDispose.mock.calls.length
+    const materialDisposalsBeforeUnmount = materialDispose.mock.calls.length
+    const textureDisposalsBeforeUnmount = textureDispose.mock.calls.length
+    view.unmount()
+
+    expect(
+      geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount,
+    ).toBe(6)
+    expect(
+      materialDispose.mock.calls.length - materialDisposalsBeforeUnmount,
+    ).toBe(1)
+    expect(
+      textureDispose.mock.calls.length - textureDisposalsBeforeUnmount,
+    ).toBe(1)
+  })
+
+  it('cleans every player livery allocation during the StrictMode effect cycle', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const geometryDispose = vi.spyOn(THREE.BufferGeometry.prototype, 'dispose')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const textureDispose = vi.spyOn(THREE.Texture.prototype, 'dispose')
+    const countLiveryGeometryDisposals = () => geometryDispose.mock.contexts
+      .filter(geometry => (
+        geometry?.name === 'player-formula-livery-graphics-geometry'
+      )).length
+    const view = render(
+      <React.StrictMode>
+        <FormulaCar isPlayer />
+      </React.StrictMode>,
+    )
+
+    expect(textureLoad).toHaveBeenCalledTimes(2)
+    expect(countLiveryGeometryDisposals()).toBe(1)
+    expect(materialDispose).toHaveBeenCalledTimes(1)
+    expect(textureDispose).toHaveBeenCalledTimes(1)
+
+    view.unmount()
+
+    expect(countLiveryGeometryDisposals()).toBe(2)
+    expect(materialDispose).toHaveBeenCalledTimes(2)
+    expect(textureDispose).toHaveBeenCalledTimes(2)
   })
 })

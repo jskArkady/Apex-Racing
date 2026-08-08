@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useGameStore } from '../store/gameStore'
+import playerFormulaLiveryAtlasUrl from '../assets/textures/player-formula-livery-surface-atlas-1024.webp'
 
 const FORMULA_CAR_DIMENSIONS = Object.freeze({
   length: 4.82,
@@ -76,6 +78,91 @@ const WHEEL_LAYOUT = Object.freeze([
   { index: 2, side: -1, x: -0.96, z: 1.28, radius: FORMULA_CAR_DIMENSIONS.rearWheelRadius },
   { index: 3, side: 1, x: 0.96, z: 1.28, radius: FORMULA_CAR_DIMENSIONS.rearWheelRadius },
 ])
+
+const freezeLiveryPanel = panel => Object.freeze({
+  ...panel,
+  position: Object.freeze(panel.position),
+  rotation: Object.freeze(panel.rotation),
+  size: Object.freeze(panel.size),
+})
+
+export const PLAYER_LIVERY_GRAPHICS_LAYOUT = Object.freeze([
+  freezeLiveryPanel({
+    key: 'rear-wing-rear-face',
+    position: [0, 1.09203, 2.051579],
+    rotation: [-0.07, 0, 0],
+    size: [1.48, 0.112],
+    variant: 0,
+  }),
+  freezeLiveryPanel({
+    key: 'rear-wing-top',
+    position: [0, 1.151824, 1.874964],
+    rotation: [-Math.PI / 2 - 0.07, 0, 0],
+    size: [1.48, 0.3],
+    variant: 1,
+  }),
+  freezeLiveryPanel({
+    key: 'monocoque-top-spine',
+    position: [0, 0.917066, -0.238903],
+    rotation: [-Math.PI / 2 + 0.06, 0, 0],
+    size: [0.252, 1.08],
+    variant: 2,
+  }),
+  freezeLiveryPanel({
+    key: 'sidepod-top-left',
+    position: [-0.61, 0.6695, 0.16],
+    rotation: [-Math.PI / 2, 0, 0],
+    size: [0.452, 0.78],
+    variant: 3,
+  }),
+  freezeLiveryPanel({
+    key: 'sidepod-top-right',
+    position: [0.61, 0.6695, 0.16],
+    rotation: [-Math.PI / 2, 0, 0],
+    size: [0.452, 0.78],
+    variant: 3,
+    mirrorU: true,
+  }),
+])
+
+export function createPlayerLiveryGraphicsGeometry() {
+  const atlasInset = 1 / 1024
+  const parts = PLAYER_LIVERY_GRAPHICS_LAYOUT.map(panel => {
+    const geometry = new THREE.PlaneGeometry(...panel.size)
+    const column = panel.variant % 2
+    const row = Math.floor(panel.variant / 2)
+    const minU = column * 0.5 + atlasInset
+    const maxU = (column + 1) * 0.5 - atlasInset
+    const minV = row === 0 ? 0.5 + atlasInset : atlasInset
+    const maxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      const sourceU = panel.mirrorU ? 1 - uvs.getX(vertex) : uvs.getX(vertex)
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, sourceU),
+        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+
+    const transform = new THREE.Matrix4().compose(
+      new THREE.Vector3(...panel.position),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(...panel.rotation)),
+      new THREE.Vector3(1, 1, 1),
+    )
+    geometry.applyMatrix4(transform)
+    return geometry
+  })
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) throw new Error('Player livery graphics geometry could not be merged')
+  merged.name = 'player-formula-livery-graphics-geometry'
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
 
 function TaperedShell({
   frontWidth,
@@ -290,6 +377,44 @@ export default function FormulaCar({
       shadow: `#${primary.clone().lerp(new THREE.Color('#050505'), 0.5).getHexString()}`,
     }
   }, [color])
+  const [playerLiveryAssets, setPlayerLiveryAssets] = useState(null)
+
+  useEffect(() => {
+    if (!isPlayer) {
+      setPlayerLiveryAssets(null)
+      return undefined
+    }
+    const geometry = createPlayerLiveryGraphicsGeometry()
+    const texture = new THREE.TextureLoader().load(playerFormulaLiveryAtlasUrl)
+    texture.name = 'generated-player-formula-livery-surface-atlas'
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.wrapS = THREE.ClampToEdgeWrapping
+    texture.wrapT = THREE.ClampToEdgeWrapping
+    texture.minFilter = THREE.LinearMipmapLinearFilter
+    texture.magFilter = THREE.LinearFilter
+    texture.generateMipmaps = true
+    texture.anisotropy = 4
+    const material = new THREE.MeshStandardMaterial({
+      map: texture,
+      roughness: 0.42,
+      metalness: 0.44,
+      emissive: '#ffffff',
+      emissiveMap: texture,
+      emissiveIntensity: 0.045,
+      side: THREE.FrontSide,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1,
+    })
+    material.name = 'player-formula-livery-graphics-material'
+    const assets = { geometry, material, texture }
+    setPlayerLiveryAssets(assets)
+    return () => {
+      assets.geometry.dispose()
+      assets.material.dispose()
+      assets.texture.dispose()
+    }
+  }, [isPlayer])
 
   useFrame((state, delta) => {
     const gameState = useGameStore.getState().gameState
@@ -419,6 +544,13 @@ export default function FormulaCar({
       >
         <meshPhysicalMaterial color={palette.primary} roughness={0.28} metalness={0.34} clearcoat={0.7} />
       </TaperedShell>
+      {isPlayer && playerLiveryAssets && (
+        <mesh
+          name="player-formula-livery-graphics"
+          geometry={playerLiveryAssets.geometry}
+          material={playerLiveryAssets.material}
+        />
+      )}
 
       {/* Roll hoop, camera pod and mirrors complete the cockpit silhouette. */}
       <mesh position={[0, 1.04, 0.58]} scale={[0.2, 0.3, 0.18]} castShadow>
