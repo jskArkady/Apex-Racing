@@ -2,6 +2,7 @@ import { render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import * as THREE from 'three'
 import FormulaCar, {
+  FORMULA_LIVERY_ATLASES,
   PLAYER_LIVERY_GRAPHICS_LAYOUT,
   createPlayerLiveryGraphicsGeometry,
 } from './FormulaCar'
@@ -124,6 +125,20 @@ describe('FormulaCar visual LOD', () => {
     expect(countNamed(container, 'formula-suspension-strut')).toBe(0)
     expect(countNamed(container, 'front-active-hinge-left')).toBe(0)
     expect(countNamed(container, 'rear-overtake-mode-strip')).toBe(0)
+    expect(countNamed(container, 'player-formula-livery-graphics')).toBe(0)
+  })
+
+  it.each([
+    ['blue', FORMULA_LIVERY_ATLASES.aiBlue],
+    ['green', FORMULA_LIVERY_ATLASES.aiGreen],
+    ['orange', FORMULA_LIVERY_ATLASES.aiOrange],
+  ])('applies the generated %s livery to an AI race car', (_, liveryAtlas) => {
+    const { container } = render(
+      <FormulaCar detail="race" liveryAtlas={liveryAtlas} />,
+    )
+
+    expectCoreRaceSilhouette(container)
+    expect(countNamed(container, 'ai-formula-livery-graphics')).toBe(1)
     expect(countNamed(container, 'player-formula-livery-graphics')).toBe(0)
   })
 

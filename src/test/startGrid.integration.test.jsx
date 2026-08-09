@@ -55,10 +55,13 @@ describe('starting-grid physics integration', () => {
   })
 
   it('places all AI bodies in the same non-overlapping shared grid', () => {
-    render(<Opponents />)
+    const view = render(<Opponents />)
     const bodies = Array.from(activeBodies)
     const poses = getStartGridPoses('single').filter((pose) => pose.racerId !== 'player')
     expect(bodies).toHaveLength(3)
+    expect(
+      view.container.querySelectorAll('[name="ai-formula-livery-graphics"]'),
+    ).toHaveLength(3)
     poses.forEach((pose) => {
       const body = bodies.find((candidate) => (
         candidate.initialX === pose.position[0] && candidate.initialZ === pose.position[2]

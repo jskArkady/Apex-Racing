@@ -2059,6 +2059,171 @@
       }
     },
     {
+      "id": "surface.ai_blue_formula.livery.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-09",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "The existing generated player formula-car livery atlas was used as the sole edit target and strict layout reference. No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, or stock texture was used as an image input.",
+      "promptIntent": "A palette-only electric-blue 2-by-2 opaque surface-atlas edit for the rear-wing, central spine, and mirrored sidepod upper surfaces of the fictional blue AI formula car.",
+      "promptConstraints": [
+        "Preserve the source atlas's exact four equal edge-to-edge modules, hard center boundaries, panel placement, stripe widths, vents, rivets, carbon weave, symmetry, scale, alignment, and full-bleed crop.",
+        "Recolor only the painted surfaces to electric racing blue centered on #2774ff, warm off-white, black graphite carbon, and restrained ice-cyan accents.",
+        "No complete car, scene, perspective, shadow, gutter, border, text, letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, recognizable trade dress, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; five merged AI overlay panels use one-texel UV insets and mirrored U mapping on the right sidepod."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module blue AI formula-car livery palette-edit master",
+          "dimensions": [1254, 1254],
+          "bytes": 2153307,
+          "sha256": "335ccc603811b74cb6ef4d8cca4f9c67bddddc581dfa81742f6e5ba53228ce3b"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "ai-blue-formula-livery-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 152292,
+          "sha256": "36c235339d827879aad59df2c6338b03191b348d4aedd7c1952c2792baac8839",
+          "encoding": "Opaque Pillow WebP quality 92, method 6",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with Lanczos; assembled an exact 1024x1024 atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-09",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [79.422, 88.475, 97.614],
+            [95.614, 118.998, 146.364],
+            [38.983, 91.482, 162.508],
+            [40.981, 63.408, 90.945]
+          ],
+          "quadrantMaxChannelStddev": [94.924, 95.745, 92.033, 92.882]
+        },
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, palette identity, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry, integration, and lifecycle tests verify the shared five-panel 20-vertex and 30-index overlay, isolated one-texel-inset UV quadrants, mirrored right-sidepod U coordinates, AI-only mesh naming, correct blue mapping, one texture load, and explicit geometry, material, and texture disposal. WSL2 headless-Chromium WebGL capture of the four-car Apex race view confirmed the blue livery alongside the green and orange variants with one active canvas, positive render calls and triangles, all three AI WebP requests loaded, and no page exception or failed asset request. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.ai_green_formula.livery.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-09",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "The existing generated player formula-car livery atlas was used as the sole edit target and strict layout reference. No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, or stock texture was used as an image input.",
+      "promptIntent": "A palette-only emerald-and-acid-lime 2-by-2 opaque surface-atlas edit for the rear-wing, central spine, and mirrored sidepod upper surfaces of the fictional green AI formula car.",
+      "promptConstraints": [
+        "Preserve the source atlas's exact four equal edge-to-edge modules, hard center boundaries, panel placement, stripe widths, vents, rivets, carbon weave, symmetry, scale, alignment, and full-bleed crop.",
+        "Recolor only the painted surfaces to emerald racing green centered on #12b886, acid lime centered on #d7ff42, restrained off-white separators, and black graphite carbon.",
+        "No complete car, scene, perspective, shadow, gutter, border, text, letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, recognizable trade dress, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; five merged AI overlay panels use one-texel UV insets and mirrored U mapping on the right sidepod."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module green AI formula-car livery palette-edit master",
+          "dimensions": [1254, 1254],
+          "bytes": 2121357,
+          "sha256": "67b39f5e6a70b71048b706e7dd61d22b228bcb63bb419f7f9c3e08a1d661853a"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "ai-green-formula-livery-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 142724,
+          "sha256": "eada0d22958701e13eb9529ea44e1f8f0a5c96928c1c254002a2507d6c3ea3b6",
+          "encoding": "Opaque Pillow WebP quality 92, method 6",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with Lanczos; assembled an exact 1024x1024 atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-09",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [71.696, 94.527, 34.95],
+            [90.447, 150.181, 67.664],
+            [43.825, 123.531, 83.197],
+            [39.143, 73.075, 49.678]
+          ],
+          "quadrantMaxChannelStddev": [97.675, 87.683, 70.219, 73.907]
+        },
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, palette identity, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry, integration, and lifecycle tests verify the shared five-panel 20-vertex and 30-index overlay, isolated one-texel-inset UV quadrants, mirrored right-sidepod U coordinates, AI-only mesh naming, correct green mapping, one texture load, and explicit geometry, material, and texture disposal. WSL2 headless-Chromium WebGL capture of the four-car Harbour race view confirmed the green livery alongside the blue and orange variants with one active canvas, positive render calls and triangles, all three AI WebP requests loaded, and no page exception or failed asset request. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.ai_orange_formula.livery.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-09",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "The existing generated player formula-car livery atlas was used as the sole edit target and strict layout reference. No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, or stock texture was used as an image input.",
+      "promptIntent": "A palette-only warm-orange 2-by-2 opaque surface-atlas edit for the rear-wing, central spine, and mirrored sidepod upper surfaces of the fictional orange AI formula car.",
+      "promptConstraints": [
+        "Preserve the source atlas's exact four equal edge-to-edge modules, hard center boundaries, panel placement, stripe widths, vents, rivets, carbon weave, symmetry, scale, alignment, and full-bleed crop.",
+        "Recolor only the painted surfaces to warm racing orange centered on #ff9d24, charcoal centered on #171a19, black graphite carbon, restrained off-white highlights, and sparse amber accents.",
+        "No complete car, scene, perspective, shadow, gutter, border, text, letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, recognizable trade dress, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; five merged AI overlay panels use one-texel UV insets and mirrored U mapping on the right sidepod."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module orange AI formula-car livery palette-edit master",
+          "dimensions": [1254, 1254],
+          "bytes": 2182046,
+          "sha256": "da3253fd61a0cce1dd953eeaef900f2f50f80f65d059604a25a4c9fff0df43a9"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "ai-orange-formula-livery-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 155640,
+          "sha256": "e1e00d6ba46949a5234f94fd11a1968b7b78eb302ca7fbef0d100e555f2f06ea",
+          "encoding": "Opaque Pillow WebP quality 92, method 6",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with Lanczos; assembled an exact 1024x1024 atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-09",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [99.466, 88.183, 73.474],
+            [151.438, 121.757, 84.689],
+            [175.848, 106.091, 29.982],
+            [92.279, 64.326, 33.828]
+          ],
+          "quadrantMaxChannelStddev": [99.006, 101.693, 99.253, 97.993]
+        },
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, palette identity, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry, integration, and lifecycle tests verify the shared five-panel 20-vertex and 30-index overlay, isolated one-texel-inset UV quadrants, mirrored right-sidepod U coordinates, AI-only mesh naming, correct orange mapping, one texture load, and explicit geometry, material, and texture disposal. WSL2 headless-Chromium WebGL capture of the four-car Temple race view confirmed the orange livery alongside the blue and green variants with one active canvas, positive render calls and triangles, all three AI WebP requests loaded, and no page exception or failed asset request. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
       "id": "surface.harbour.open_water.ripple_height",
       "revision": 1,
       "sourceType": "generated",

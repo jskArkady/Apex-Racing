@@ -4,6 +4,16 @@ import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useGameStore } from '../store/gameStore'
 import playerFormulaLiveryAtlasUrl from '../assets/textures/player-formula-livery-surface-atlas-1024.webp'
+import aiBlueFormulaLiveryAtlasUrl from '../assets/textures/ai-blue-formula-livery-surface-atlas-1024.webp'
+import aiGreenFormulaLiveryAtlasUrl from '../assets/textures/ai-green-formula-livery-surface-atlas-1024.webp'
+import aiOrangeFormulaLiveryAtlasUrl from '../assets/textures/ai-orange-formula-livery-surface-atlas-1024.webp'
+
+export const FORMULA_LIVERY_ATLASES = Object.freeze({
+  player: Object.freeze({ id: 'player', url: playerFormulaLiveryAtlasUrl }),
+  aiBlue: Object.freeze({ id: 'ai-blue', url: aiBlueFormulaLiveryAtlasUrl }),
+  aiGreen: Object.freeze({ id: 'ai-green', url: aiGreenFormulaLiveryAtlasUrl }),
+  aiOrange: Object.freeze({ id: 'ai-orange', url: aiOrangeFormulaLiveryAtlasUrl }),
+})
 
 const FORMULA_CAR_DIMENSIONS = Object.freeze({
   length: 4.82,
@@ -125,7 +135,7 @@ export const PLAYER_LIVERY_GRAPHICS_LAYOUT = Object.freeze([
   }),
 ])
 
-export function createPlayerLiveryGraphicsGeometry() {
+export function createPlayerLiveryGraphicsGeometry(owner = 'player') {
   const atlasInset = 1 / 1024
   const parts = PLAYER_LIVERY_GRAPHICS_LAYOUT.map(panel => {
     const geometry = new THREE.PlaneGeometry(...panel.size)
@@ -158,7 +168,7 @@ export function createPlayerLiveryGraphicsGeometry() {
   const merged = mergeGeometries(parts)
   for (const geometry of parts) geometry.dispose()
   if (!merged) throw new Error('Player livery graphics geometry could not be merged')
-  merged.name = 'player-formula-livery-graphics-geometry'
+  merged.name = `${owner}-formula-livery-graphics-geometry`
   merged.computeBoundingBox()
   merged.computeBoundingSphere()
   return merged
@@ -358,6 +368,7 @@ export default function FormulaCar({
   color = '#ef3157',
   accent = '#f4f6ef',
   isPlayer = false,
+  liveryAtlas = null,
   rigidBodyRef,
   detail = 'hero',
 }) {
@@ -377,16 +388,17 @@ export default function FormulaCar({
       shadow: `#${primary.clone().lerp(new THREE.Color('#050505'), 0.5).getHexString()}`,
     }
   }, [color])
-  const [playerLiveryAssets, setPlayerLiveryAssets] = useState(null)
+  const resolvedLiveryAtlas = isPlayer ? FORMULA_LIVERY_ATLASES.player : liveryAtlas
+  const [liveryAssets, setLiveryAssets] = useState(null)
 
   useEffect(() => {
-    if (!isPlayer) {
-      setPlayerLiveryAssets(null)
+    if (!resolvedLiveryAtlas) {
+      setLiveryAssets(null)
       return undefined
     }
-    const geometry = createPlayerLiveryGraphicsGeometry()
-    const texture = new THREE.TextureLoader().load(playerFormulaLiveryAtlasUrl)
-    texture.name = 'generated-player-formula-livery-surface-atlas'
+    const geometry = createPlayerLiveryGraphicsGeometry(resolvedLiveryAtlas.id)
+    const texture = new THREE.TextureLoader().load(resolvedLiveryAtlas.url)
+    texture.name = `generated-${resolvedLiveryAtlas.id}-formula-livery-surface-atlas`
     texture.colorSpace = THREE.SRGBColorSpace
     texture.wrapS = THREE.ClampToEdgeWrapping
     texture.wrapT = THREE.ClampToEdgeWrapping
@@ -406,15 +418,15 @@ export default function FormulaCar({
       polygonOffsetFactor: -1,
       polygonOffsetUnits: -1,
     })
-    material.name = 'player-formula-livery-graphics-material'
+    material.name = `${resolvedLiveryAtlas.id}-formula-livery-graphics-material`
     const assets = { geometry, material, texture }
-    setPlayerLiveryAssets(assets)
+    setLiveryAssets(assets)
     return () => {
       assets.geometry.dispose()
       assets.material.dispose()
       assets.texture.dispose()
     }
-  }, [isPlayer])
+  }, [resolvedLiveryAtlas])
 
   useFrame((state, delta) => {
     const gameState = useGameStore.getState().gameState
@@ -544,11 +556,11 @@ export default function FormulaCar({
       >
         <meshPhysicalMaterial color={palette.primary} roughness={0.28} metalness={0.34} clearcoat={0.7} />
       </TaperedShell>
-      {isPlayer && playerLiveryAssets && (
+      {liveryAssets && (
         <mesh
-          name="player-formula-livery-graphics"
-          geometry={playerLiveryAssets.geometry}
-          material={playerLiveryAssets.material}
+          name={isPlayer ? 'player-formula-livery-graphics' : 'ai-formula-livery-graphics'}
+          geometry={liveryAssets.geometry}
+          material={liveryAssets.material}
         />
       )}
 

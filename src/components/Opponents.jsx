@@ -11,7 +11,7 @@ import {
   hasCrossedFinishLine
 } from '../utils/raceLogic'
 import { getStartGridPose } from '../utils/startGrid'
-import FormulaCar from './FormulaCar'
+import FormulaCar, { FORMULA_LIVERY_ATLASES } from './FormulaCar'
 import { isClearlyBelowTrack } from '../utils/drivingGuards'
 import {
   advanceAIMergeDistance,
@@ -66,9 +66,9 @@ const PROJECTION_REFINEMENT_ITERATIONS = 14
 const AI_TRAFFIC_SCAN_DISTANCE = 110
 const wrapProgress = (t) => ((t % 1.0) + 1.0) % 1.0
 const OPPONENT_CONFIG = Object.freeze([
-  Object.freeze({ id: 1, racerId: 'ai_1', color: '#2774ff', accent: '#f4f6ef', laneBias: -0.7, paceScale: 0.985 }),
-  Object.freeze({ id: 2, racerId: 'ai_2', color: '#12b886', accent: '#d7ff42', laneBias: 0.7, paceScale: 1 }),
-  Object.freeze({ id: 3, racerId: 'ai_3', color: '#ff9d24', accent: '#171a19', laneBias: 0, paceScale: 0.97 }),
+  Object.freeze({ id: 1, racerId: 'ai_1', color: '#2774ff', accent: '#f4f6ef', liveryAtlas: FORMULA_LIVERY_ATLASES.aiBlue, laneBias: -0.7, paceScale: 0.985 }),
+  Object.freeze({ id: 2, racerId: 'ai_2', color: '#12b886', accent: '#d7ff42', liveryAtlas: FORMULA_LIVERY_ATLASES.aiGreen, laneBias: 0.7, paceScale: 1 }),
+  Object.freeze({ id: 3, racerId: 'ai_3', color: '#ff9d24', accent: '#171a19', liveryAtlas: FORMULA_LIVERY_ATLASES.aiOrange, laneBias: 0, paceScale: 0.97 }),
 ])
 
 function projectPositionToCurve(curve, curveLength, carPos, estimatedProgress) {
@@ -879,6 +879,7 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
           color={data.color}
           accent={data.accent}
           detail={visualDetail}
+          liveryAtlas={data.liveryAtlas}
           rigidBodyRef={bodyRef}
         />
       </group>

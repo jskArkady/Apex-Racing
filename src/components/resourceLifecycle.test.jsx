@@ -2,7 +2,7 @@ import React from 'react'
 import { render } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import * as THREE from 'three'
-import FormulaCar from './FormulaCar'
+import FormulaCar, { FORMULA_LIVERY_ATLASES } from './FormulaCar'
 import SkyBackdrop from './SkyBackdrop'
 import Track from './Track'
 import { getTrackPreset } from '../utils/trackData'
@@ -460,6 +460,41 @@ describe('owned Three.js resource lifecycle', () => {
     )
     expect(
       view.container.querySelector('[name="player-formula-livery-graphics"]'),
+    ).toBeTruthy()
+
+    const geometryDisposalsBeforeUnmount = geometryDispose.mock.calls.length
+    const materialDisposalsBeforeUnmount = materialDispose.mock.calls.length
+    const textureDisposalsBeforeUnmount = textureDispose.mock.calls.length
+    view.unmount()
+
+    expect(
+      geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount,
+    ).toBe(6)
+    expect(
+      materialDispose.mock.calls.length - materialDisposalsBeforeUnmount,
+    ).toBe(1)
+    expect(
+      textureDispose.mock.calls.length - textureDisposalsBeforeUnmount,
+    ).toBe(1)
+  })
+
+  it.each([
+    ['blue', FORMULA_LIVERY_ATLASES.aiBlue],
+    ['green', FORMULA_LIVERY_ATLASES.aiGreen],
+    ['orange', FORMULA_LIVERY_ATLASES.aiOrange],
+  ])('loads and disposes the generated %s AI livery resources', (color, liveryAtlas) => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const geometryDispose = vi.spyOn(THREE.BufferGeometry.prototype, 'dispose')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const textureDispose = vi.spyOn(THREE.Texture.prototype, 'dispose')
+    const view = render(<FormulaCar detail="race" liveryAtlas={liveryAtlas} />)
+
+    expect(textureLoad).toHaveBeenCalledOnce()
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining(`ai-${color}-formula-livery-surface-atlas-1024.webp`),
+    )
+    expect(
+      view.container.querySelector('[name="ai-formula-livery-graphics"]'),
     ).toBeTruthy()
 
     const geometryDisposalsBeforeUnmount = geometryDispose.mock.calls.length
