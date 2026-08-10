@@ -2279,6 +2279,66 @@
         "reviewedAt": null,
         "notes": "No external human or legal review has been claimed."
       }
+    },
+    {
+      "id": "surface.shared.gantry_structure.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-10",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external gantry, bridge, circuit, racing series, vehicle, sponsor, brand, real-location, industrial-equipment, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque shared structural-surface atlas for every player-visible face of the three start-finish gantries and the three Apex media bridges.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with hard center boundaries, orthographic surface artwork, uniform neutral exposure, and no complete gantry, scene, perspective, gutter, border, shadow, or artwork crossing a split.",
+        "The top row contains a horizontally repeatable X-braced crossbar cell and a vertically repeatable diagonal-braced upright cell; the bottom row contains a horizontally repeatable ribbed cable-tray underside and a bolted service plate for rear, top, side, and end faces.",
+        "Deep graphite, charcoal, gunmetal, galvanized silver, off-white fasteners, and extremely sparse muted amber with no text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsor marks, flags, screens, LED ribbons, signal lenses, floodlights, camera lenses, telemetry, people, vehicles, track, scenery, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; all logical crossbar and upright faces are segmented into atlas-safe panels and merged into one draw surface with one-texel UV insets."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared gantry structural-surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 1975080,
+          "sha256": "62fc7c22537774461968e6fc5ee9e267779d212242e94f9ec2facc3644970a27"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-gantry-structure-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 97706,
+          "sha256": "49d4977d1a2ebe20998606a66c17e83358d9a9824e7e69ba17b84050b1ad8b86",
+          "encoding": "Opaque browser-canvas WebP quality 0.92",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with high-quality browser-canvas resampling; applied a restrained 1.22x plus 8-level RGB tone lift for night readability; assembled an exact 1024x1024 atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-10",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [56.91, 58.17, 60.2],
+            [63.16, 64.14, 65.38],
+            [44.46, 45.28, 46.83],
+            [61.41, 62.48, 64.21]
+          ],
+          "quadrantStddevRgb": [
+            [32.33, 32.84, 33.09],
+            [25.7, 25.68, 24.63],
+            [22.63, 22.68, 22.51],
+            [19.32, 19.07, 18.46]
+          ]
+        },
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, the four requested structural roles, module isolation, readable contrast, text, logos, perspective, gutters, and compression artifacts. Geometry and lifecycle tests verify segmented finite surfaces, outward axis-aligned normals, isolated one-texel-inset UV quadrants, one shared texture load, one material, one merged geometry, explicit disposal across every venue, and corrected display offsets that remain ahead of the structural overlays. The full 562-test regression, lint, production build, and four representative 1440x900 WebGL captures passed. The three start-finish views and one Apex media-bridge view retained their display, signal, and glow layers with no visible z-fighting, atlas bleed, clipping, page exceptions, failed requests, or error responses; the added structure costs one draw call and one texture per venue, with 736 Apex, 188 Harbour, or 196 Temple triangles. One initial Apex capture logged a generic browser resource 404 without a failed request or error response, so it was not attributable to this asset."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
     }
   ]
 }

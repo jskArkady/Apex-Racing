@@ -60,6 +60,21 @@ describe('development visual capture requests', () => {
       expect(request.captureProgress).toBeGreaterThan(0.9)
       expect(request.captureProgress).toBeLessThan(1)
     }
+    const mediaGantryRequest = parseVisualCaptureRequest(
+      '?visualCapture=1&track=apex_gp&view=media-gantry',
+    )
+    expect(mediaGantryRequest).toEqual({
+      trackId: 'apex_gp',
+      view: 'media-gantry',
+      captureProgress: expect.any(Number),
+      targetProgress: 0.245,
+      targetLateral: 0,
+      targetHeight: 4.6,
+    })
+    expect(mediaGantryRequest.captureProgress).toBeCloseTo(0.2287227742109316, 12)
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=harbour_street&view=media-gantry',
+    )).toBeNull()
     expect(parseVisualCaptureRequest('?visualCapture=1&track=unknown&view=start')).toBeNull()
     expect(parseVisualCaptureRequest('?visualCapture=1&track=apex_gp&view=unknown')).toBeNull()
     expect(parseVisualCaptureRequest('?visualCapture=0&track=apex_gp&view=start')).toBeNull()

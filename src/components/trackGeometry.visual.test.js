@@ -28,6 +28,7 @@ import {
   createCircuitSceneryGeometry,
   createCrowdPanelGeometry,
   createGantryDisplayGeometry,
+  createGantryStructureSurfaceGeometry,
   createGrandstandStructureGeometry,
   createHarbourBuildingFacadeGeometry,
   createHarbourMarinaSurfaceGeometry,
@@ -56,8 +57,10 @@ import {
   EDGE_LINE_WIDTH,
   FINISH_LINE_LEVEL,
   GANTRY_DISPLAY_LAYOUTS,
+  GANTRY_STRUCTURE_VARIANTS,
   getCurbSegmentLength,
   getFloodlightPositions,
+  getGantryStructureLayout,
   getBrakingBoardLayout,
   getHarbourTunnelLayout,
   getHarbourTunnelLightingLayout,
@@ -136,6 +139,11 @@ describe('circuit visual geometry', () => {
         createPitComplexStructureGeometry(preset.curve, preset.venue),
         createPitGarageFacadeGeometry(preset.curve, preset.venue),
         createGantryDisplayGeometry(preset.curve, preset.venue),
+        createGantryStructureSurfaceGeometry(
+          preset.curve,
+          preset.venue,
+          preset.roadWidth,
+        ),
         ...(preset.venue === 'apex'
           ? [
             createApexVenueFacadeGeometry(preset.curve),
@@ -212,6 +220,7 @@ describe('circuit visual geometry', () => {
       expect(geometry.boundingBox.max.y).toBeLessThan(7.6)
 
       for (let panel = 0; panel < layouts.length; panel += 1) {
+        expect(layouts[panel].approachOffset).toBe(panel === 0 ? -0.402 : -0.382)
         const tangent = preset.curve
           .getTangentAt(layouts[panel].progress)
           .normalize()
@@ -219,6 +228,108 @@ describe('circuit visual geometry', () => {
         expect(normal.dot(tangent)).toBeLessThan(-0.9)
       }
 
+      geometry.dispose()
+    }
+  })
+
+  it('covers every gantry structure face with segmented atlas-safe surfaces', () => {
+    const atlasInset = 1 / 1024
+    for (const preset of TRACK_PRESETS) {
+      const geometry = createGantryStructureSurfaceGeometry(
+        preset.curve,
+        preset.venue,
+        preset.roadWidth,
+      )
+      const layouts = getGantryStructureLayout(preset.venue, preset.roadWidth)
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+      const variantCounts = [0, 0, 0, 0]
+      let expectedQuads = 0
+      let quadOffset = 0
+
+      for (const layout of layouts) {
+        const [barWidth, barHeight] = layout.crossbar.size
+        const [, postHeight] = layout.post.size
+        const barPanels = Math.ceil(barWidth / 2)
+        const postBaseY = layout.post.centerY - postHeight / 2
+        const postTopY = Math.min(
+          layout.post.centerY + postHeight / 2,
+          layout.crossbar.centerY - barHeight / 2,
+        )
+        const postPanels = Math.ceil((postTopY - postBaseY) / 1)
+        const layoutQuads = barPanels * 4 + 2 + postPanels * 8
+        expectedQuads += layoutQuads
+
+        const tangent = preset.curve.getTangentAt(layout.progress).normalize()
+        const side = new THREE.Vector3().crossVectors(
+          new THREE.Vector3(0, 1, 0),
+          tangent,
+        ).normalize()
+        const axes = [tangent, side, new THREE.Vector3(0, 1, 0)]
+        for (let quad = quadOffset; quad < quadOffset + layoutQuads; quad += 1) {
+          const normal = new THREE.Vector3().fromBufferAttribute(normals, quad * 4)
+          expect(normal.length()).toBeCloseTo(1, 5)
+          expect(Math.max(...axes.map(axis => Math.abs(normal.dot(axis))))).toBeGreaterThan(0.9999)
+        }
+        quadOffset += layoutQuads
+      }
+
+      expect(positions.count).toBe(expectedQuads * 4)
+      expect(normals.count).toBe(positions.count)
+      expect(uvs.count).toBe(positions.count)
+      expect(geometry.getIndex().count).toBe(expectedQuads * 6)
+      expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(uvs.array).every(Number.isFinite)).toBe(true)
+
+      for (let quad = 0; quad < expectedQuads; quad += 1) {
+        const quadUvs = Array.from({ length: 4 }, (_, vertex) => ({
+          u: uvs.getX(quad * 4 + vertex),
+          v: uvs.getY(quad * 4 + vertex),
+        }))
+        const minU = Math.min(...quadUvs.map(uv => uv.u))
+        const maxU = Math.max(...quadUvs.map(uv => uv.u))
+        const minV = Math.min(...quadUvs.map(uv => uv.v))
+        const maxV = Math.max(...quadUvs.map(uv => uv.v))
+        expect(minU).toBeGreaterThanOrEqual(atlasInset)
+        expect(maxU).toBeLessThanOrEqual(1 - atlasInset)
+        expect(minV).toBeGreaterThanOrEqual(atlasInset)
+        expect(maxV).toBeLessThanOrEqual(1 - atlasInset)
+        expect(maxU <= 0.5 - atlasInset || minU >= 0.5 + atlasInset).toBe(true)
+        expect(maxV <= 0.5 - atlasInset || minV >= 0.5 + atlasInset).toBe(true)
+        const column = minU > 0.5 ? 1 : 0
+        const row = minV > 0.5 ? 0 : 1
+        variantCounts[row * 2 + column] += 1
+      }
+
+      const expectedBarPanels = layouts.reduce((sum, layout) => (
+        sum + Math.ceil(layout.crossbar.size[0] / 2)
+      ), 0)
+      const firstLayoutBarPanels = Math.ceil(layouts[0].crossbar.size[0] / 2)
+      const firstPostFrontQuad = firstLayoutBarPanels * 4 + 2
+      expect(
+        uvs.getX(firstPostFrontQuad * 4)
+        + uvs.getX((firstPostFrontQuad + 4) * 4),
+      ).toBeCloseTo(1.5, 6)
+      const expectedPostPanels = layouts.reduce((sum, layout) => {
+        const [, barHeight] = layout.crossbar.size
+        const [, postHeight] = layout.post.size
+        const postBaseY = layout.post.centerY - postHeight / 2
+        const postTopY = Math.min(
+          layout.post.centerY + postHeight / 2,
+          layout.crossbar.centerY - barHeight / 2,
+        )
+        return sum + Math.ceil((postTopY - postBaseY) / 1)
+      }, 0)
+      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.crossbarFront]).toBe(expectedBarPanels)
+      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.upright]).toBe(expectedPostPanels * 4)
+      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.underside]).toBe(expectedBarPanels)
+      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.serviceBackEnd]).toBe(
+        expectedBarPanels * 2 + layouts.length * 2 + expectedPostPanels * 4,
+      )
+      expect(geometry.boundingBox.min.y).toBeCloseTo(0, 5)
+      expect(geometry.boundingBox.max.y).toBeCloseTo(7.562, 5)
       geometry.dispose()
     }
   })

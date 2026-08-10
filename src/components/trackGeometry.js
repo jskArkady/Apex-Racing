@@ -41,6 +41,12 @@ export const TRACKSIDE_OPERATIONS_VARIANTS = Object.freeze({
   pitWallDisplay: 2,
   broadcastCabinet: 3,
 })
+export const GANTRY_STRUCTURE_VARIANTS = Object.freeze({
+  crossbarFront: 0,
+  upright: 1,
+  underside: 2,
+  serviceBackEnd: 3,
+})
 export const FINISH_LINE_LEVEL = 0.134
 export const HARBOUR_TUNNEL_ROOF_CENTER_Y = 6.45
 export const HARBOUR_TUNNEL_ROOF_HEIGHT = 0.42
@@ -478,14 +484,14 @@ export const GANTRY_DISPLAY_LAYOUTS = Object.freeze({
       centerY: 7.28,
       width: 7.2,
       height: 0.48,
-      approachOffset: -0.39,
+      approachOffset: -0.402,
     }),
     ...MEDIA_BRIDGE_PROGRESS.map(progress => Object.freeze({
       progress,
       centerY: 5.5,
       width: 7.2,
       height: 0.54,
-      approachOffset: -0.37,
+      approachOffset: -0.382,
     })),
   ]),
   harbour: Object.freeze([
@@ -494,7 +500,7 @@ export const GANTRY_DISPLAY_LAYOUTS = Object.freeze({
       centerY: 7.28,
       width: 7.2,
       height: 0.48,
-      approachOffset: -0.39,
+      approachOffset: -0.402,
     }),
   ]),
   temple: Object.freeze([
@@ -503,7 +509,7 @@ export const GANTRY_DISPLAY_LAYOUTS = Object.freeze({
       centerY: 7.28,
       width: 7.2,
       height: 0.48,
-      approachOffset: -0.39,
+      approachOffset: -0.402,
     }),
   ]),
 })
@@ -2404,6 +2410,212 @@ export function createGantryDisplayGeometry(curve, venue = 'apex') {
 
   const merged = mergeGeometries(parts)
   for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function getGantryStructureLayout(venue = 'apex', roadWidth = ROAD_WIDTH) {
+  const displays = GANTRY_DISPLAY_LAYOUTS[venue] ?? GANTRY_DISPLAY_LAYOUTS.apex
+  return displays.map(display => {
+    const isStart = display.progress === START_GANTRY_PROGRESS
+    const crossbar = Object.freeze({
+      centerY: isStart ? 7.15 : 5.5,
+      size: Object.freeze([
+        roadWidth + (isStart ? 3.2 : 2.8),
+        isStart ? 0.8 : 0.72,
+        isStart ? 0.72 : 0.68,
+      ]),
+    })
+    const post = Object.freeze({
+      centerY: isStart ? 3.7 : 2.8,
+      size: Object.freeze([
+        isStart ? 0.48 : 0.34,
+        isStart ? 7.4 : 5.6,
+        isStart ? 0.48 : 0.34,
+      ]),
+      laterals: Object.freeze([
+        -roadWidth / 2 - (isStart ? 1.35 : 1.15),
+        roadWidth / 2 + (isStart ? 1.35 : 1.15),
+      ]),
+    })
+    return Object.freeze({
+      kind: isStart ? 'start' : 'media',
+      progress: display.progress,
+      crossbar,
+      post,
+    })
+  })
+}
+
+export function createGantryStructureSurfaceGeometry(
+  curve,
+  venue = 'apex',
+  roadWidth = ROAD_WIDTH,
+) {
+  const atlasInset = 1 / 1024
+  const faceOffset = 0.012
+  const maxCrossbarPanelSpan = 2
+  const maxPostPanelSpan = 1
+  const parts = []
+
+  const remapAtlasQuadrant = (geometry, variant, mirrorU = false) => {
+    const column = variant % 2
+    const row = Math.floor(variant / 2)
+    const minU = column * 0.5 + atlasInset
+    const maxU = (column + 1) * 0.5 - atlasInset
+    const minV = row === 0 ? 0.5 + atlasInset : atlasInset
+    const maxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(
+          minU,
+          maxU,
+          mirrorU ? 1 - uvs.getX(vertex) : uvs.getX(vertex),
+        ),
+        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+  }
+
+  const addPlane = ({
+    center,
+    across,
+    vertical,
+    normal,
+    width,
+    height,
+    variant,
+    mirrorU = false,
+  }) => {
+    const geometry = new THREE.PlaneGeometry(width, height)
+    const matrix = new THREE.Matrix4().makeBasis(across, vertical, normal)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+    remapAtlasQuadrant(geometry, variant, mirrorU)
+    parts.push(geometry)
+  }
+
+  for (const layout of getGantryStructureLayout(venue, roadWidth)) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, layout.progress, point, tangent, side)
+
+    const [barWidth, barHeight, barDepth] = layout.crossbar.size
+    const barCenter = point.clone().addScaledVector(WORLD_UP, layout.crossbar.centerY)
+    const barPanelCount = Math.ceil(barWidth / maxCrossbarPanelSpan)
+    const barPanelWidth = barWidth / barPanelCount
+    for (let panel = 0; panel < barPanelCount; panel += 1) {
+      const lateral = (panel - (barPanelCount - 1) / 2) * barPanelWidth
+      const segmentCenter = barCenter.clone().addScaledVector(side, lateral)
+
+      for (const tangentSign of [-1, 1]) {
+        addPlane({
+          center: segmentCenter.clone().addScaledVector(
+            tangent,
+            tangentSign * (barDepth / 2 + faceOffset),
+          ),
+          across: side.clone().multiplyScalar(tangentSign),
+          vertical: WORLD_UP,
+          normal: tangent.clone().multiplyScalar(tangentSign),
+          width: barPanelWidth,
+          height: barHeight,
+          variant: tangentSign < 0
+            ? GANTRY_STRUCTURE_VARIANTS.crossbarFront
+            : GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+        })
+      }
+
+      for (const verticalSign of [-1, 1]) {
+        addPlane({
+          center: segmentCenter.clone().addScaledVector(
+            WORLD_UP,
+            verticalSign * (barHeight / 2 + faceOffset),
+          ),
+          across: side,
+          vertical: tangent.clone().multiplyScalar(-verticalSign),
+          normal: WORLD_UP.clone().multiplyScalar(verticalSign),
+          width: barPanelWidth,
+          height: barDepth,
+          variant: verticalSign < 0
+            ? GANTRY_STRUCTURE_VARIANTS.underside
+            : GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+        })
+      }
+    }
+
+    for (const sideSign of [-1, 1]) {
+      addPlane({
+        center: barCenter.clone().addScaledVector(
+          side,
+          sideSign * (barWidth / 2 + faceOffset),
+        ),
+        across: tangent.clone().multiplyScalar(-sideSign),
+        vertical: WORLD_UP,
+        normal: side.clone().multiplyScalar(sideSign),
+        width: barDepth,
+        height: barHeight,
+        variant: GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+      })
+    }
+
+    const [postWidth, postHeight, postDepth] = layout.post.size
+    const postBaseY = layout.post.centerY - postHeight / 2
+    const postTopY = Math.min(
+      layout.post.centerY + postHeight / 2,
+      layout.crossbar.centerY - barHeight / 2,
+    )
+    const exposedPostHeight = postTopY - postBaseY
+    const postPanelCount = Math.ceil(exposedPostHeight / maxPostPanelSpan)
+    const postPanelHeight = exposedPostHeight / postPanelCount
+    for (const lateral of layout.post.laterals) {
+      const postBase = point.clone().addScaledVector(side, lateral)
+      for (let panel = 0; panel < postPanelCount; panel += 1) {
+        const centerY = postBaseY + (panel + 0.5) * postPanelHeight
+        const segmentCenter = postBase.clone().addScaledVector(WORLD_UP, centerY)
+
+        for (const tangentSign of [-1, 1]) {
+          addPlane({
+            center: segmentCenter.clone().addScaledVector(
+              tangent,
+              tangentSign * (postDepth / 2 + faceOffset),
+            ),
+            across: side.clone().multiplyScalar(tangentSign),
+            vertical: WORLD_UP,
+            normal: tangent.clone().multiplyScalar(tangentSign),
+            width: postWidth,
+            height: postPanelHeight,
+            variant: GANTRY_STRUCTURE_VARIANTS.upright,
+            mirrorU: panel % 2 === 1,
+          })
+        }
+
+        for (const sideSign of [-1, 1]) {
+          addPlane({
+            center: segmentCenter.clone().addScaledVector(
+              side,
+              sideSign * (postWidth / 2 + faceOffset),
+            ),
+            across: tangent.clone().multiplyScalar(-sideSign),
+            vertical: WORLD_UP,
+            normal: side.clone().multiplyScalar(sideSign),
+            width: postDepth,
+            height: postPanelHeight,
+            variant: GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+          })
+        }
+      }
+    }
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) throw new Error('Gantry structure surface geometry could not be merged')
+  merged.name = 'shared-gantry-structure-surface-geometry'
   merged.computeBoundingBox()
   merged.computeBoundingSphere()
   return merged

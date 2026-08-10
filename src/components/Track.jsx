@@ -34,6 +34,7 @@ import templePitGarageFacadeUrl from '../assets/textures/temple-day-pit-garage-f
 import templeTreeSpriteAtlasUrl from '../assets/textures/temple-tree-sprite-atlas-1024.webp'
 import pitComplexStructureAtlasUrl from '../assets/textures/pit-complex-structure-surface-atlas-1024.webp'
 import sharedBrakingDistanceBoardAtlasUrl from '../assets/textures/shared-braking-distance-board-atlas-1024.webp'
+import sharedGantryStructureAtlasUrl from '../assets/textures/shared-gantry-structure-surface-atlas-1024.webp'
 import sharedPalmTreeSpriteAtlasUrl from '../assets/textures/shared-palm-tree-sprite-atlas-1024.webp'
 import sharedTrackLightingSignalAtlasUrl from '../assets/textures/shared-track-lighting-signal-atlas-1024.webp'
 import sharedTracksideOperationsAtlasUrl from '../assets/textures/shared-trackside-operations-atlas-1024.webp'
@@ -53,6 +54,7 @@ import {
   createCircuitGlowGeometry,
   createCrowdPanelGeometry,
   createGantryDisplayGeometry,
+  createGantryStructureSurfaceGeometry,
   createGrandstandStructureGeometry,
   createHarbourBuildingFacadeGeometry,
   createHarbourMarinaSurfaceGeometry,
@@ -209,6 +211,11 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
     )
     const pitGarageFacadeGeometry = createPitGarageFacadeGeometry(trackCurve, activeTrack.venue)
     const gantryDisplayGeometry = createGantryDisplayGeometry(trackCurve, activeTrack.venue)
+    const gantryStructureSurfaceGeometry = createGantryStructureSurfaceGeometry(
+      trackCurve,
+      activeTrack.venue,
+      roadWidth,
+    )
     const apexVenueFacadeGeometry = activeTrack.venue === 'apex'
       ? createApexVenueFacadeGeometry(trackCurve)
       : null
@@ -393,6 +400,16 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       gantryDisplayTexture.generateMipmaps = true
       gantryDisplayTexture.anisotropy = 2
     }
+    const gantryStructureSurfaceTexture = new THREE.TextureLoader()
+      .load(sharedGantryStructureAtlasUrl)
+    gantryStructureSurfaceTexture.name = 'generated-shared-gantry-structure-surface-atlas'
+    gantryStructureSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+    gantryStructureSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+    gantryStructureSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+    gantryStructureSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+    gantryStructureSurfaceTexture.magFilter = THREE.LinearFilter
+    gantryStructureSurfaceTexture.generateMipmaps = true
+    gantryStructureSurfaceTexture.anisotropy = 4
     const apexVenueFacadeTexture = activeTrack.venue === 'apex'
       ? new THREE.TextureLoader().load(apexVenueFacadeAtlasUrl)
       : null
@@ -628,6 +645,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       pitComplexStructureGeometry,
       pitGarageFacadeGeometry,
       gantryDisplayGeometry,
+      gantryStructureSurfaceGeometry,
       apexVenueFacadeGeometry,
       apexRaceControlFacadeGeometry,
       apexPitStaffBillboardGeometry,
@@ -655,6 +673,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       pitComplexStructureTexture,
       pitGarageFacadeTexture,
       gantryDisplayTexture,
+      gantryStructureSurfaceTexture,
       apexVenueFacadeTexture,
       apexRaceControlFacadeTexture,
       apexPitStaffBillboardTexture,
@@ -771,6 +790,15 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           toneMapped: false,
         })
         : null,
+      gantryStructureSurfaceMaterial: new THREE.MeshStandardMaterial({
+        map: gantryStructureSurfaceTexture,
+        roughness: 0.68,
+        metalness: 0.25,
+        emissive: '#ffffff',
+        emissiveMap: gantryStructureSurfaceTexture,
+        emissiveIntensity: activeTrack.venue === 'apex' ? 0.11 : 0.015,
+        side: THREE.FrontSide,
+      }),
       apexVenueFacadeMaterial: apexVenueFacadeTexture
         ? new THREE.MeshStandardMaterial({
           map: apexVenueFacadeTexture,
@@ -937,6 +965,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.pitComplexStructureGeometry,
       assets.pitGarageFacadeGeometry,
       assets.gantryDisplayGeometry,
+      assets.gantryStructureSurfaceGeometry,
       assets.apexVenueFacadeGeometry,
       assets.apexRaceControlFacadeGeometry,
       assets.apexPitStaffBillboardGeometry,
@@ -964,6 +993,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.pitComplexStructureTexture,
       assets.pitGarageFacadeTexture,
       assets.gantryDisplayTexture,
+      assets.gantryStructureSurfaceTexture,
       assets.apexVenueFacadeTexture,
       assets.apexRaceControlFacadeTexture,
       assets.apexPitStaffBillboardTexture,
@@ -993,6 +1023,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.pitComplexStructureMaterial,
       assets.pitGarageFacadeMaterial,
       assets.gantryDisplayMaterial,
+      assets.gantryStructureSurfaceMaterial,
       assets.apexVenueFacadeMaterial,
       assets.apexRaceControlFacadeMaterial,
       assets.apexPitStaffBillboardMaterial,
@@ -1138,6 +1169,12 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           material={assets.gantryDisplayMaterial}
         />
       )}
+      <mesh
+        name="track-gantry-structure-surfaces"
+        geometry={assets.gantryStructureSurfaceGeometry}
+        material={assets.gantryStructureSurfaceMaterial}
+        receiveShadow
+      />
       {assets.apexVenueFacadeMaterial && (
         <mesh
           name="track-apex-venue-facades"
