@@ -14,8 +14,9 @@ import apexVenueFacadeAtlasUrl from '../assets/textures/apex-night-tower-hospita
 import grandstandStructureAtlasUrl from '../assets/textures/grandstand-structure-surface-atlas-1024.webp'
 import harbourCrowdPanelUrl from '../assets/textures/harbour-day-crowd-panel-1024.webp'
 import harbourGantryDisplayUrl from '../assets/textures/harbour-day-gantry-display-1024.webp'
-import harbourInfieldAlbedoUrl from '../assets/textures/harbour-concrete-infield-albedo-512.webp'
+import harbourInfieldAlbedoUrl from '../assets/textures/harbour-hardscape-infield-albedo-1024.webp'
 import harbourApartmentFacadeAtlasUrl from '../assets/textures/harbour-apartment-facade-atlas-1024.webp'
+import harbourApartmentUpperSurfaceAtlasUrl from '../assets/textures/harbour-apartment-upper-surface-atlas-1024.webp'
 import harbourBarrierAtlasUrl from '../assets/textures/harbour-day-barrier-atlas-1024.webp'
 import harbourMarinaAtlasUrl from '../assets/textures/harbour-marina-quay-promenade-atlas-1024.webp'
 import harbourOpenWaterRippleHeightUrl from '../assets/textures/harbour-open-water-ripple-height-1024.webp'
@@ -25,6 +26,7 @@ import harbourSwimmingPoolAtlasUrl from '../assets/textures/harbour-swimming-poo
 import harbourTunnelCeilingPortalAtlasUrl from '../assets/textures/harbour-tunnel-ceiling-portal-atlas-1024.webp'
 import harbourTunnelWallAtlasUrl from '../assets/textures/harbour-tunnel-wall-atlas-1024.webp'
 import harbourYachtFacadeAtlasUrl from '../assets/textures/harbour-yacht-facade-atlas-1024.webp'
+import harbourYachtUpperSurfaceAtlasUrl from '../assets/textures/harbour-yacht-upper-surface-atlas-1024.webp'
 import templeCrowdPanelUrl from '../assets/textures/temple-day-crowd-panel-1024.webp'
 import templeBarrierAtlasUrl from '../assets/textures/temple-day-barrier-atlas-1024.webp'
 import templeBankingTimingAtlasUrl from '../assets/textures/temple-day-banking-timing-atlas-1024.webp'
@@ -35,6 +37,7 @@ import templeTreeSpriteAtlasUrl from '../assets/textures/temple-tree-sprite-atla
 import pitComplexStructureAtlasUrl from '../assets/textures/pit-complex-structure-surface-atlas-1024.webp'
 import sharedBrakingDistanceBoardAtlasUrl from '../assets/textures/shared-braking-distance-board-atlas-1024.webp'
 import sharedGantryStructureAtlasUrl from '../assets/textures/shared-gantry-structure-surface-atlas-1024.webp'
+import sharedKerbSurfaceAtlasUrl from '../assets/textures/shared-kerb-surface-atlas-1024.webp'
 import sharedPalmTreeSpriteAtlasUrl from '../assets/textures/shared-palm-tree-sprite-atlas-1024.webp'
 import sharedTrackLightingSignalAtlasUrl from '../assets/textures/shared-track-lighting-signal-atlas-1024.webp'
 import sharedTracksideOperationsAtlasUrl from '../assets/textures/shared-trackside-operations-atlas-1024.webp'
@@ -42,6 +45,7 @@ import asphaltAlbedoUrl from '../assets/textures/track-asphalt-albedo-512.webp'
 import { getTrackPreset } from '../utils/trackData'
 import {
   BARRIER_SEGMENTS,
+  createApexGravelRunoffGeometry,
   createApexPitStaffBillboardGeometry,
   createApexRaceControlFacadeGeometry,
   createApexTentCanopyGeometry,
@@ -56,6 +60,7 @@ import {
   createGantryDisplayGeometry,
   createGantryStructureSurfaceGeometry,
   createGrandstandStructureGeometry,
+  createHarbourApartmentUpperSurfaceGeometry,
   createHarbourBuildingFacadeGeometry,
   createHarbourMarinaSurfaceGeometry,
   createHarbourRetainingWallFacadeGeometry,
@@ -63,11 +68,15 @@ import {
   createHarbourTunnelCeilingPortalGeometry,
   createHarbourTunnelWallGeometry,
   createHarbourYachtFacadeGeometry,
+  createHarbourYachtUpperSurfaceGeometry,
+  createKerbSurfaceGeometry,
   createPitComplexStructureGeometry,
   createPitGarageFacadeGeometry,
   createPalmTreeBillboardGeometry,
   createRoadColliderGeometry,
   createRoadGeometry,
+  createTempleGrassVergeGeometry,
+  createTempleGravelRunoffGeometry,
   createTempleTreeBillboardGeometry,
   createTempleVenueFacadeGeometry,
   createTrackLightingGraphicsGeometry,
@@ -75,6 +84,7 @@ import {
   getFloodlightPositions,
   getHarbourTunnelLightingLayout,
   HARBOUR_WATER,
+  INFIELD_ALBEDO_REPEAT,
   ROAD_SEGMENTS,
 } from './trackGeometry'
 
@@ -87,6 +97,11 @@ const INFIELD_ALBEDO_BY_VENUE = Object.freeze({
   apex: apexInfieldAlbedoUrl,
   harbour: harbourInfieldAlbedoUrl,
   temple: templeInfieldAlbedoUrl,
+})
+const INFIELD_ALBEDO_TEXTURE_CONFIG_BY_VENUE = Object.freeze({
+  apex: Object.freeze({ repeat: INFIELD_ALBEDO_REPEAT, anisotropy: 2 }),
+  harbour: Object.freeze({ repeat: 28, anisotropy: 4 }),
+  temple: Object.freeze({ repeat: INFIELD_ALBEDO_REPEAT, anisotropy: 2 }),
 })
 const BARRIER_ATLAS_BY_VENUE = Object.freeze({
   apex: apexBarrierAtlasUrl,
@@ -200,6 +215,11 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       roadWidth,
     )
     const sceneryGeometry = createCircuitSceneryGeometry(trackCurve, activeTrack.venue, roadWidth)
+    const kerbSurfaceGeometry = createKerbSurfaceGeometry(
+      trackCurve,
+      activeTrack.venue,
+      roadWidth,
+    )
     const crowdPanelGeometry = createCrowdPanelGeometry(trackCurve, activeTrack.venue)
     const grandstandStructureGeometry = createGrandstandStructureGeometry(
       trackCurve,
@@ -208,6 +228,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
     const pitComplexStructureGeometry = createPitComplexStructureGeometry(
       trackCurve,
       activeTrack.venue,
+      roadWidth,
     )
     const pitGarageFacadeGeometry = createPitGarageFacadeGeometry(trackCurve, activeTrack.venue)
     const gantryDisplayGeometry = createGantryDisplayGeometry(trackCurve, activeTrack.venue)
@@ -237,6 +258,9 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
     const buildingFacadeGeometry = activeTrack.venue === 'harbour'
       ? createHarbourBuildingFacadeGeometry(trackCurve)
       : null
+    const apartmentUpperSurfaceGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourApartmentUpperSurfaceGeometry(trackCurve)
+      : null
     const retainingWallFacadeGeometry = activeTrack.venue === 'harbour'
       ? createHarbourRetainingWallFacadeGeometry(trackCurve, roadWidth)
       : null
@@ -249,8 +273,20 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
     const yachtFacadeGeometry = activeTrack.venue === 'harbour'
       ? createHarbourYachtFacadeGeometry()
       : null
+    const yachtUpperSurfaceGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourYachtUpperSurfaceGeometry()
+      : null
     const treeBillboardGeometry = activeTrack.venue === 'temple'
       ? createTempleTreeBillboardGeometry(trackCurve)
+      : null
+    const templeGrassVergeGeometry = activeTrack.venue === 'temple'
+      ? createTempleGrassVergeGeometry(trackCurve, roadWidth)
+      : null
+    const templeGravelRunoffGeometry = activeTrack.venue === 'temple'
+      ? createTempleGravelRunoffGeometry(trackCurve, roadWidth)
+      : null
+    const apexGravelRunoffGeometry = activeTrack.venue === 'apex'
+      ? createApexGravelRunoffGeometry(trackCurve, roadWidth)
       : null
     const palmTreeBillboardGeometry = ['apex', 'harbour'].includes(activeTrack.venue)
       ? createPalmTreeBillboardGeometry(trackCurve, activeTrack.venue)
@@ -279,6 +315,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       ? new THREE.TextureLoader().load(infieldAlbedoUrl)
       : null
     if (infieldAlbedoTexture) {
+      const infieldTextureConfig = INFIELD_ALBEDO_TEXTURE_CONFIG_BY_VENUE[activeTrack.venue]
       infieldAlbedoTexture.name = `generated-${activeTrack.venue}-infield-albedo`
       infieldAlbedoTexture.colorSpace = THREE.SRGBColorSpace
       infieldAlbedoTexture.wrapS = THREE.RepeatWrapping
@@ -286,8 +323,37 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       infieldAlbedoTexture.minFilter = THREE.LinearMipmapLinearFilter
       infieldAlbedoTexture.magFilter = THREE.LinearFilter
       infieldAlbedoTexture.generateMipmaps = true
-      infieldAlbedoTexture.anisotropy = 2
-      infieldAlbedoTexture.repeat.set(70, 70)
+      infieldAlbedoTexture.anisotropy = infieldTextureConfig.anisotropy
+      infieldAlbedoTexture.repeat.set(
+        infieldTextureConfig.repeat,
+        infieldTextureConfig.repeat,
+      )
+    }
+    const templeGravelRunoffTexture = activeTrack.venue === 'temple'
+      ? new THREE.TextureLoader().load(apexInfieldAlbedoUrl)
+      : null
+    if (templeGravelRunoffTexture) {
+      templeGravelRunoffTexture.name = 'generated-temple-gravel-runoff-albedo'
+      templeGravelRunoffTexture.colorSpace = THREE.SRGBColorSpace
+      templeGravelRunoffTexture.wrapS = THREE.RepeatWrapping
+      templeGravelRunoffTexture.wrapT = THREE.RepeatWrapping
+      templeGravelRunoffTexture.minFilter = THREE.LinearMipmapLinearFilter
+      templeGravelRunoffTexture.magFilter = THREE.LinearFilter
+      templeGravelRunoffTexture.generateMipmaps = true
+      templeGravelRunoffTexture.anisotropy = 4
+    }
+    const apexGravelRunoffTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexInfieldAlbedoUrl)
+      : null
+    if (apexGravelRunoffTexture) {
+      apexGravelRunoffTexture.name = 'generated-apex-gravel-runoff-albedo'
+      apexGravelRunoffTexture.colorSpace = THREE.SRGBColorSpace
+      apexGravelRunoffTexture.wrapS = THREE.RepeatWrapping
+      apexGravelRunoffTexture.wrapT = THREE.RepeatWrapping
+      apexGravelRunoffTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexGravelRunoffTexture.magFilter = THREE.LinearFilter
+      apexGravelRunoffTexture.generateMipmaps = true
+      apexGravelRunoffTexture.anisotropy = 4
     }
     const barrierAtlasUrl = BARRIER_ATLAS_BY_VENUE[activeTrack.venue]
     const barrierAtlasTexture = barrierAtlasUrl
@@ -336,6 +402,15 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
     trackLightingGraphicsTexture.magFilter = THREE.LinearFilter
     trackLightingGraphicsTexture.generateMipmaps = true
     trackLightingGraphicsTexture.anisotropy = 4
+    const kerbSurfaceTexture = new THREE.TextureLoader().load(sharedKerbSurfaceAtlasUrl)
+    kerbSurfaceTexture.name = 'generated-shared-kerb-surface-atlas'
+    kerbSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+    kerbSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+    kerbSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+    kerbSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+    kerbSurfaceTexture.magFilter = THREE.LinearFilter
+    kerbSurfaceTexture.generateMipmaps = true
+    kerbSurfaceTexture.anisotropy = 4
     const crowdPanelUrl = CROWD_PANEL_BY_VENUE[activeTrack.venue]
     const crowdPanelTexture = crowdPanelUrl
       ? new THREE.TextureLoader().load(crowdPanelUrl)
@@ -501,6 +576,19 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       buildingFacadeTexture.generateMipmaps = true
       buildingFacadeTexture.anisotropy = 4
     }
+    const apartmentUpperSurfaceTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourApartmentUpperSurfaceAtlasUrl)
+      : null
+    if (apartmentUpperSurfaceTexture) {
+      apartmentUpperSurfaceTexture.name = 'generated-harbour-apartment-upper-surface-atlas'
+      apartmentUpperSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      apartmentUpperSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      apartmentUpperSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      apartmentUpperSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apartmentUpperSurfaceTexture.magFilter = THREE.LinearFilter
+      apartmentUpperSurfaceTexture.generateMipmaps = true
+      apartmentUpperSurfaceTexture.anisotropy = 4
+    }
     const retainingWallFacadeTexture = activeTrack.venue === 'harbour'
       ? new THREE.TextureLoader().load(harbourRetainingWallAtlasUrl)
       : null
@@ -567,6 +655,19 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       yachtFacadeTexture.magFilter = THREE.LinearFilter
       yachtFacadeTexture.generateMipmaps = true
       yachtFacadeTexture.anisotropy = 4
+    }
+    const yachtUpperSurfaceTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourYachtUpperSurfaceAtlasUrl)
+      : null
+    if (yachtUpperSurfaceTexture) {
+      yachtUpperSurfaceTexture.name = 'generated-harbour-yacht-upper-surface-atlas'
+      yachtUpperSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      yachtUpperSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      yachtUpperSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      yachtUpperSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      yachtUpperSurfaceTexture.magFilter = THREE.LinearFilter
+      yachtUpperSurfaceTexture.generateMipmaps = true
+      yachtUpperSurfaceTexture.anisotropy = 4
     }
     const treeBillboardTexture = activeTrack.venue === 'temple'
       ? new THREE.TextureLoader().load(templeTreeSpriteAtlasUrl)
@@ -640,6 +741,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       tracksideOperationsGraphicsGeometry,
       trackLightingGraphicsGeometry,
       sceneryGeometry,
+      kerbSurfaceGeometry,
       crowdPanelGeometry,
       grandstandStructureGeometry,
       pitComplexStructureGeometry,
@@ -653,10 +755,15 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       tunnelWallGeometry,
       tunnelCeilingPortalGeometry,
       buildingFacadeGeometry,
+      apartmentUpperSurfaceGeometry,
       retainingWallFacadeGeometry,
       marinaSurfaceGeometry,
       swimmingPoolSurfaceGeometry,
       yachtFacadeGeometry,
+      yachtUpperSurfaceGeometry,
+      templeGrassVergeGeometry,
+      templeGravelRunoffGeometry,
+      apexGravelRunoffGeometry,
       treeBillboardGeometry,
       palmTreeBillboardGeometry,
       templeVenueFacadeGeometry,
@@ -664,10 +771,13 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       catchFenceGeometry,
       asphaltAlbedoTexture,
       infieldAlbedoTexture,
+      templeGravelRunoffTexture,
+      apexGravelRunoffTexture,
       barrierAtlasTexture,
       brakingBoardGraphicsTexture,
       tracksideOperationsGraphicsTexture,
       trackLightingGraphicsTexture,
+      kerbSurfaceTexture,
       crowdPanelTexture,
       grandstandStructureTexture,
       pitComplexStructureTexture,
@@ -681,11 +791,13 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       tunnelWallTexture,
       tunnelCeilingPortalTexture,
       buildingFacadeTexture,
+      apartmentUpperSurfaceTexture,
       retainingWallFacadeTexture,
       marinaSurfaceTexture,
       swimmingPoolSurfaceTexture,
       openWaterRippleTexture,
       yachtFacadeTexture,
+      yachtUpperSurfaceTexture,
       treeBillboardTexture,
       palmTreeBillboardTexture,
       templeVenueFacadeTexture,
@@ -749,6 +861,13 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
         roughness: 0.62,
         metalness: 0.18,
       }),
+      kerbSurfaceMaterial: new THREE.MeshStandardMaterial({
+        map: kerbSurfaceTexture,
+        vertexColors: true,
+        roughness: 0.9,
+        metalness: 0.02,
+        side: THREE.FrontSide,
+      }),
       crowdPanelMaterial: crowdPanelTexture
         ? new THREE.MeshStandardMaterial({
           map: crowdPanelTexture,
@@ -768,6 +887,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       }),
       pitComplexStructureMaterial: new THREE.MeshStandardMaterial({
         map: pitComplexStructureTexture,
+        vertexColors: true,
         roughness: 0.86,
         metalness: 0.08,
         side: THREE.DoubleSide,
@@ -876,6 +996,14 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           side: THREE.DoubleSide,
         })
         : null,
+      apartmentUpperSurfaceMaterial: apartmentUpperSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apartmentUpperSurfaceTexture,
+          roughness: 0.78,
+          metalness: 0.04,
+          side: THREE.FrontSide,
+        })
+        : null,
       retainingWallFacadeMaterial: retainingWallFacadeTexture
         ? new THREE.MeshStandardMaterial({
           map: retainingWallFacadeTexture,
@@ -905,6 +1033,42 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           roughness: 0.64,
           metalness: 0.05,
           side: THREE.DoubleSide,
+        })
+        : null,
+      yachtUpperSurfaceMaterial: yachtUpperSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: yachtUpperSurfaceTexture,
+          roughness: 0.64,
+          metalness: 0.05,
+          vertexColors: true,
+          side: THREE.FrontSide,
+        })
+        : null,
+      templeGrassVergeMaterial: templeGrassVergeGeometry && infieldAlbedoTexture
+        ? new THREE.MeshStandardMaterial({
+          map: infieldAlbedoTexture,
+          vertexColors: true,
+          roughness: 1,
+          metalness: 0,
+          side: THREE.FrontSide,
+        })
+        : null,
+      templeGravelRunoffMaterial: templeGravelRunoffGeometry && templeGravelRunoffTexture
+        ? new THREE.MeshStandardMaterial({
+          map: templeGravelRunoffTexture,
+          vertexColors: true,
+          roughness: 1,
+          metalness: 0,
+          side: THREE.FrontSide,
+        })
+        : null,
+      apexGravelRunoffMaterial: apexGravelRunoffGeometry && apexGravelRunoffTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexGravelRunoffTexture,
+          vertexColors: true,
+          roughness: 1,
+          metalness: 0,
+          side: THREE.FrontSide,
         })
         : null,
       treeBillboardMaterial: treeBillboardTexture
@@ -960,6 +1124,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.tracksideOperationsGraphicsGeometry,
       assets.trackLightingGraphicsGeometry,
       assets.sceneryGeometry,
+      assets.kerbSurfaceGeometry,
       assets.crowdPanelGeometry,
       assets.grandstandStructureGeometry,
       assets.pitComplexStructureGeometry,
@@ -973,10 +1138,15 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.tunnelWallGeometry,
       assets.tunnelCeilingPortalGeometry,
       assets.buildingFacadeGeometry,
+      assets.apartmentUpperSurfaceGeometry,
       assets.retainingWallFacadeGeometry,
       assets.marinaSurfaceGeometry,
       assets.swimmingPoolSurfaceGeometry,
       assets.yachtFacadeGeometry,
+      assets.yachtUpperSurfaceGeometry,
+      assets.templeGrassVergeGeometry,
+      assets.templeGravelRunoffGeometry,
+      assets.apexGravelRunoffGeometry,
       assets.treeBillboardGeometry,
       assets.palmTreeBillboardGeometry,
       assets.templeVenueFacadeGeometry,
@@ -984,10 +1154,13 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.catchFenceGeometry,
       assets.asphaltAlbedoTexture,
       assets.infieldAlbedoTexture,
+      assets.templeGravelRunoffTexture,
+      assets.apexGravelRunoffTexture,
       assets.barrierAtlasTexture,
       assets.brakingBoardGraphicsTexture,
       assets.tracksideOperationsGraphicsTexture,
       assets.trackLightingGraphicsTexture,
+      assets.kerbSurfaceTexture,
       assets.crowdPanelTexture,
       assets.grandstandStructureTexture,
       assets.pitComplexStructureTexture,
@@ -1001,11 +1174,13 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.tunnelWallTexture,
       assets.tunnelCeilingPortalTexture,
       assets.buildingFacadeTexture,
+      assets.apartmentUpperSurfaceTexture,
       assets.retainingWallFacadeTexture,
       assets.marinaSurfaceTexture,
       assets.swimmingPoolSurfaceTexture,
       assets.openWaterRippleTexture,
       assets.yachtFacadeTexture,
+      assets.yachtUpperSurfaceTexture,
       assets.treeBillboardTexture,
       assets.palmTreeBillboardTexture,
       assets.templeVenueFacadeTexture,
@@ -1018,6 +1193,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.tracksideOperationsGraphicsMaterial,
       assets.trackLightingGraphicsMaterial,
       assets.sceneryMaterial,
+      assets.kerbSurfaceMaterial,
       assets.crowdPanelMaterial,
       assets.grandstandStructureMaterial,
       assets.pitComplexStructureMaterial,
@@ -1031,10 +1207,15 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.tunnelWallMaterial,
       assets.tunnelCeilingPortalMaterial,
       assets.buildingFacadeMaterial,
+      assets.apartmentUpperSurfaceMaterial,
       assets.retainingWallFacadeMaterial,
       assets.marinaSurfaceMaterial,
       assets.swimmingPoolSurfaceMaterial,
       assets.yachtFacadeMaterial,
+      assets.yachtUpperSurfaceMaterial,
+      assets.templeGrassVergeMaterial,
+      assets.templeGravelRunoffMaterial,
+      assets.apexGravelRunoffMaterial,
       assets.treeBillboardMaterial,
       assets.palmTreeBillboardMaterial,
       assets.templeVenueFacadeMaterial,
@@ -1110,13 +1291,44 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
         )}
       </RigidBody>
 
-      {/* All kerbs, paint, buildings, stands and light structures share one draw call. */}
+      {/* Paint, buildings, stands and light structures share one scenery draw call. */}
       <mesh
         geometry={assets.sceneryGeometry}
         material={assets.sceneryMaterial}
         castShadow={activeGraphicsQuality === 'high'}
         receiveShadow
       />
+      <mesh
+        name="track-kerb-surfaces"
+        geometry={assets.kerbSurfaceGeometry}
+        material={assets.kerbSurfaceMaterial}
+        castShadow={activeGraphicsQuality === 'high'}
+        receiveShadow
+      />
+      {assets.templeGrassVergeMaterial && (
+        <mesh
+          name="track-temple-grass-verges"
+          geometry={assets.templeGrassVergeGeometry}
+          material={assets.templeGrassVergeMaterial}
+          receiveShadow
+        />
+      )}
+      {assets.templeGravelRunoffMaterial && (
+        <mesh
+          name="track-temple-gravel-runoff"
+          geometry={assets.templeGravelRunoffGeometry}
+          material={assets.templeGravelRunoffMaterial}
+          receiveShadow
+        />
+      )}
+      {assets.apexGravelRunoffMaterial && (
+        <mesh
+          name="track-apex-gravel-runoff"
+          geometry={assets.apexGravelRunoffGeometry}
+          material={assets.apexGravelRunoffMaterial}
+          receiveShadow
+        />
+      )}
       {assets.crowdPanelMaterial && (
         <mesh
           name="track-crowd-panels"
@@ -1231,6 +1443,15 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           receiveShadow
         />
       )}
+      {assets.apartmentUpperSurfaceMaterial && (
+        <mesh
+          name="track-harbour-apartment-upper-surfaces"
+          geometry={assets.apartmentUpperSurfaceGeometry}
+          material={assets.apartmentUpperSurfaceMaterial}
+          castShadow={activeGraphicsQuality === 'high'}
+          receiveShadow
+        />
+      )}
       {assets.retainingWallFacadeMaterial && (
         <mesh
           name="track-harbour-retaining-wall-facades"
@@ -1259,6 +1480,14 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           name="track-harbour-yacht-facades"
           geometry={assets.yachtFacadeGeometry}
           material={assets.yachtFacadeMaterial}
+          receiveShadow
+        />
+      )}
+      {assets.yachtUpperSurfaceMaterial && (
+        <mesh
+          name="track-harbour-yacht-upper-surfaces"
+          geometry={assets.yachtUpperSurfaceGeometry}
+          material={assets.yachtUpperSurfaceMaterial}
           receiveShadow
         />
       )}

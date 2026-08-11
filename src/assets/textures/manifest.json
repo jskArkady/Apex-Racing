@@ -86,14 +86,14 @@
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-07-30",
+        "reviewedAt": "2026-08-11",
         "metrics": {
           "meanLuminance": 220.32,
           "luminanceStdDev": 7.9,
           "leftRightEdgeMae": 3,
           "topBottomEdgeMae": 3.25
         },
-        "notes": "Metrics were measured from the decoded final WebP. The 3x3 tiled preview was visually inspected for borders, large-scale repetition, directional patterns, text, markings, and compression artifacts. No blocking issue was found."
+        "notes": "Metrics were measured from the decoded final WebP. The 3x3 tiled preview was visually inspected for borders, large-scale repetition, directional patterns, text, markings, and compression artifacts. The same generated fine-gravel tile is now reused on all 91 Apex corner-runoff blocks, six 75-metre Apex pit-straight apron bands, and 78 Temple corner-runoff blocks. Apex uses one 2,328-vertex, 3,492-index, 1,164-triangle geometry and its own material/texture/draw path; Temple retains one 1,872-vertex, 2,808-index, 936-triangle geometry and its own material/texture/draw path. The original flat-colour boxes were removed from each venue's scenery geometry, and exhaustive geometry tests verify the exact seven- or six-corner by thirteen-stripe layouts, the six frozen pit-straight bands, outward winding, finite bounds, venue tints, a consistent 1.5-metre physical UV scale on every box face, and invariant combined topology. WSL2 headless Chrome WebGL captures cover the established Temple kerb and gravel chase views, a dedicated Apex first-corner chase at 1440x900 and 3840x2160, and an Apex pit-straight chase. The Apex corner captures retained one WebGL canvas, a visible player car, 145 render calls, 63,900 submitted triangles, 129 geometries and 24 textures, with restrained fine-gravel variation, clean boundaries, no obvious tile repetition, z-fighting or clipping, zero page exceptions, zero request failures and zero HTTP error responses. One generic development resource-404 console line had no matching failed request or error response and was not attributable to this asset. No blocking issue was found."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -103,47 +103,51 @@
     },
     {
       "id": "surface.harbour.infield.albedo",
-      "revision": 1,
+      "revision": 2,
       "sourceType": "generated",
-      "generatedAt": "2026-07-30",
+      "generatedAt": "2026-08-11",
       "tool": "OpenAI built-in imagegen",
       "model": "built-in default (not exposed)",
       "seed": null,
-      "referencePolicy": "No external city, concrete, circuit, road, brand, vehicle, F1, FIA, sponsor, or stock photography was used as an image input.",
-      "promptIntent": "Strictly top-down, high-key salt-weathered fine-aggregate service concrete; intended as a tintable repeating Three.js urban infield albedo without joints, baked light, or identifiable markings.",
+      "referencePolicy": "No external harbour, city, circuit, concrete, paving, road, vehicle, brand, sponsor, real-location, or stock-texture image was used as an image input. The earlier local Harbour infield derivative was inspected for runtime scale and contrast but was not supplied to the image model.",
+      "promptIntent": "A strict top-down, edge-to-edge Mediterranean harbour hardscape albedo with medium-scale slab rhythm, expansion joints, restrained repaired seams, aggregate, salt weathering, utility-cover details, and faint tire-scuff haze for the broad player-visible Harbour infield.",
       "promptConstraints": [
-        "No slab joints, seams, cracks, drains, grates, manholes, markings, kerbs, footprints, tire tracks, oil, rust, puddles, moss, litter, text, logos, flags, watermarks, or UI.",
-        "No perspective, horizon, directional light, reflections, vignette, obvious focal point, directional pattern, or identifiable real-city or real-circuit surface.",
-        "The runtime derivative must remain low-contrast, power-of-two, and visually seamless when repeated."
+        "Strict orthographic top-down flat albedo with warm pale-gray concrete, large irregular slab divisions, fine aggregate, salt-weathered tonal patches, restrained repaired seams, sparse embedded utility covers, and subtle tire-scuff haze.",
+        "No perspective, horizon, directional light, cast shadow, ambient occlusion, reflection, vignette, water, curb, barrier, vehicle, person, building, vegetation, litter, text, pseudo-text, logo, brand, sponsor, flag, UI, or watermark.",
+        "The runtime derivative must be exact opaque RGB 1024-by-1024 WebP, retain the source's unique central detail, and blend opposing outer edges gradually enough to repeat without a visible border or mirrored four-way focal pattern."
       ],
       "sources": [
         {
-          "role": "generated texture master",
+          "role": "generated Harbour hardscape infield albedo master",
           "dimensions": [1254, 1254],
-          "bytes": 2988425,
-          "sha256": "16bb24f0bbea2572b7ca71b6b119b62c1fa80318058549442d2682c632c1d88a"
+          "bytes": 3131321,
+          "sha256": "2a24fa980fca233db3ad90567849d4179c31ac44d72543ffac5577c2c6d7e706"
         }
       ],
       "derivatives": [
         {
-          "file": "harbour-concrete-infield-albedo-512.webp",
-          "dimensions": [512, 512],
-          "bytes": 49804,
-          "sha256": "13b098356ffdf20d14596e5d5df9b3a2300b693e02504239b9d34c653953c03e",
-          "encoding": "WebP quality 82, method 6",
-          "processing": "Stripped of low-frequency luminance variation with a Gaussian high-pass, normalized around RGB 223/225/224, mirror-synthesized into a power-of-two periodic tile, and downscaled with Lanczos."
+          "file": "harbour-hardscape-infield-albedo-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 315444,
+          "sha256": "620cec1a529d6e54f895a6271cd19bf3f8902ff651f5931737deaa5f1a7f0832",
+          "encoding": "Opaque browser-canvas WebP quality 0.92",
+          "processing": "Resized the complete 1254-by-1254 RGB source to 1024-by-1024 with high-quality browser-canvas resampling, then cross-blended opposing pixels over the outer 160 pixels in both axes while retaining the central 704-by-704 region unchanged; this avoids the rejected mirrored four-quadrant repetition while making the borders periodic."
         }
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-07-30",
+        "reviewedAt": "2026-08-11",
         "metrics": {
-          "meanLuminance": 224.75,
-          "luminanceStdDev": 7.78,
-          "leftRightEdgeMae": 2.59,
-          "topBottomEdgeMae": 2.81
+          "meanLuminance": 163.323,
+          "luminanceStdDev": 8.996,
+          "minimumLuminance": 53.051,
+          "maximumLuminance": 216.758,
+          "leftRightEdgeMae": 1.445,
+          "topBottomEdgeMae": 1.572,
+          "alphaMinimum": 255,
+          "alphaMaximum": 255
         },
-        "notes": "Metrics were measured from the decoded final WebP. The 3x3 tiled preview was visually inspected for borders, large-scale repetition, directional patterns, text, markings, and compression artifacts. No blocking issue was found."
+        "notes": "The decoded derivative and 3-by-3 tiled preview were inspected for exact dimensions, full opacity, readable slab rhythm, opposing-edge continuity, compression artifacts, text, logos, directional lighting, and the rejected candidate's obvious mirrored four-way symmetry. Runtime integration replaces the former 512-pixel fine-concrete tile without adding a texture, geometry, material, or draw call; Harbour alone uses a 28-by-28 repeat and anisotropy 4 while Apex and Temple retain their established 70-by-70 repeat and anisotropy 2. Final WSL2 Chrome WebGL QA covered Harbour and yacht landmark views, a real stationary yacht-chase camera with the player car visible, and a 3840-by-2160 Harbour capture. The medium-scale joints, aggregate, salt wear, and repairs remained legible across the broad infield with no visible tile boundary, mirrored focal pattern, z-fighting, clipping, water or promenade regression, page exception, failed request, or HTTP error response. Captures retained one WebGL canvas and positive render calls; a generic console 404 had no matching failed request or error response and was not attributable to this asset. The focused 24-test lifecycle suite, full 61-file 576-test regression, repository oxlint, 670-module production build, all 53 manifest derivative byte-and-hash checks, git diff whitespace check, and an independent requirement-and-diff review passed."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -153,7 +157,7 @@
     },
     {
       "id": "surface.temple.infield.albedo",
-      "revision": 1,
+      "revision": 2,
       "sourceType": "generated",
       "generatedAt": "2026-07-30",
       "tool": "OpenAI built-in imagegen",
@@ -186,14 +190,14 @@
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-07-30",
+        "reviewedAt": "2026-08-11",
         "metrics": {
           "meanLuminance": 225.2,
           "luminanceStdDev": 7.89,
           "leftRightEdgeMae": 3.03,
           "topBottomEdgeMae": 3.52
         },
-        "notes": "Metrics were measured from the decoded final WebP. The 3x3 tiled preview was visually inspected for borders, large-scale repetition, directional patterns, text, markings, and compression artifacts. No blocking issue was found."
+        "notes": "Metrics were measured from the decoded final WebP. The 3x3 tiled preview was visually inspected for borders, large-scale repetition, directional patterns, text, markings, and compression artifacts. On 2026-08-11 the same generated turf was additionally reused for both full-lap Temple grass verges instead of loading or generating a duplicate image. The two exact former scenery ribbons were moved into one named 696-vertex, 2,076-index, 692-triangle geometry with the original green tint, upward normals, corrected outward winding through tight offset curves, 12-metre physical tile scale, distinct side phases, one shared material, no extra texture load, and explicit geometry and material disposal. Geometry and lifecycle tests verify that scenery-plus-verge topology remains unchanged, the existing 70-by-70 infield texture transform is compensated in UV space, and Temple-only ownership adds one geometry and one material while texture counts stay fixed. Identical 1440-by-900 before/after and 3840-by-2160 WSL2 Chrome player-chase captures at progress 0.695 retained one WebGL canvas, a visible player car, zero page exceptions, zero failed requests, zero HTTP error responses, unchanged 22-texture usage, and the expected one-call/one-geometry increase; removing the flat verge from the scenery shadow pass reduced submitted triangles from 56,014 to 55,322 without changing visible topology. The focused 116-test set, full 61-file 570-test regression suite, affected-file oxlint, 664-module production build, manifest parse, and diff check passed. Each first browser page logged one generic resource 404 console line without a matching failed request or error response, so it was not attributable to this asset. No blocking issue was found."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -1408,19 +1412,19 @@
     },
     {
       "id": "surface.temple.banking_timing.atlas",
-      "revision": 1,
+      "revision": 2,
       "sourceType": "generated",
       "generatedAt": "2026-08-03",
       "tool": "OpenAI built-in imagegen",
       "model": "built-in default (not exposed)",
       "seed": null,
       "referencePolicy": "No external banking, timing tower, parkland circuit, brand, vehicle, F1, FIA, sponsor, Monza, real-location image, or stock photography was used as an image input.",
-      "promptIntent": "A strict 2-by-2 atlas containing a straight-on historic concrete banking fascia/pier module, an orthographic concrete soffit module, and two straight-on red/cream timing-tower facade modules; intended for every player-visible surface of the fictional Temple banking flyover and all four sides of its timing tower.",
+      "promptIntent": "A strict 2-by-2 atlas containing a straight-on historic concrete banking fascia/pier module, an orthographic concrete soffit module, and two straight-on red/cream timing-tower facade modules; intended for every player-visible surface of the fictional Temple banking flyover, all four sides of its timing tower, and all six faces of the projecting glass curtain box.",
       "promptConstraints": [
         "Exactly four equal square modules in a 2-by-2 grid with hard center boundaries and no element crossing a split; the top-left is a warm-gray concrete fascia/pier elevation, the top-right is a coordinated coffered soffit, and the bottom row contains two red/cream timing-tower facade variants.",
         "Every module fills its quadrant edge-to-edge with exact straight-on or orthographic projection, maintained materials, precise formwork seams, restrained joint moss, dark graphite-green glazing, and no surrounding environment.",
         "No perspective, sky, ground, road, racetrack, forest, neighboring structures, rooftop view, vehicles, people, silhouettes, flags, text, letters, numbers, symbols, arrows, logos, trademarks, sponsor marks, advertisements, UI, watermark, or recognizable real-world landmark.",
-        "The runtime derivative must remain opaque and power-of-two; twenty-six banking faces use the top atlas row and all four timing-tower sides use the bottom row with one-texel UV insets."
+        "The runtime derivative must remain opaque and power-of-two; twenty-six banking faces use the top atlas row while four timing-tower body sides and six projecting glass-curtain faces use the bottom row with one-texel UV isolation and centered physical-aspect crops on the thin curtain ends, top, and underside."
       ],
       "sources": [
         {
@@ -1451,7 +1455,7 @@
           "nearWhitePercent": 0,
           "nearBlackPercent": 0.114
         },
-        "notes": "The decoded derivative was inspected for exact quadrant separation, projection consistency, blank borders, text, symbols, logos, unintended transparency, collapsed coffer/window detail, and compression artifacts. Headless WebGL captures of the Temple Banking and Start landmark views confirmed concrete fascia, coffer and support detail plus red/cream timing-tower glazing, one active 1440x900 canvas, visible capture targets, and zero page exceptions. Geometry tests independently verified all twenty-six banking surfaces and four timing-tower sides use the intended atlas rows and soffit columns with one-texel insets. No blocking issue was found."
+        "notes": "The decoded derivative was inspected for exact quadrant separation, projection consistency, blank borders, text, symbols, logos, unintended transparency, collapsed coffer/window detail, and compression artifacts. Geometry tests now verify 36 finite surfaces: all 26 banking faces, four timing-tower body sides, and the top, underside, two long sides, and two short ends of the projecting glass curtain. The thin curtain faces preserve physical aspect inside isolated bottom-row modules, every triangle has FrontSide winding aligned with its outward normal, and the original glass box was removed from scenery so triangle topology remains invariant. Final 1440x900 and 3840x2160 real chase-camera captures kept the full tower, curtain, floor bands, and cap in frame with one WebGL canvas, a visible player car, 146 calls, 55,248 triangles, 131 geometries, and 26 textures. No z-fighting, adjacent-quadrant bleed, clipping, backface loss, page exception, failed request, or HTTP error response was found. The focused 118-test set, full 61-file 579-test regression, repository oxlint, 670-module production build, all 53 manifest derivative byte-and-hash checks, and diff checks passed. One generic development resource-404 console line had no matching failed request or error response and was not attributable to this asset."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -1567,7 +1571,7 @@
     },
     {
       "id": "surface.shared.pit_complex_structure.atlas",
-      "revision": 1,
+      "revision": 3,
       "sourceType": "generated",
       "generatedAt": "2026-08-03",
       "tool": "OpenAI built-in imagegen",
@@ -1579,7 +1583,8 @@
         "Exactly four equal square modules in a 2-by-2 grid with hard center boundaries and no element crossing a split; the top row contains service-facade and concrete end-wall modules while the bottom row contains roof-top and canopy-underside modules.",
         "Every module fills its quadrant edge-to-edge with exact straight-on or orthographic projection, straight axis-aligned seams, even neutral diffuse light, graphite modular cladding, warm-gray concrete, galvanized joints, roof membrane, drainage channels, ribbed metal soffit, and shallow beams.",
         "No perspective, stadium or paddock scene, racetrack, sky, ground, people, pit crew, drivers, silhouettes, vehicles, tools, furniture, flags, screens, numbers, text, letters, symbols, arrows, logos, trademarks, sponsor marks, advertisements, UI, watermark, or recognizable real-world team or venue.",
-        "The runtime derivative must remain opaque and power-of-two; segmented long faces preserve material scale and all 140 major exposed building, roof, soffit, end-wall, rear-wall, and Apex pit-wall faces use role-specific quadrants with one-texel UV insets."
+        "The runtime derivative must remain opaque and power-of-two; segmented long faces preserve material scale and all 140 major exposed building, roof, soffit, end-wall, rear-wall, and Apex pit-wall faces use role-specific quadrants with one-texel UV insets.",
+        "Runtime reuse adds the top, underside, four fascia and end faces of all five Apex marshal-post roof caps, the Temple timing-tower cap, and all five Temple timing-tower floor bands to the same geometry and material, using venue-specific vertex tints while removing the original solid-colour boxes."
       ],
       "sources": [
         {
@@ -1601,7 +1606,7 @@
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-08-03",
+        "reviewedAt": "2026-08-11",
         "metrics": {
           "meanLuminance": 136.11,
           "luminanceStdDev": 58.62,
@@ -1610,7 +1615,7 @@
           "nearWhitePercent": 0,
           "nearBlackPercent": 0.226
         },
-        "notes": "The decoded derivative was inspected for exact quadrant separation, orthographic and front projection, blank borders, doors or shutters in the roof modules, people, text, symbols, logos, unintended transparency, collapsed structural detail, and compression artifacts. Geometry tests verified all 140 major non-ground-facing pit-building, roof, soffit, end-wall, rear-wall, and Apex pit-wall faces use their role-specific atlas quadrants with one-texel UV insets and segmented long spans. WSL2 headless Chrome WebGL captures of all three pit complexes plus a low-angle Harbour soffit view at 1440x900 confirmed the new roof, ribbed underside, end-wall, facade and pit-wall materials coexist with the existing garage fronts, with one active canvas, visible targets, and zero console, page, or network failures. No blocking issue was found."
+        "notes": "The decoded derivative was inspected for exact quadrant separation, orthographic and front projection, blank borders, doors or shutters in the roof modules, people, text, symbols, logos, unintended transparency, collapsed structural detail, and compression artifacts. Geometry tests now verify 206 generated surfaces: the original 140 major non-ground-facing pit-building, roof, soffit, end-wall, rear-wall, and Apex pit-wall faces, all 30 faces of five Apex marshal-post roof caps, all six faces of the Temple timing-tower cap, and all 30 faces of its five floor bands. Every face uses a role-specific atlas quadrant with one-texel UV insets; the original 132 cap, roof, and floor-band triangles were removed from scenery and replaced by the same 132 triangles in the pit-structure geometry. Red, cream, and warm-white vertex tints preserve venue identity, and combined topology remains invariant without another texture, material, geometry object, or draw call. Existing all-venue pit-complex, Harbour soffit, and Apex marshal-post captures remain valid. Final Temple real chase-camera captures at 1440x900 and 3840x2160 kept the full tower, glass curtain, five textured floor bands, and cap in frame with one canvas, a visible car, 146 calls, 55,248 triangles, 131 geometries, and 26 textures. No capture showed z-fighting, atlas bleed, clipping, page exception, request failure, or HTTP error response. The focused 118-test set, full 61-file 579-test regression, repository oxlint, 670-module production build, all 53 manifest derivative byte-and-hash checks, and diff checks passed. One generic development resource-404 console line had no matching failed request or error response and was not attributable to this asset."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -1730,7 +1735,7 @@
     },
     {
       "id": "surface.apex.tent_canopy.atlas",
-      "revision": 1,
+      "revision": 2,
       "sourceType": "generated",
       "generatedAt": "2026-08-03",
       "tool": "OpenAI built-in imagegen",
@@ -1742,7 +1747,8 @@
         "Exactly four equal edge-to-edge square modules in a 2-by-2 grid, presented as flat orthographic material samples rather than tent objects or a scene.",
         "The modules are warm ivory canvas with graphite seams, midnight-navy canvas with restrained gold piping, crimson-and-ivory broad panels, and off-white canvas with graphite support-tape bands and restrained gold accents.",
         "Matte weather-resistant tension fabric with readable straight bands, subtle weave and stitching, even neutral reference lighting, and no transparency, borders, gutters, padding, perspective, radial folds, converging lines, objects, logos, brands, sponsor marks, text, symbols, UI, or watermark.",
-        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 atlas module so mip-safe UV insets cannot sample an adjacent design; all nine former solid-colour pyramid roofs must use one atlas quadrant apiece."
+        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 atlas module so mip-safe UV insets cannot sample an adjacent design; all nine former solid-colour pyramid roofs must use one atlas quadrant apiece.",
+        "Subsequent runtime reuse must preserve the original fabric modules while replacing the eight tower-crown cones and four hospitality roof-cap boxes at their original dimensions in the same generated-surface draw call, with no duplicate solid-colour geometry underneath."
       ],
       "sources": [
         {
@@ -1764,7 +1770,7 @@
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-08-03",
+        "reviewedAt": "2026-08-10",
         "metrics": {
           "quadrantDimensions": [512, 512],
           "quadrantMeanRgb": [
@@ -1775,7 +1781,7 @@
           ],
           "quadrantMaxChannelStddev": [22.304, 22.628, 87.729, 81.505]
         },
-        "notes": "The decoded RGB derivative was inspected for exact quadrant boundaries, four distinct edge-to-edge fabric designs, straight material-detail alignment, adequate mid-scale contrast, text, logos, trademarks, unwanted objects, perspective, gutters, and compression artifacts. Geometry tests verified all nine former solid-colour four-sided canopy roofs preserve their positions and dimensions while using one atlas quadrant apiece with one-texel UV insets. WSL2 headless Chrome WebGL captures of the full canopy row, close pass, reverse view, and the standard player chase composition at 1440x900 confirmed readable fabric patterns, natural night brightness, coherent roofline repetition, no adjacent-module bleed, one active canvas, visible capture targets, and zero console errors, page exceptions, or network failures. Existing Three.js and Rapier deprecation warnings remain unrelated. No blocking issue was found."
+        "notes": "The decoded RGB derivative was inspected for exact quadrant boundaries, four distinct edge-to-edge fabric designs, straight material-detail alignment, adequate mid-scale contrast, text, logos, trademarks, unwanted objects, perspective, gutters, and compression artifacts. The original nine main-straight tent canopies remain unchanged. Runtime reuse now replaces eight former solid-colour ten-sided tower-crown cones and four full hospitality roof-cap boxes with the same generated atlas inside the existing canopy mesh, so texture, material, geometry-object, draw-call, and total triangle counts remain unchanged and no coplanar solid geometry remains underneath. Geometry tests verified 611 finite vertices, 840 indices, outward winding, exact dimensions, frozen layouts, per-part one-texel UV insets, isolated atlas quadrants, and bounds covering all 21 canopy and roof objects. WSL2 headless Chrome WebGL captures at 1440x900 and 3840x2160 covered the tower landmark, a stationary real chase tower view, a raised high-speed-equivalent hospitality chase view, and an independently driven roughly 150 km/h race view. They confirmed readable crown seams, intact roof caps, natural night brightness, no z-fighting, adjacent-module bleed, clipping, backface loss, page exceptions, request failures, or error responses; the independently driven before-and-after frames retained identical calls, triangles, geometries, and textures. The targeted 69-test geometry/lifecycle/capture set, full 61-file 564-test suite, oxlint, production build, manifest parse, and diff check passed on 2026-08-10. Existing generic development resource-404 console noise and Three.js/Rapier deprecation warnings remain unrelated. No blocking issue was found."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -1797,7 +1803,7 @@
         "Exactly four equal edge-to-edge square sign-face modules in a 2-by-2 grid, presented as flat orthographic printed artwork rather than physical sign objects or a scene.",
         "The top-left module contains exactly 150, the top-right exactly 100, the bottom-left exactly 50, and the bottom-right contains only broad restrained red-and-graphite diagonal safety stripes without text or symbols.",
         "Large centered black condensed sans-serif digits, warm-white retroreflective backing, evenly inset narrow safety-red border, strong at-speed contrast, subtle laminate grain, and no extra characters, units, letters, punctuation, logos, brands, sponsor marks, emblems, perspective, bevels, shadows, background scene, UI, or watermark.",
-        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 module; the 150, 100, and 50 modules must appear 48, 32, and 16 world metres before every configured major corner, preserving the existing board bodies and posts."
+        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 module; the 150, 100, and 50 modules must appear 48, 32, and 16 world metres before every configured major corner, while the safety-stripe module covers every non-approach body face and preserves the existing board bodies and posts."
       ],
       "sources": [
         {
@@ -1830,7 +1836,7 @@
           ],
           "quadrantMaxChannelStddev": [100.797, 101.235, 97.239, 72.636]
         },
-        "notes": "The decoded RGB derivative was inspected for exact 150, 100, and 50 digit sequences, one occurrence per numbered module, correct module placement, clear condensed numeral forms, centered alignment, intact red borders, exact quadrant boundaries, strong contrast, extra characters, text in the safety-stripe module, logos, trademarks, unwanted objects, perspective, gutters, and compression artifacts. Geometry tests verified all 54 boards across the three venues use 150, 100, and 50 modules in order, sit 48, 32, and 16 world metres before each configured major corner, use one-texel UV insets, and face approaching drivers. WSL2 headless Chrome WebGL captures of representative Apex, Harbour, and Temple braking approaches plus an Apex reverse view at 1440x900 confirmed readable at-speed order, strong day/night contrast, no adjacent-module bleed, plain non-mirrored rear faces, one active canvas, visible capture targets, and zero console errors, page exceptions, or network failures. Existing Three.js and Rapier deprecation warnings remain unrelated. No blocking issue was found."
+        "notes": "The decoded RGB derivative was inspected for exact 150, 100, and 50 digit sequences, one occurrence per numbered module, correct module placement, clear condensed numeral forms, centered alignment, intact red borders, exact quadrant boundaries, strong contrast, extra characters, text in the safety-stripe module, logos, trademarks, unwanted objects, perspective, gutters, and compression artifacts. Geometry tests verify all 54 boards across the three venues use 150, 100, and 50 modules in order, sit 48, 32, and 16 world metres before each configured major corner, and expose 324 mapped surfaces: 54 unchanged numbered approach faces plus 270 rear, end, top, and bottom service faces using the safety-stripe module. Every face has an outward normal and one-texel quadrant isolation; the narrow service faces use centered physical-aspect crops. This expands the existing merged board graphics from 108 to 648 triangles without another texture, material, geometry, or draw call, while retaining the original solid bodies and steel posts. Final WSL2 Chrome WebGL QA covered real stationary chase cameras on Apex, Harbour, and Temple at 1440-by-900 plus a 3840-by-2160 Temple detail view. The numbered compositions remained readable and the newly visible striped top and end edges stayed crisp with no z-fighting, adjacent-module bleed, clipping, missing backfaces, page exception, failed request, or HTTP error response; every capture retained one WebGL canvas, a visible player car, and positive render calls. Chrome emitted one generic resource 404 console line without a matching failed request or error response, so it was not attributable to this asset. Existing Three.js and Rapier deprecation warnings remain unrelated. No blocking issue was found."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -1847,12 +1853,12 @@
       "model": "built-in default (not exposed)",
       "seed": null,
       "referencePolicy": "No external marshal post, broadcast camera, pit-wall display, equipment cabinet, racing series, circuit, vehicle, sponsor, brand, real-location, or stock-texture image was used as an image input.",
-      "promptIntent": "An exact 2-by-2 opaque trackside-operations surface atlas shared by marshal posts, broadcast equipment, and pit-wall displays across the three playable circuits.",
+      "promptIntent": "An exact 2-by-2 opaque trackside-operations surface atlas shared by the complete player-visible bodies of marshal posts, broadcast equipment, and pit-wall displays across the three playable circuits.",
       "promptConstraints": [
         "Exactly four equal edge-to-edge square front-face modules in a 2-by-2 grid, presented as flat orthographic surface artwork rather than complete physical objects or a scene.",
         "The modules are an observation-window marshal-post facade, a centered broadcast-camera lens, a nonverbal illuminated telemetry display, and a vented broadcast-equipment cabinet face.",
         "Graphite, near-black, warm off-white, signal red, cyan, muted gold, and small amber accents with readable medium-scale detail, restrained wear, and no letters, numbers, words, punctuation, pseudo-text, logos, brands, sponsor marks, flags, emblems, hazard icons, people, vehicles, perspective, shadows, background scene, UI chrome, or watermark.",
-        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 module; one-texel UV insets must map 43 driver-facing surfaces comprising five Apex marshal-post facades, twelve shared broadcast-camera lenses, fourteen Apex pit-wall displays, and twelve shared broadcast cabinets."
+        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 module; one-texel UV insets map 222 surfaces comprising all four exposed vertical faces of five roof-covered Apex marshal-post bodies, all six faces of twelve elevated broadcast-lens housings, and all five exposed faces of twelve grounded broadcast cabinets and fourteen Apex pit-wall display bodies. The 179 new service faces use centered physical-aspect crops of the cabinet module instead of stretching square artwork."
       ],
       "sources": [
         {
@@ -1885,7 +1891,7 @@
           ],
           "quadrantMaxChannelStddev": [92.289, 25.059, 42.321, 36.64]
         },
-        "notes": "The decoded derivative was inspected for exact quadrant boundaries, the four requested equipment faces, module isolation, readable medium-scale contrast, text, logos, trademarks, unwanted objects, perspective, gutters, and compression artifacts. Geometry tests verified 43 driver-facing panels across the three venues: five Apex marshal-post facades, twelve shared broadcast-camera lenses, fourteen Apex pit-wall telemetry displays, and twelve shared broadcast cabinets, all with one-texel UV insets and normals facing the circuit. WSL2 headless Chrome WebGL captures of the Apex pit wall, marshal post, and broadcast equipment plus representative Harbour and Temple broadcast equipment and an Apex reverse pass at 1440x900 confirmed readable night/day contrast, telemetry detail after removal of five obsolete overlapping glow faces, no adjacent-module bleed, one active canvas, visible capture targets, and zero console errors, page exceptions, or network failures. Existing Three.js and Rapier deprecation warnings remain unrelated. No blocking issue was found."
+        "notes": "The decoded derivative was inspected for exact quadrant boundaries, the four requested equipment roles, module isolation, readable medium-scale contrast, text, logos, trademarks, unwanted objects, perspective, gutters, and compression artifacts. Geometry tests now verify 222 finite outward-facing surfaces across the three venues: 20 exposed vertical faces on five roof-covered Apex marshal-post bodies, 72 faces on twelve elevated broadcast-lens housings, 70 faces on fourteen Apex pit-wall display bodies, and 60 faces on twelve grounded broadcast cabinets. The original 43 circuit-facing compositions remain unchanged; rear, both end, exposed top, and elevated-lens bottom faces use the cabinet module with one-texel isolation and centered physical-aspect crops. This raises the single merged operations geometry from 54 to 268 Apex triangles and from 16 to 88 Harbour or Temple triangles without another texture, material, geometry, or draw call. Final WSL2 Chrome WebGL QA covered a real Apex marshal-post chase at 1440-by-900 and 3840-by-2160 plus a real broadcast-equipment chase on all three venues. Every capture retained one WebGL canvas and a visible player car, and showed readable service panels with no z-fighting, adjacent-module bleed, clipping, missing backfaces, page exception, failed request, or HTTP error response. The focused 78-test set, full 61-file 576-test regression, repository oxlint, 670-module production build, all 53 manifest derivative byte-and-hash checks, git diff whitespace check, and an independent requirement-and-diff review passed; a generic console 404 without a matching failed request or error response remains unrelated."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -1907,7 +1913,7 @@
         "Exactly four equal edge-to-edge square front-face modules in a 2-by-2 grid, presented as flat orthographic surface artwork rather than complete objects or a scene.",
         "The modules are a 5-by-3 warm-white floodlight reflector panel, one centered red Fresnel start-signal lens, two parallel cool-white tunnel LED bars, and a dark floodlight rear service panel.",
         "Graphite, near-black, warm white, deep safety red, cool white, brushed silver, and a small amber accent with medium-scale detail and no text, pseudo-text, logos, brands, sponsor marks, people, vehicles, track, perspective, shadows, background scene, UI, or watermark.",
-        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 module; one-texel UV insets must map 70 lighting surfaces across the three venues."
+        "The runtime derivative must be power-of-two RGB with each source quadrant independently resized to an exact 512-by-512 module; one-texel UV insets must map 126 lighting surfaces across the three venues."
       ],
       "sources": [
         {
@@ -1940,7 +1946,7 @@
           ],
           "quadrantMaxChannelStddev": [78.929, 60.788, 63.95, 19.3]
         },
-        "notes": "The decoded derivative was inspected for exact quadrant boundaries, correct reflector and light-bar counts, the single centered signal lens, module isolation, readable contrast, text, logos, perspective, gutters, and compression artifacts. Geometry tests verified 70 mapped surfaces across the three venues: fourteen Apex floodlight fronts, fourteen rear service panels, thirty shared start-signal lenses, and twelve Harbour tunnel luminaires, all with one-texel UV insets and correct front, rear, or downward normals. WSL2 headless Chrome WebGL captures of the Apex pit straight and start gantry, Harbour tunnel and start gantry, and Temple start gantry at 1440x900 confirmed readable day/night lighting, no obsolete bulb-box overlap, one active canvas, visible capture targets, positive render calls, zero page exceptions, zero request failures, and zero HTTP error responses. Chrome emitted one first-page generic resource 404 console line without a matching failed request or error response; it did not recur and no application resource failure was observed. No blocking issue was found."
+        "notes": "The decoded derivative was inspected for exact quadrant boundaries, correct reflector and light-bar counts, the single centered signal lens, module isolation, readable contrast, text, logos, perspective, gutters, and compression artifacts. Geometry tests verify 126 mapped surfaces across the three venues: all six faces of fourteen Apex floodlight heads, thirty shared start-signal lenses, and twelve Harbour tunnel luminaires. The original fourteen reflector fronts and fourteen rear service panels remain unchanged; fifty-six added floodlight end, top, and bottom faces reuse the rear-service module with one-texel isolation, outward normals, and centered physical-aspect crops. The single merged lighting geometry grows by only 112 triangles without another texture, material, geometry, or draw call. Final WSL2 Chrome WebGL QA includes the established Apex pit straight and three-venue start or tunnel views plus a real Apex floodlight chase at 1440-by-900 and 3840-by-2160. The large angled floodlight head retained its reflector composition and continuous dark service edges with no z-fighting, adjacent-module bleed, clipping, missing backfaces, obsolete bulb-box overlap, page exception, failed request, or HTTP error response; both final captures retained one WebGL canvas, a visible player car, positive render calls, and unchanged geometry, texture, and call counts. The focused 54-test set, full 61-file 576-test regression, repository oxlint, 670-module production build, manifest integrity check, and git diff whitespace check passed. Chrome emitted one generic resource 404 console line without a matching failed request or error response, so it was not attributable to this asset. No blocking issue was found."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -2012,12 +2018,12 @@
       "model": "built-in default (not exposed)",
       "seed": null,
       "referencePolicy": "No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, or stock texture was used as an image input.",
-      "promptIntent": "An exact 2-by-2 opaque surface atlas for the always-visible rear-wing, central spine, and mirrored sidepod upper surfaces of the fictional player formula car.",
+      "promptIntent": "An exact 2-by-2 opaque surface atlas for the always-visible rear-wing assembly, rear endplates, beam wings, central spine, and mirrored sidepod upper surfaces of the fictional player formula car.",
       "promptConstraints": [
         "Exactly four equal edge-to-edge square modules in a 2-by-2 grid with hard center boundaries, flat orthographic surface artwork, uniform neutral exposure, and no complete car, component mockup, scene, perspective, gutter, border, or shadow.",
         "The top row contains a symmetric rear-wing rear-face chevron and a symmetric longitudinal rear-wing top design; the bottom row contains a central crimson engine-cover spine and a mirror-safe graphite sidepod airflow design.",
         "Crimson #ef3157, warm off-white #f4f6ef, deep graphite carbon, restrained silver, and sparse electric lime #bfff35 with no letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, people, wheels, track, UI, or watermark.",
-        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; five merged player-only overlay panels use one-texel UV insets and a mirrored U mapping on the right sidepod."
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; eighteen merged player-only overlay panels reuse the four authored modules across the primary and three lower rear-wing elements, rear endplates, beam wings, rear centre pillar, central spine, and sidepod tops with one-texel UV insets and intentional mirrored U mappings."
       ],
       "sources": [
         {
@@ -2039,7 +2045,7 @@
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-08-08",
+        "reviewedAt": "2026-08-11",
         "metrics": {
           "quadrantDimensions": [512, 512],
           "quadrantMeanRgb": [
@@ -2050,7 +2056,347 @@
           ],
           "quadrantMaxChannelStddev": [93.2, 95.63, 76.87, 81.77]
         },
-        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, module isolation, readable contrast, text, logos, perspective, gutters, and compression artifacts. Geometry and lifecycle tests verified five panels merged into one 20-vertex, 30-index draw surface, isolated one-texel-inset UV quadrants, explicit mirrored right-sidepod U coordinates, outward unit normals and finite bounds, player-only LOD gating, one texture load, and explicit geometry, material, and texture disposal, including both allocations in React StrictMode's setup-cleanup-setup effect cycle. WSL2 headless Chrome WebGL captures of the Apex night, Harbour day, and Temple day start-gantry views at 1440x900 plus native-scale car crops confirmed a crisp rear chevron, longitudinal top stripe, balanced mirrored sidepod artwork, consistent exposure, and no visible UV bleed, surface penetration, z-fighting, or clipping. Every capture had one active WebGL canvas, a visible landmark target, positive render calls, zero page exceptions, zero request failures, and zero HTTP error responses. The capture helper's car-origin heuristic reported false because the rigid-body origin projected just beyond its conservative -0.9 NDC threshold, while the rendered car visibly occupied the lower viewport and crop in every screenshot. Chrome emitted one first-page generic resource 404 console line without a matching failed request or error response; it did not recur. No blocking issue was found."
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, module isolation, readable contrast, text, logos, perspective, gutters, and compression artifacts. Geometry and lifecycle tests verified eighteen panels merged into one 72-vertex, 108-index draw surface, including six lower-rear-wing panels, four endplate faces, two beam-wing tops, and the rear centre pillar in addition to the original five hero panels; tests also verify isolated one-texel-inset UV quadrants, intentional mirrored mappings, outward unit normals, triangle winding, finite bounds, player-only LOD gating, one texture load, and explicit geometry, material, and texture disposal in React StrictMode. WSL2 headless Chrome WebGL captures of the player chase car on Apex, Harbour, and Temple at 1440x900 plus a 3840x2160 Harbour crop confirmed readable layered rear-aero artwork with no visible UV bleed, surface penetration, z-fighting, clipping, or loss of the original rear chevron, spine, and sidepod treatment. Every capture had one active WebGL canvas, a visible player car, positive render calls, zero page exceptions, zero request failures, and zero HTTP error responses. Chrome emitted one first-page generic resource 404 console line without a matching failed request or error response. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.player_formula.bodywork.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-11",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, stock texture, or real-world trade dress was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque surface atlas for the player-visible engine-cover facets, monocoque shoulders, tapered nose, front-wing tops, front endplates, and rear underfloor surfaces of the fictional player formula car.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules in a 2-by-2 grid with hard center boundaries, flat orthographic surface artwork, uniform neutral diffuse exposure, and no complete car, component mockup, scene, perspective, gutter, border, baked lighting, shadow, reflection, or depth.",
+        "Top-left is a mirror-safe graphite engine-cover treatment with an off-white spear, crimson rails and sparse lime pinstripes; top-right is a graphite-and-crimson monocoque shoulder treatment; bottom-left is a warm off-white tapered-nose treatment; bottom-right is a repeatable graphite front-aero service surface.",
+        "Crimson #ef3157, warm off-white #f4f6ef, deep graphite #111515, restrained silver #66706d, and sparse electric lime #bfff35 with no text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsors, flags, emblems, people, wheels, track, UI, watermark, recognizable team livery, or real-world trade dress.",
+        "The runtime derivative must be fully opaque and power-of-two with each 627-by-627 source quadrant independently resized to an exact 512-by-512 module; twenty-eight merged player-only panels reconstruct the upper and upper-side facets of the engine cover, monocoque, nose, and both sidepods, then reuse the front-aero module on four wing tops, four endplate faces, the rear underfloor face, and the rear underfloor deck with one-texel seam isolation."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module player formula-car upper-bodywork surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2003898,
+          "sha256": "d132fa26726adf848af0e6d024164b4bf37adacbdb8f9788e5deedc25d6edad5"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "player-formula-bodywork-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 92006,
+          "sha256": "6131ff29003d49b9b74d2aaaaba4f262bb707033e602b84ec8f4e3b8b9e38a17",
+          "encoding": "Opaque browser-canvas WebP quality 0.92",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with high-quality browser-canvas resampling; assembled an exact 1024x1024 RGB atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-11",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [80.009, 65.755, 64.211],
+            [80.283, 46.938, 49.975],
+            [123.028, 119.892, 116.311],
+            [48.858, 41.293, 42.903]
+          ],
+          "quadrantMaxChannelStddev": [86.644, 77.449, 98.747, 46.962]
+        },
+        "notes": "The 1254x1254 RGB source and decoded 1024x1024 opaque derivative were inspected for exact quadrant boundaries, module isolation, readable medium-scale detail, text, logos, perspective, gutters, clipping and compression artifacts. Geometry tests verify twenty-eight merged panels with 112 vertices and 168 indices: twelve upper and upper-side facets cover the engine cover, monocoque, and nose, six additional facets cover both sidepods' upper and outward surfaces, and four front-wing tops, four outward-facing endplate surfaces, one rear underfloor face, and one rear underfloor deck reuse the front-aero module. Tests also verify one-texel UV isolation, outward upper/side normals, forward triangle winding, finite exact bounds, and no duplicate player or AI path. Lifecycle tests verify player-only loading, named geometry, texture and material ownership, and complete disposal during normal and React StrictMode lifecycles. WSL2 headless Chrome WebGL captures at 1440x900 on Apex and Harbour plus 3840x2160 Harbour detail views confirmed the engine-cover, shoulder, nose, sidepod, and rear-underfloor treatments with palette-correct AI variants and no visible UV bleed, z-fighting, surface penetration or clipping. Every capture had four racers, one active WebGL canvas, a visible player car, positive render calls, zero page exceptions, zero request failures and zero HTTP error responses; Chrome emitted one generic first-page 404 console line without a matching failed request or error response. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.ai_blue_formula.bodywork.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-11",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "The existing generated player formula-car bodywork atlas was used as the sole edit target and strict layout reference. No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, stock texture, or real-world trade dress was used as an image input.",
+      "promptIntent": "A palette-only electric-blue 2-by-2 opaque surface-atlas edit for the engine-cover facets, monocoque shoulders, tapered nose, front-wing tops, front endplates, and rear underfloor surfaces of the fictional blue AI formula car.",
+      "promptConstraints": [
+        "Preserve the source atlas's exact four equal edge-to-edge modules, hard center boundaries, panel placement, stripe widths, vents, fasteners, carbon weave, symmetry, scale, alignment, and full-bleed crop.",
+        "Recolor only the painted crimson and lime accents to electric racing blue centered on #2774ff and restrained ice cyan while preserving warm off-white, graphite carbon, silver hardware, and neutral diffuse exposure.",
+        "No complete car, scene, perspective, shadow, reflection, gutter, border, text, letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, recognizable trade dress, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; twenty-eight merged AI panels reconstruct the upper and upper-side facets of the engine cover, monocoque, nose, and both sidepods, then cover the front-wing tops, endplates, rear underfloor face, and rear underfloor deck with one-texel seam isolation."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module blue AI formula-car bodywork palette-edit master",
+          "dimensions": [1254, 1254],
+          "bytes": 1947252,
+          "sha256": "280914ecc5bdeec1645aa009b5ee6d52b8bfefe214e2f46827c8585bee070edb"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "ai-blue-formula-bodywork-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 93254,
+          "sha256": "786f5141b6d102a8b5190817e018e64a0385ea021d29dc44f121e53048492493",
+          "encoding": "Opaque browser-canvas WebP quality 0.92",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with high-quality browser-canvas resampling; assembled an exact 1024x1024 RGB atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-11",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [60.856, 70.294, 79.904],
+            [39.638, 59.102, 83.527],
+            [116.027, 118.014, 117.566],
+            [35.664, 43.147, 50.847]
+          ],
+          "quadrantMaxChannelStddev": [86.396, 82.458, 98.388, 50.651]
+        },
+        "notes": "The 1254x1254 RGB source and decoded 1024x1024 opaque derivative were inspected for exact quadrant boundaries, palette fidelity, module isolation, readable medium-scale detail, text, logos, perspective, gutters, clipping, and compression artifacts. Geometry and lifecycle tests verify the shared twenty-eight-panel surface, including eighteen engine-cover, monocoque, nose, and sidepod upper/outer facets plus the front aero and rear underfloor, the blue AI-specific texture and material selection, named mesh ownership, one-texel seam isolation, outward normals, and complete geometry, material, and texture disposal. Four-car WSL2 headless Chrome WebGL captures on Apex and Harbour at 1440x900 plus 3840x2160 Harbour detail captures confirmed the blue, green, and orange curved bodywork treatments together with no visible UV bleed, z-fighting, surface penetration, or clipping. Every capture registered all four racers, one active WebGL canvas, positive render calls, HTTP 200 for all generated Formula atlases, zero page exceptions, zero request failures, and zero HTTP error responses; Chrome emitted one generic first-page 404 console line without a matching failed request or error response. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.ai_green_formula.bodywork.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-11",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "The existing generated player formula-car bodywork atlas was used as the sole edit target and strict layout reference. No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, stock texture, or real-world trade dress was used as an image input.",
+      "promptIntent": "A palette-only emerald-green 2-by-2 opaque surface-atlas edit for the engine-cover facets, monocoque shoulders, tapered nose, front-wing tops, front endplates, and rear underfloor surfaces of the fictional green AI formula car.",
+      "promptConstraints": [
+        "Preserve the source atlas's exact four equal edge-to-edge modules, hard center boundaries, panel placement, stripe widths, vents, fasteners, carbon weave, symmetry, scale, alignment, and full-bleed crop.",
+        "Recolor only the painted crimson and lime accents to saturated emerald racing green centered on #20b77a and restrained acid-lime pinstripes while preserving warm off-white, graphite carbon, silver hardware, and neutral diffuse exposure.",
+        "No complete car, scene, perspective, shadow, reflection, gutter, border, text, letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, recognizable trade dress, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; twenty-eight merged AI panels reconstruct the upper and upper-side facets of the engine cover, monocoque, nose, and both sidepods, then cover the front-wing tops, endplates, rear underfloor face, and rear underfloor deck with one-texel seam isolation."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module green AI formula-car bodywork palette-edit master",
+          "dimensions": [1254, 1254],
+          "bytes": 1845412,
+          "sha256": "78a8e7b42db1cbcae162ff88c6ef0ce8bd398289677ac1f82d18a8dcb27df9f1"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "ai-green-formula-bodywork-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 90394,
+          "sha256": "4666f7732a6640752463af3c8130f36a5b32c1ed089fe9128785e182b61e9c7b",
+          "encoding": "Opaque browser-canvas WebP quality 0.92",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with high-quality browser-canvas resampling; assembled an exact 1024x1024 RGB atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-11",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [61.15, 75.338, 67.83],
+            [42.352, 71.587, 60.542],
+            [115.436, 119.713, 114.155],
+            [36.139, 47.096, 44.639]
+          ],
+          "quadrantMaxChannelStddev": [80.205, 61.759, 97.382, 37.369]
+        },
+        "notes": "The 1254x1254 RGB source and decoded 1024x1024 opaque derivative were inspected for exact quadrant boundaries, palette fidelity, module isolation, readable medium-scale detail, text, logos, perspective, gutters, clipping, and compression artifacts. Geometry and lifecycle tests verify the shared twenty-eight-panel surface, including eighteen engine-cover, monocoque, nose, and sidepod upper/outer facets plus the front aero and rear underfloor, the green AI-specific texture and material selection, named mesh ownership, one-texel seam isolation, outward normals, and complete geometry, material, and texture disposal. Four-car WSL2 headless Chrome WebGL captures on Apex and Harbour at 1440x900 plus 3840x2160 Harbour detail captures confirmed the blue, green, and orange curved bodywork treatments together with no visible UV bleed, z-fighting, surface penetration, or clipping. Every capture registered all four racers, one active WebGL canvas, positive render calls, HTTP 200 for all generated Formula atlases, zero page exceptions, zero request failures, and zero HTTP error responses; Chrome emitted one generic first-page 404 console line without a matching failed request or error response. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.ai_orange_formula.bodywork.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-11",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "The existing generated player formula-car bodywork atlas was used as the sole edit target and strict layout reference. No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, stock texture, or real-world trade dress was used as an image input.",
+      "promptIntent": "A palette-only vivid-orange 2-by-2 opaque surface-atlas edit for the engine-cover facets, monocoque shoulders, tapered nose, front-wing tops, front endplates, and rear underfloor surfaces of the fictional orange AI formula car.",
+      "promptConstraints": [
+        "Preserve the source atlas's exact four equal edge-to-edge modules, hard center boundaries, panel placement, stripe widths, vents, fasteners, carbon weave, symmetry, scale, alignment, and full-bleed crop.",
+        "Recolor only the painted crimson and lime accents to vivid racing orange centered on #ff8a00 and restrained amber pinstripes while preserving warm off-white, graphite carbon, silver hardware, and neutral diffuse exposure.",
+        "No complete car, scene, perspective, shadow, reflection, gutter, border, text, letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, recognizable trade dress, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; twenty-eight merged AI panels reconstruct the upper and upper-side facets of the engine cover, monocoque, nose, and both sidepods, then cover the front-wing tops, endplates, rear underfloor face, and rear underfloor deck with one-texel seam isolation."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module orange AI formula-car bodywork palette-edit master",
+          "dimensions": [1254, 1254],
+          "bytes": 1854206,
+          "sha256": "c37d4a31d9fa30856ae6c2fa7978ff88a100ee08b11573e16264ca4675f29682"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "ai-orange-formula-bodywork-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 93024,
+          "sha256": "92ed0ca69997670ef1f5a8e8ff0db7ba2f609e4fe62416c6965e6b373d8cbda9",
+          "encoding": "Opaque browser-canvas WebP quality 0.92",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with high-quality browser-canvas resampling; assembled an exact 1024x1024 RGB atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-11",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [81.521, 71.919, 56.997],
+            [84.527, 63.438, 37.31],
+            [121.799, 119.326, 111.955],
+            [49.874, 45.471, 38.29]
+          ],
+          "quadrantMaxChannelStddev": [90.421, 86.25, 99.04, 52.364]
+        },
+        "notes": "The 1254x1254 RGB source and decoded 1024x1024 opaque derivative were inspected for exact quadrant boundaries, palette fidelity, module isolation, readable medium-scale detail, text, logos, perspective, gutters, clipping, and compression artifacts. Geometry and lifecycle tests verify the shared twenty-eight-panel surface, including eighteen engine-cover, monocoque, nose, and sidepod upper/outer facets plus the front aero and rear underfloor, the orange AI-specific texture and material selection, named mesh ownership, one-texel seam isolation, outward normals, and complete geometry, material, and texture disposal. Four-car WSL2 headless Chrome WebGL captures on Apex and Harbour at 1440x900 plus 3840x2160 Harbour detail captures confirmed the blue, green, and orange curved bodywork treatments together with no visible UV bleed, z-fighting, surface penetration, or clipping. Every capture registered all four racers, one active WebGL canvas, positive render calls, HTTP 200 for all generated Formula atlases, zero page exceptions, zero request failures, and zero HTTP error responses; Chrome emitted one generic first-page 404 console line without a matching failed request or error response. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.shared_formula.cockpit_mechanical.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-11",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external cockpit, halo, mirror, helmet, suspension, exhaust, diffuser, racing car, team, driver, sponsor, brand, racing series, vehicle manufacturer, logo, stock texture, or real-world trade dress was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque shared surface atlas for the player-visible cockpit carbon, mechanical metal, directional aero carbon, and tintable composite components of every fictional player and AI formula car.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with hard mathematical center boundaries, flat orthographic surface artwork, no gutter or artwork crossing a split, and even neutral diffuse albedo exposure.",
+        "Top-left is neutral graphite cockpit-and-halo carbon with restrained molded contours and flush fasteners; top-right is brushed titanium and black-anodized axial mechanical service skin; bottom-left is directional carbon diffuser and floor-fence skin; bottom-right is mid-light neutral tintable composite for mirror shells, helmet shell, and camera pod.",
+        "No complete component, complete car, wheel, track, road, sky, people, driver, hands, scene, perspective, depth illusion, raised object, directional light, cast shadow, ambient-occlusion vignette, glare, reflection, transparency, text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsor marks, flags, emblems, arrows, icons, UI, watermark, or recognizable real-world racing trade dress.",
+        "The runtime derivative must be fully opaque and power-of-two with each exact 627-by-627 source quadrant independently resized to a 512-by-512 module. Existing cockpit surround, roll hoop, camera pod, mirrors, halo, helmet, floor fences, diffuser fins, suspension struts, mirror supports, and exhaust geometries must be merged without duplicate solid-colour meshes; all four cars share one reference-counted texture and one vertex-tinted material."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared formula cockpit and mechanical surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2205067,
+          "sha256": "bdc14339c4d35b3b80c906de19fbd35b5ae251445312c545ae6f6286000f78f7"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-formula-cockpit-mechanical-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 153512,
+          "sha256": "047aeaf39d77f88e06308b0fee1a007308f3960ba823cca9c282cce5bc418022",
+          "encoding": "Opaque browser-canvas WebP quality 0.92",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with high-quality browser-canvas resampling; assembled an exact 1024x1024 RGB atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-11",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [38.363, 38.465, 38.405],
+            [98.459, 96.861, 93.338],
+            [42.946, 43.065, 42.899],
+            [139.812, 141.462, 139.985]
+          ],
+          "quadrantStddevRgb": [
+            [13.261, 13.262, 13.259],
+            [22.634, 22.202, 21.793],
+            [12.463, 12.457, 12.461],
+            [48.567, 49.051, 48.3]
+          ]
+        },
+        "notes": "The 1254x1254 RGB source and decoded 1024x1024 fully opaque derivative were inspected for exact quadrant boundaries, module roles, neutral tintability, readable contrast, text, logos, perspective, gutters, clipping, and compression artifacts. The original cockpit surround, roll hoop, camera pod, two mirrors and supports, helmet, halo and spine, exhaust, four floor fences, four diffuser fins, and eight suspension struts are replaced without duplicate solid-colour meshes by one merged atlas mesh per car; hero, race, and low tiers contain 1,511/1,095/765 finite vertices and 4,788/4,068/3,180 indices respectively. Geometry tests verify all four one-texel-inset UV modules, clamped sphere-pole UVs, vertex tint data, outward winding, exact tier bounds, and invalid-tier rejection. Lifecycle tests verify one shared texture and material across a four-car field, named per-car geometry, complete final reference-counted disposal, and React StrictMode setup-cleanup symmetry. WSL2 Chrome chase captures on Apex, Harbour, and Temple at 1440x900 plus a 3840x2160 Harbour detail view confirmed readable cockpit carbon, tinted mirrors and helmet shells, preserved halo and mechanical silhouettes, and no visible UV bleed, z-fighting, clipping, or backface loss. Every capture registered four racers, one active WebGL canvas, positive render calls, HTTP 200 for the new atlas, zero page exceptions, zero request failures, and zero HTTP error responses; Chrome emitted one generic first-page 404 console line without a matching failed request or error response. The focused 71-test set, complete 61-file 575-test suite, repository lint, 670-module production build, manifest parse, and diff whitespace check passed. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.shared_formula.tyre_wheel.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-11",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external tyre, wheel, racing car, team, driver, sponsor, brand, racing series, vehicle manufacturer, logo, stock texture, or real-world trade dress was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque shared surface atlas for the tread, outer and inner sidewalls, and carbon wheel covers of every fictional player and AI formula-car wheel.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with hard mathematical center boundaries, flat orthographic surface artwork, no gutter or artwork crossing a split, and even neutral diffuse albedo exposure.",
+        "The top row contains a horizontally seamless near-black slick tread band and a concentric blank outer sidewall; the bottom row contains a darker concentric inner sidewall and a centered carbon service-disc wheel cover with restrained radial slots, silver fasteners, and one muted-red balance marker.",
+        "No complete tyre, wheel, car, vehicle, scene, perspective, road, track, pit, people, colored tyre stripe, text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsors, flags, emblems, arrows, UI, watermark, dramatic damage, mud, water, smoke, directional light, shadow, glare, reflection, or baked environment.",
+        "The runtime derivative must be fully opaque and power-of-two with each exact 627-by-627 source quadrant independently resized to a 512-by-512 module; CylinderGeometry torso and cap UV groups map to tread and sidewall modules by physical wheel side, while front-facing CircleGeometry wheel covers map to the fourth module with one-texel isolation. All four cars share one reference-counted texture and two materials."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared formula tyre and wheel surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2047738,
+          "sha256": "3b4d87cb718efacd55185af55f4ba00ab673480dcd2ecec38d2ef950b9673d28"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-formula-tyre-wheel-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 127050,
+          "sha256": "bb7b1b03dfb31ac7d7a058db09ce71bb4910404a2c94467fecb5d7b33def92de",
+          "encoding": "Opaque browser-canvas WebP quality 0.92",
+          "processing": "Split the 1254x1254 source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with high-quality browser-canvas resampling; assembled an exact 1024x1024 RGB atlas and encoded it as opaque WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-11",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [28.638, 28.668, 28.684],
+            [20.086, 20.376, 20.634],
+            [21.06, 21.416, 21.8],
+            [27.32, 27.509, 27.439]
+          ],
+          "quadrantStddevRgb": [
+            [10.945, 10.961, 10.94],
+            [11.964, 11.933, 11.924],
+            [12.472, 12.33, 12.274],
+            [19.095, 18.606, 18.584]
+          ]
+        },
+        "notes": "The 1254x1254 RGB source and decoded 1024x1024 fully opaque derivative were inspected for exact quadrant boundaries, module roles, radial centering, tread continuity, readable contrast, text, logos, perspective, gutters, clipping, and compression artifacts. Geometry and lifecycle tests verify isolated tread, outer-sidewall, inner-sidewall, and wheel-cover UV mappings, outward triangle winding, named resource ownership, one shared texture load across four cars, and reference-counted final disposal. Four-car WSL2 Chrome captures on Apex, Harbour, and Temple at 1440x900 plus a 3840x2160 Harbour detail view show readable tread wear bands and wheel-cover service details with no visible seam, UV bleed, z-fighting, clipping, or wheel silhouette regression; each capture registered four racers, one WebGL canvas, positive render calls, HTTP 200 for the atlas, zero page exceptions, zero request failures, and zero HTTP error responses. The complete 61-file, 574-test suite, repository lint, 669-module production build, manifest parse, and diff whitespace check passed. No blocking issue was found."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -2067,12 +2413,12 @@
       "model": "built-in default (not exposed)",
       "seed": null,
       "referencePolicy": "The existing generated player formula-car livery atlas was used as the sole edit target and strict layout reference. No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, or stock texture was used as an image input.",
-      "promptIntent": "A palette-only electric-blue 2-by-2 opaque surface-atlas edit for the rear-wing, central spine, and mirrored sidepod upper surfaces of the fictional blue AI formula car.",
+      "promptIntent": "A palette-only electric-blue 2-by-2 opaque surface-atlas edit for the rear-wing assembly, rear endplates, beam wings, central spine, and mirrored sidepod upper surfaces of the fictional blue AI formula car.",
       "promptConstraints": [
         "Preserve the source atlas's exact four equal edge-to-edge modules, hard center boundaries, panel placement, stripe widths, vents, rivets, carbon weave, symmetry, scale, alignment, and full-bleed crop.",
         "Recolor only the painted surfaces to electric racing blue centered on #2774ff, warm off-white, black graphite carbon, and restrained ice-cyan accents.",
         "No complete car, scene, perspective, shadow, gutter, border, text, letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, recognizable trade dress, UI, or watermark.",
-        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; five merged AI overlay panels use one-texel UV insets and mirrored U mapping on the right sidepod."
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; eighteen merged AI overlay panels reuse the four authored modules across the primary and three lower rear-wing elements, rear endplates, beam wings, rear centre pillar, central spine, and sidepod tops with one-texel UV insets and intentional mirrored U mappings."
       ],
       "sources": [
         {
@@ -2094,7 +2440,7 @@
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-08-09",
+        "reviewedAt": "2026-08-11",
         "metrics": {
           "quadrantDimensions": [512, 512],
           "quadrantMeanRgb": [
@@ -2105,7 +2451,7 @@
           ],
           "quadrantMaxChannelStddev": [94.924, 95.745, 92.033, 92.882]
         },
-        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, palette identity, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry, integration, and lifecycle tests verify the shared five-panel 20-vertex and 30-index overlay, isolated one-texel-inset UV quadrants, mirrored right-sidepod U coordinates, AI-only mesh naming, correct blue mapping, one texture load, and explicit geometry, material, and texture disposal. WSL2 headless-Chromium WebGL capture of the four-car Apex race view confirmed the blue livery alongside the green and orange variants with one active canvas, positive render calls and triangles, all three AI WebP requests loaded, and no page exception or failed asset request. No blocking issue was found."
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, palette identity, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry, integration, and lifecycle tests verify the shared eighteen-panel 72-vertex and 108-index overlay, including lower rear-wing, endplate, beam-wing and rear-pillar coverage, isolated one-texel-inset UV quadrants, intentional mirrored mappings, AI-only mesh naming, correct blue mapping, one texture load, and explicit geometry, material, and texture disposal. The same shared geometry was visually verified on the player chase car across all three venues, while the prior four-car Apex race capture confirms the palette-specific AI texture and mesh path. No blocking issue was found."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -2122,12 +2468,12 @@
       "model": "built-in default (not exposed)",
       "seed": null,
       "referencePolicy": "The existing generated player formula-car livery atlas was used as the sole edit target and strict layout reference. No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, or stock texture was used as an image input.",
-      "promptIntent": "A palette-only emerald-and-acid-lime 2-by-2 opaque surface-atlas edit for the rear-wing, central spine, and mirrored sidepod upper surfaces of the fictional green AI formula car.",
+      "promptIntent": "A palette-only emerald-and-acid-lime 2-by-2 opaque surface-atlas edit for the rear-wing assembly, rear endplates, beam wings, central spine, and mirrored sidepod upper surfaces of the fictional green AI formula car.",
       "promptConstraints": [
         "Preserve the source atlas's exact four equal edge-to-edge modules, hard center boundaries, panel placement, stripe widths, vents, rivets, carbon weave, symmetry, scale, alignment, and full-bleed crop.",
         "Recolor only the painted surfaces to emerald racing green centered on #12b886, acid lime centered on #d7ff42, restrained off-white separators, and black graphite carbon.",
         "No complete car, scene, perspective, shadow, gutter, border, text, letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, recognizable trade dress, UI, or watermark.",
-        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; five merged AI overlay panels use one-texel UV insets and mirrored U mapping on the right sidepod."
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; eighteen merged AI overlay panels reuse the four authored modules across the primary and three lower rear-wing elements, rear endplates, beam wings, rear centre pillar, central spine, and sidepod tops with one-texel UV insets and intentional mirrored U mappings."
       ],
       "sources": [
         {
@@ -2149,7 +2495,7 @@
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-08-09",
+        "reviewedAt": "2026-08-11",
         "metrics": {
           "quadrantDimensions": [512, 512],
           "quadrantMeanRgb": [
@@ -2160,7 +2506,7 @@
           ],
           "quadrantMaxChannelStddev": [97.675, 87.683, 70.219, 73.907]
         },
-        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, palette identity, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry, integration, and lifecycle tests verify the shared five-panel 20-vertex and 30-index overlay, isolated one-texel-inset UV quadrants, mirrored right-sidepod U coordinates, AI-only mesh naming, correct green mapping, one texture load, and explicit geometry, material, and texture disposal. WSL2 headless-Chromium WebGL capture of the four-car Harbour race view confirmed the green livery alongside the blue and orange variants with one active canvas, positive render calls and triangles, all three AI WebP requests loaded, and no page exception or failed asset request. No blocking issue was found."
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, palette identity, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry, integration, and lifecycle tests verify the shared eighteen-panel 72-vertex and 108-index overlay, including lower rear-wing, endplate, beam-wing and rear-pillar coverage, isolated one-texel-inset UV quadrants, intentional mirrored mappings, AI-only mesh naming, correct green mapping, one texture load, and explicit geometry, material, and texture disposal. The same shared geometry was visually verified on the player chase car across all three venues, while the prior four-car Harbour race capture confirms the palette-specific AI texture and mesh path. No blocking issue was found."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -2177,12 +2523,12 @@
       "model": "built-in default (not exposed)",
       "seed": null,
       "referencePolicy": "The existing generated player formula-car livery atlas was used as the sole edit target and strict layout reference. No external racing car, team livery, driver, sponsor, brand, racing series, vehicle manufacturer, logo, or stock texture was used as an image input.",
-      "promptIntent": "A palette-only warm-orange 2-by-2 opaque surface-atlas edit for the rear-wing, central spine, and mirrored sidepod upper surfaces of the fictional orange AI formula car.",
+      "promptIntent": "A palette-only warm-orange 2-by-2 opaque surface-atlas edit for the rear-wing assembly, rear endplates, beam wings, central spine, and mirrored sidepod upper surfaces of the fictional orange AI formula car.",
       "promptConstraints": [
         "Preserve the source atlas's exact four equal edge-to-edge modules, hard center boundaries, panel placement, stripe widths, vents, rivets, carbon weave, symmetry, scale, alignment, and full-bleed crop.",
         "Recolor only the painted surfaces to warm racing orange centered on #ff9d24, charcoal centered on #171a19, black graphite carbon, restrained off-white highlights, and sparse amber accents.",
         "No complete car, scene, perspective, shadow, gutter, border, text, letters, numbers, pseudo-text, logos, brands, sponsor marks, flags, recognizable trade dress, UI, or watermark.",
-        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; five merged AI overlay panels use one-texel UV insets and mirrored U mapping on the right sidepod."
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; eighteen merged AI overlay panels reuse the four authored modules across the primary and three lower rear-wing elements, rear endplates, beam wings, rear centre pillar, central spine, and sidepod tops with one-texel UV insets and intentional mirrored U mappings."
       ],
       "sources": [
         {
@@ -2204,7 +2550,7 @@
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-08-09",
+        "reviewedAt": "2026-08-11",
         "metrics": {
           "quadrantDimensions": [512, 512],
           "quadrantMeanRgb": [
@@ -2215,7 +2561,7 @@
           ],
           "quadrantMaxChannelStddev": [99.006, 101.693, 99.253, 97.993]
         },
-        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, palette identity, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry, integration, and lifecycle tests verify the shared five-panel 20-vertex and 30-index overlay, isolated one-texel-inset UV quadrants, mirrored right-sidepod U coordinates, AI-only mesh naming, correct orange mapping, one texture load, and explicit geometry, material, and texture disposal. WSL2 headless-Chromium WebGL capture of the four-car Temple race view confirmed the orange livery alongside the blue and green variants with one active canvas, positive render calls and triangles, all three AI WebP requests loaded, and no page exception or failed asset request. No blocking issue was found."
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, symmetry, palette identity, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry, integration, and lifecycle tests verify the shared eighteen-panel 72-vertex and 108-index overlay, including lower rear-wing, endplate, beam-wing and rear-pillar coverage, isolated one-texel-inset UV quadrants, intentional mirrored mappings, AI-only mesh naming, correct orange mapping, one texture load, and explicit geometry, material, and texture disposal. The same shared geometry was visually verified on the player chase car across all three venues, while the prior four-car Temple race capture confirms the palette-specific AI texture and mesh path. No blocking issue was found."
       },
       "humanIpReview": {
         "status": "pending_user_approval",
@@ -2282,19 +2628,19 @@
     },
     {
       "id": "surface.shared.gantry_structure.atlas",
-      "revision": 1,
+      "revision": 2,
       "sourceType": "generated",
       "generatedAt": "2026-08-10",
       "tool": "OpenAI built-in imagegen",
       "model": "built-in default (not exposed)",
       "seed": null,
       "referencePolicy": "No external gantry, bridge, circuit, racing series, vehicle, sponsor, brand, real-location, industrial-equipment, or stock-texture image was used as an image input.",
-      "promptIntent": "An exact 2-by-2 opaque shared structural-surface atlas for every player-visible face of the three start-finish gantries and the three Apex media bridges.",
+      "promptIntent": "An exact 2-by-2 opaque shared structural-surface atlas for every player-visible face of the three start-finish gantries, the three Apex media bridges, the full-height Apex timing mast, and all 288 repeated barrier-support posts across the three fictional circuits.",
       "promptConstraints": [
         "Exactly four equal edge-to-edge square modules with hard center boundaries, orthographic surface artwork, uniform neutral exposure, and no complete gantry, scene, perspective, gutter, border, shadow, or artwork crossing a split.",
         "The top row contains a horizontally repeatable X-braced crossbar cell and a vertically repeatable diagonal-braced upright cell; the bottom row contains a horizontally repeatable ribbed cable-tray underside and a bolted service plate for rear, top, side, and end faces.",
         "Deep graphite, charcoal, gunmetal, galvanized silver, off-white fasteners, and extremely sparse muted amber with no text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsor marks, flags, screens, LED ribbons, signal lenses, floodlights, camera lenses, telemetry, people, vehicles, track, scenery, UI, or watermark.",
-        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; all logical crossbar and upright faces are segmented into atlas-safe panels and merged into one draw surface with one-texel UV insets."
+        "The runtime derivative must be fully opaque and power-of-two with each source quadrant independently resized to an exact 512-by-512 module; all logical gantry, media-bridge, Apex timing-mast, and 96-per-venue barrier-post faces are segmented into atlas-safe panels and merged into one draw surface with one-texel UV insets, while thin post faces use centered physical-aspect crops."
       ],
       "sources": [
         {
@@ -2316,7 +2662,7 @@
       ],
       "assetQaReview": {
         "status": "passed",
-        "reviewedAt": "2026-08-10",
+        "reviewedAt": "2026-08-11",
         "metrics": {
           "quadrantDimensions": [512, 512],
           "quadrantMeanRgb": [
@@ -2332,7 +2678,193 @@
             [19.32, 19.07, 18.46]
           ]
         },
-        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, the four requested structural roles, module isolation, readable contrast, text, logos, perspective, gutters, and compression artifacts. Geometry and lifecycle tests verify segmented finite surfaces, outward axis-aligned normals, isolated one-texel-inset UV quadrants, one shared texture load, one material, one merged geometry, explicit disposal across every venue, and corrected display offsets that remain ahead of the structural overlays. The full 562-test regression, lint, production build, and four representative 1440x900 WebGL captures passed. The three start-finish views and one Apex media-bridge view retained their display, signal, and glow layers with no visible z-fighting, atlas bleed, clipping, page exceptions, failed requests, or error responses; the added structure costs one draw call and one texture per venue, with 736 Apex, 188 Harbour, or 196 Temple triangles. One initial Apex capture logged a generic browser resource 404 without a failed request or error response, so it was not attributable to this asset."
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, the four requested structural roles, module isolation, readable contrast, text, logos, perspective, gutters, and compression artifacts. Geometry and lifecycle tests verify segmented finite surfaces, outward axis-aligned normals, isolated one-texel-inset UV quadrants, one shared texture load, one material, one merged geometry, explicit disposal across every venue, and corrected display offsets that remain ahead of the structural overlays. The shared surface covers every gantry and media-bridge structural face, all four segmented vertical sides and exposed top of the 17-metre Apex timing-mast pole, every face of its two crossbars, and the four exposed sides plus top of all 96 barrier-support posts per venue. The posts add 864 quads and 1,728 triangles to each already-owned structural mesh without another texture, geometry, material, or draw call; the exact structural totals are 2,650 Apex, 1,916 Harbour, and 1,924 Temple triangles. Final all-venue 1440x900 real race-camera captures kept the player car visible and showed the repeated graphite upright cells without z-fighting, atlas bleed, clipping, missing faces, page exceptions, failed requests, or HTTP error responses. Apex, Harbour, and Temple reported 84,828, 81,748, and 76,152 visible-frame triangles respectively with unchanged texture ownership. The focused 118-test set, full 61-file 579-test regression, repository oxlint, 670-module production build, all 53 manifest derivative byte-and-hash checks, and diff checks passed. A generic browser console 404 without a matching failed request or error response remains unrelated to this asset."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.yacht_upper.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-10",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external yacht, marina, harbour, circuit, vehicle, brand, sponsor, real-location, industrial-equipment, or stock-texture image was used as an image input. The existing local yacht facade atlas was inspected for coverage and palette continuity but was not supplied to the image model.",
+      "promptIntent": "An exact 2-by-2 opaque upper-surface atlas for the deck, cabin roof, tinted service roof, and tinted service fascia of all nine fictional Harbour yachts.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with mathematically straight hard center boundaries, no gutters or artwork crossing a split, and flat axis-aligned orthographic surface projections under neutral diffuse albedo lighting.",
+        "The top row contains a warm-ivory nonslip hull deck with restrained synthetic-teak insert and a shell-white cabin roof with smoked skylights and flush vents; the bottom row contains a neutral service-equipment roof and a low-profile service side/end fascia.",
+        "No perspective, complete yacht, hull side or end, water, marina, quay, wake, ropes, railings, mast, antenna, furniture, people, animals, vehicles, flags, text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsors, registration marks, emblems, UI, watermark, shadows, glare, baked reflections, damage, rust, or grime.",
+        "The runtime derivative must be fully opaque and power-of-two with each exact 627-by-627 source quadrant independently resized to a 512-by-512 module; 63 merged panels use one-texel UV insets and vertex colors preserve the existing alternating red and cyan service-block identity."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Harbour yacht upper-surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 1818090,
+          "sha256": "87e57c85ecaeee7ca6b21edd2eb542cf2cd469ed18bb6150732ec96eb7e4d3c7"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-yacht-upper-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 41282,
+          "sha256": "e368aa7f04fb20e42d625710a116596b652919d756455cd3a66dfed46fccae15",
+          "encoding": "Opaque Sharp WebP quality 88, effort 6, smart chroma subsampling",
+          "processing": "Split the 1254x1254 RGB source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with Lanczos3; assembled an exact opaque RGB 1024x1024 atlas and encoded it as WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-10",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [214.77, 203.82, 184.31],
+            [204.96, 202.57, 196.89],
+            [147.99, 152.87, 155.52],
+            [178.26, 178.93, 176.11]
+          ],
+          "quadrantStddevRgb": [
+            [25.47, 27.36, 30.7],
+            [59.23, 52.74, 47.55],
+            [45.93, 42.03, 39.85],
+            [85.22, 76.81, 69.83]
+          ],
+          "quadrantNearBlackPercent": [0, 0, 0.000038, 0.000004],
+          "quadrantNearWhitePercent": [0, 0.000004, 0, 0.001804]
+        },
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, the four requested upper-surface roles, module isolation, readable broad contrast, text, logos, perspective, gutters, clipping, and compression artifacts. Geometry, lifecycle, and capture-request tests verify 63 finite panels, FrontSide winding aligned with outward normals, exact one-texel-inset UV quadrants, alternating tint colors, Harbour-only loading, one merged geometry, one material, one texture, and explicit disposal. The full 564-test regression, lint, production build, manifest integrity check, and independent post-integration review passed. Final WebGL QA covered the 1440-by-900 Harbour and yacht landmarks, a real stationary player chase camera with the car visible, and a 3840-by-2160 yacht detail capture. No z-fighting, adjacent-quadrant bleed, clipping, backface loss, water or promenade regression, page exception, failed request, or HTTP error response was found. The yacht landmark measured the expected one-call, one-geometry, one-texture, and 126-triangle increase; the chase capture retained one WebGL canvas and reported the car visible. Separate first browser sessions logged a generic resource 404 console line without a matching failed request or error response, so it was not attributable to this asset."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.harbour.apartment_upper.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-10",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external apartment, building, roof, balcony, glass-railing, harbour, circuit, vehicle, brand, sponsor, real-location, architectural-material, or stock-texture image was used as an image input. The existing local apartment facade atlas was inspected for coverage and palette continuity but was not supplied to the image model.",
+      "promptIntent": "An exact 2-by-2 opaque architectural-surface atlas for the roof caps, projecting balcony slabs, and slim smoked-glass balcony bands of all fourteen fictional Harbour apartment towers.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with mathematically straight hard center boundaries, no gutters or artwork crossing a split, and flat axis-aligned architectural surface artwork under neutral diffuse albedo lighting.",
+        "The top row contains a top-down muted-terracotta roof-cap surface and a straight-on terracotta coping, fascia, and sheltered-soffit material; the bottom row contains projection-neutral warm-ivory balcony stone and a straight-on smoked blue-green glass band with restrained rails and uprights.",
+        "No perspective, complete roof, balcony, facade or building, scene, sky, horizon, road, harbour, water, reflected skyline, doors, furniture, plants, laundry, people, vehicles, boats, antennas, flags, text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsors, emblems, graffiti, damage, cracks, rust, grime, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two with each exact 627-by-627 source quadrant independently resized to a 512-by-512 module; all six faces of 14 roof caps, 109 balcony slabs, and 109 protruding glass bands use one-texel-isolated centered physical-aspect UV crops."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Harbour apartment upper-surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2663569,
+          "sha256": "7e67b37f7c05584cd23a816490895c3d8c365f8dca9e9d5f024108a6de87cb7f"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "harbour-apartment-upper-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 160856,
+          "sha256": "1133820087bce7e6f87c5af74d7d0daf5b2f3f3250c318875e07afb903fab71d",
+          "encoding": "Opaque Pillow WebP quality 88, method 6",
+          "processing": "Split the 1254x1254 RGB source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 with Lanczos; assembled an exact opaque RGB 1024x1024 atlas and encoded it as WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-11",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [177.588, 88.032, 62.088],
+            [136.551, 59.161, 37.15],
+            [197.186, 188.868, 172.459],
+            [44.269, 70.273, 75.282]
+          ],
+          "quadrantStddevRgb": [
+            [9.107, 8.1, 7.961],
+            [47.776, 26.748, 22.309],
+            [11.572, 11.747, 12.124],
+            [15.676, 20.335, 18.505]
+          ],
+          "quadrantNearBlackPercent": [0, 0, 0, 0.009918],
+          "quadrantNearWhitePercent": [0, 0, 0, 0]
+        },
+        "notes": "The generated source and decoded derivative were inspected for exact quadrant boundaries, opacity, the four requested architectural roles, module isolation, readable contrast, text, logos, perspective, gutters, clipping, and compression artifacts. Geometry and lifecycle tests verify exact replacement of 14 roof caps, 109 balcony slabs, and 109 protruding glass bands as 232 closed boxes with 5,568 vertices, 8,352 indices, and 2,784 triangles; all six faces use outward FrontSide winding, one-texel-isolated centered physical-aspect UV crops, and the combined scenery-plus-surface topology remains unchanged with no duplicate solids. Harbour-only integration verifies one merged geometry, one material, one texture load, named-mesh rendering, high-quality shadow preservation, and explicit disposal. Final WSL2 Chrome WebGL QA covered a stationary real player chase view, the Casino landmark at 1440-by-900 and 3840-by-2160, and a moving race view. The terracotta roof caps, pale-stone balcony slabs, and smoked teal glass bands remained readable with no z-fighting, adjacent-quadrant bleed, clipping, missing backfaces, facade or kerb regression, page exception, failed request, or HTTP error response; every capture retained one WebGL canvas, positive render calls, and the player chase captures reported the car visible. The focused 110-test set, full 61-file 568-test regression suite, affected-file oxlint, 664-module production build, manifest integrity check, diff check, and an independent geometry review passed. Each first browser page logged one generic resource 404 console line without a matching failed request or error response, so it was not attributable to this asset."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.shared.kerb.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-10",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external kerb, circuit, racing series, vehicle, sponsor, brand, real-location, construction-material, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 neutral, tintable structural-surface atlas for all six faces of every red, cream-white, and green kerb box across the three fictional circuits.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with hard center boundaries, orthographic flat surface artwork, neutral diffuse exposure, and no complete kerb, visible thickness, scene, perspective, gutter, border, shadow, or artwork crossing a split.",
+        "The top row contains two pale warm-gray tread variants with fine transverse ribs, drainage grooves, aggregate, and restrained tire abrasion; the bottom row contains a low kerb-edge fascia and a neutral end/service face.",
+        "The artwork must remain bright and chromatically neutral for runtime red, cream-white, and Italian-green vertex-color multiplication, with no colored paint, flags, checker patterns, text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsor marks, arrows, vehicles, track scene, asphalt, grass, gravel, barriers, people, UI, or watermark.",
+        "The runtime derivative must be fully opaque and power-of-two; the generated two-pixel dark center separator is excluded before each clean module is independently resized, and every mapped box face uses one-texel quadrant isolation plus a centered physical-aspect crop."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared kerb surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2870783,
+          "sha256": "7098a7850ce4fabd4a7e9f71fb0fead6e3d90768c2a774a19b7da1d026510799"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-kerb-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 229132,
+          "sha256": "047d2e4c1952f4ffd5268cfd086cac1510e5abe84ffeb269624a21dcfd230075",
+          "encoding": "Opaque Pillow WebP quality 88, method 6",
+          "processing": "Detected and discarded source columns 626-627 and rows 626-627 that formed the dark center separator; independently cropped the four remaining 626-by-626 RGB modules, resized each to 512-by-512 with Lanczos, assembled an exact opaque RGB 1024-by-1024 atlas, and encoded it as WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-10",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "quadrantMeanRgb": [
+            [189.21, 180.75, 170.06],
+            [194.7, 187.28, 177.7],
+            [192.5, 185.18, 176.0],
+            [198.17, 190.68, 181.29]
+          ],
+          "quadrantStddevRgb": [
+            [17.08, 17.09, 17.22],
+            [14.49, 14.52, 14.72],
+            [19.64, 19.25, 18.86],
+            [12.14, 12.16, 12.41]
+          ],
+          "quadrantNearBlackPercent": [0, 0, 0, 0],
+          "quadrantNearWhitePercent": [0, 0, 0, 0]
+        },
+        "notes": "The generated source and decoded derivative were inspected for exact module roles, neutral tintability, opacity, separator removal, module isolation, text, logos, perspective, clipping, and compression artifacts. Geometry, lifecycle, and adversarial component tests verify all 609 Apex, 612 Harbour, and 604 Temple kerb boxes: 574 continuous boundary boxes per venue, 35/25/30 corner-apex blocks, and 13 additional Harbour chicane stripes. They also verify finite full-face attributes, outward winding, one-texel-isolated physical-aspect UV crops, unchanged combined scenery-plus-kerb triangle counts, red/white/green vertex-color cycles, one shared texture load, one merged geometry, one tint material, named-mesh rendering, and explicit disposal. The full 566-test regression suite, oxlint, 663-module production build, manifest integrity check, and git diff whitespace check passed. Final WSL2 Chrome WebGL QA covered moving race-camera captures for all three venues at 1440-by-900, a 3840-by-2160 Temple detail capture, and stationary real chase-camera captures anchored to one representative kerb corner on every venue. The generated tread and fascia stayed readable across the Apex and Harbour red/white and Temple red/white/green cycles with no z-fighting, adjacent-quadrant bleed, clipping, missing faces, road-edge regression, page exception, failed request, or HTTP error response. Every capture retained one WebGL canvas, a visible player car, positive render calls, and the expected shared texture and geometry. Each first browser page logged one generic resource 404 console line without a matching failed request or error response, so it was not attributable to this asset."
       },
       "humanIpReview": {
         "status": "pending_user_approval",

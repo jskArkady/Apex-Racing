@@ -7,16 +7,18 @@ import {
   BARRIER_GRAPHICS_HEIGHT,
   BARRIER_SEGMENTS,
   BRAKING_BOARD_LABELS,
-  BRAKING_BOARD_PANEL,
   BRAKING_BOARD_WORLD_SCALE,
   APEX_PIT_STAFF_APPROACH_PROGRESS_OFFSET,
   APEX_PIT_STAFF_LAYOUT,
   APEX_PALM_TREE_LAYOUT,
+  APEX_MARSHAL_POST_ROOF,
   APEX_PIT_WALL_DISPLAY_LAYOUT,
   APEX_RACE_CONTROL_LAYOUT,
+  APEX_TIMING_MAST_LAYOUT,
   APEX_TENT_CANOPY_LAYOUT,
   BROADCAST_CAMERA_PROGRESS,
   createApexPitStaffBillboardGeometry,
+  createApexGravelRunoffGeometry,
   createApexRaceControlFacadeGeometry,
   createApexTentCanopyGeometry,
   createApexVenueFacadeGeometry,
@@ -30,6 +32,7 @@ import {
   createGantryDisplayGeometry,
   createGantryStructureSurfaceGeometry,
   createGrandstandStructureGeometry,
+  createHarbourApartmentUpperSurfaceGeometry,
   createHarbourBuildingFacadeGeometry,
   createHarbourMarinaSurfaceGeometry,
   createHarbourRetainingWallFacadeGeometry,
@@ -37,11 +40,15 @@ import {
   createHarbourTunnelCeilingPortalGeometry,
   createHarbourTunnelWallGeometry,
   createHarbourYachtFacadeGeometry,
+  createHarbourYachtUpperSurfaceGeometry,
+  createKerbSurfaceGeometry,
   createPitComplexStructureGeometry,
   createPitGarageFacadeGeometry,
   createPalmTreeBillboardGeometry,
   createRoadColliderGeometry,
   createRoadGeometry,
+  createTempleGrassVergeGeometry,
+  createTempleGravelRunoffGeometry,
   createTempleTreeBillboardGeometry,
   createTempleVenueFacadeGeometry,
   createTrackLightingGraphicsGeometry,
@@ -58,9 +65,15 @@ import {
   FINISH_LINE_LEVEL,
   GANTRY_DISPLAY_LAYOUTS,
   GANTRY_STRUCTURE_VARIANTS,
+  KERB_SURFACE_VARIANTS,
   getCurbSegmentLength,
+  getApexGravelRunoffLayout,
+  getApexPitStraightRunoffLayout,
+  getBrakingBoardGraphicsLayout,
   getFloodlightPositions,
   getGantryStructureLayout,
+  getKerbSurfaceLayout,
+  getTempleGravelRunoffLayout,
   getBrakingBoardLayout,
   getHarbourTunnelLayout,
   getHarbourTunnelLightingLayout,
@@ -70,6 +83,7 @@ import {
   getTracksideOperationsGraphicsLayout,
   GRANDSTAND_LAYOUTS,
   HARBOUR_BUILDINGS,
+  HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS,
   HARBOUR_MARINA_LAYOUT,
   HARBOUR_RETAINING_WALL_LAYOUT,
   HARBOUR_SWIMMING_POOL_PANELS,
@@ -87,6 +101,8 @@ import {
   HARBOUR_WATER,
   HARBOUR_WATER_SURFACE_Y,
   HARBOUR_YACHT_LAYOUT,
+  INFIELD_ALBEDO_REPEAT,
+  LOW_DETAIL_SURFACE_SEGMENTS,
   MARSHAL_POST_PROGRESS,
   PIT_GARAGE_FACADE_LAYOUTS,
   ROAD_SEGMENTS,
@@ -98,12 +114,21 @@ import {
   START_GANTRY_PROGRESS,
   START_GRID_BOX,
   START_LIGHT_LATERALS,
+  APEX_FLOODLIGHT_LAYOUT,
   SURFACE_LEVELS,
   TEMPLE_BANKING_LAYOUT,
+  TEMPLE_TURF_WORLD_TILE_SIZE,
+  TEMPLE_GRAVEL_WORLD_TILE_SIZE,
   TEMPLE_TIMING_TOWER_LAYOUT,
+  TEMPLE_TIMING_TOWER_CAP,
+  TEMPLE_TIMING_TOWER_FLOOR_BANDS,
+  TEMPLE_TIMING_TOWER_GLASS,
   TEMPLE_TREE_LAYOUT,
+  TRACKSIDE_BARRIER_POST_LAYOUT,
   TRACK_LIGHTING_GRAPHICS_VARIANTS,
   TRACKSIDE_OPERATIONS_VARIANTS,
+  TRACKSIDE_OPERATIONS_BODY_LAYOUTS,
+  YACHT_UPPER_SURFACE_VARIANTS,
 } from './trackGeometry'
 
 describe('circuit visual geometry', () => {
@@ -134,6 +159,7 @@ describe('circuit visual geometry', () => {
           preset.roadWidth,
         ),
         createCircuitSceneryGeometry(preset.curve, preset.venue, preset.roadWidth),
+        createKerbSurfaceGeometry(preset.curve, preset.venue, preset.roadWidth),
         createCrowdPanelGeometry(preset.curve, preset.venue),
         createGrandstandStructureGeometry(preset.curve, preset.venue),
         createPitComplexStructureGeometry(preset.curve, preset.venue),
@@ -150,6 +176,7 @@ describe('circuit visual geometry', () => {
             createApexRaceControlFacadeGeometry(preset.curve, preset.roadWidth),
             createApexPitStaffBillboardGeometry(preset.curve),
             createApexTentCanopyGeometry(preset.curve),
+            createApexGravelRunoffGeometry(preset.curve, preset.roadWidth),
           ]
           : []),
         ...(preset.venue === 'harbour'
@@ -160,12 +187,14 @@ describe('circuit visual geometry', () => {
               preset.roadWidth,
             ),
             createHarbourBuildingFacadeGeometry(preset.curve),
+            createHarbourApartmentUpperSurfaceGeometry(preset.curve),
             createHarbourRetainingWallFacadeGeometry(
               preset.curve,
               preset.roadWidth,
             ),
             createHarbourSwimmingPoolSurfaceGeometry(),
             createHarbourYachtFacadeGeometry(),
+            createHarbourYachtUpperSurfaceGeometry(),
           ]
           : []),
         ...(['apex', 'harbour'].includes(preset.venue)
@@ -173,6 +202,8 @@ describe('circuit visual geometry', () => {
           : []),
         ...(preset.venue === 'temple'
           ? [
+            createTempleGrassVergeGeometry(preset.curve, preset.roadWidth),
+            createTempleGravelRunoffGeometry(preset.curve, preset.roadWidth),
             createTempleTreeBillboardGeometry(preset.curve),
             createTempleVenueFacadeGeometry(preset.curve, preset.roadWidth),
           ]
@@ -232,7 +263,7 @@ describe('circuit visual geometry', () => {
     }
   })
 
-  it('covers every gantry structure face with segmented atlas-safe surfaces', () => {
+  it('covers every gantry and Apex timing-mast face with atlas-safe surfaces', () => {
     const atlasInset = 1 / 1024
     for (const preset of TRACK_PRESETS) {
       const geometry = createGantryStructureSurfaceGeometry(
@@ -273,6 +304,102 @@ describe('circuit visual geometry', () => {
           expect(Math.max(...axes.map(axis => Math.abs(normal.dot(axis))))).toBeGreaterThan(0.9999)
         }
         quadOffset += layoutQuads
+      }
+
+      const [, barrierPostHeight] = TRACKSIDE_BARRIER_POST_LAYOUT.size
+      const barrierPostBaseY = Math.max(
+        0,
+        TRACKSIDE_BARRIER_POST_LAYOUT.centerY - barrierPostHeight / 2,
+      )
+      const exposedBarrierPostHeight = (
+        TRACKSIDE_BARRIER_POST_LAYOUT.centerY
+        + barrierPostHeight / 2
+        - barrierPostBaseY
+      )
+      const barrierPostPanels = Math.ceil(exposedBarrierPostHeight / 1)
+      const barrierPostQuadsPerSide = barrierPostPanels * 4 + 1
+      const barrierPostQuads = (
+        TRACKSIDE_BARRIER_POST_LAYOUT.count * 2 * barrierPostQuadsPerSide
+      )
+      const firstBarrierQuad = quadOffset
+      for (
+        let post = 0;
+        post < TRACKSIDE_BARRIER_POST_LAYOUT.count;
+        post += 1
+      ) {
+        const tangent = preset.curve
+          .getTangentAt(post / TRACKSIDE_BARRIER_POST_LAYOUT.count)
+          .normalize()
+        const side = new THREE.Vector3().crossVectors(
+          new THREE.Vector3(0, 1, 0),
+          tangent,
+        ).normalize()
+        const axes = [tangent, side, new THREE.Vector3(0, 1, 0)]
+        const postFirstQuad = quadOffset + post * barrierPostQuadsPerSide * 2
+        for (
+          let quad = postFirstQuad;
+          quad < postFirstQuad + barrierPostQuadsPerSide * 2;
+          quad += 1
+        ) {
+          const normal = new THREE.Vector3().fromBufferAttribute(normals, quad * 4)
+          expect(normal.length()).toBeCloseTo(1, 5)
+          expect(
+            Math.max(...axes.map(axis => Math.abs(normal.dot(axis)))),
+          ).toBeGreaterThan(0.9999)
+        }
+      }
+      expectedQuads += barrierPostQuads
+      quadOffset += barrierPostQuads
+
+      const firstBarrierU = Array.from(
+        { length: 4 },
+        (_, vertex) => uvs.getX(firstBarrierQuad * 4 + vertex),
+      )
+      const firstBarrierV = Array.from(
+        { length: 4 },
+        (_, vertex) => uvs.getY(firstBarrierQuad * 4 + vertex),
+      )
+      const mappedBarrierAspect = (
+        (Math.max(...firstBarrierU) - Math.min(...firstBarrierU))
+        / (Math.max(...firstBarrierV) - Math.min(...firstBarrierV))
+      )
+      expect(mappedBarrierAspect).toBeCloseTo(
+        TRACKSIDE_BARRIER_POST_LAYOUT.size[0]
+          / (exposedBarrierPostHeight / barrierPostPanels),
+        6,
+      )
+
+      const timingMastPolePanels = preset.venue === 'apex'
+        ? Math.ceil(APEX_TIMING_MAST_LAYOUT.pole.size[1] / 1)
+        : 0
+      const timingMastBarPanels = preset.venue === 'apex'
+        ? APEX_TIMING_MAST_LAYOUT.crossbars.reduce((sum, crossbar) => (
+          sum + Math.ceil(crossbar.size[0] / 2)
+        ), 0)
+        : 0
+      const timingMastQuads = preset.venue === 'apex'
+        ? timingMastPolePanels * 4
+          + 1
+          + timingMastBarPanels * 4
+          + APEX_TIMING_MAST_LAYOUT.crossbars.length * 2
+        : 0
+      if (timingMastQuads > 0) {
+        const tangent = preset.curve
+          .getTangentAt(APEX_TIMING_MAST_LAYOUT.progress)
+          .normalize()
+        const side = new THREE.Vector3().crossVectors(
+          new THREE.Vector3(0, 1, 0),
+          tangent,
+        ).normalize()
+        const axes = [tangent, side, new THREE.Vector3(0, 1, 0)]
+        for (let quad = quadOffset; quad < quadOffset + timingMastQuads; quad += 1) {
+          const normal = new THREE.Vector3().fromBufferAttribute(normals, quad * 4)
+          expect(normal.length()).toBeCloseTo(1, 5)
+          expect(
+            Math.max(...axes.map(axis => Math.abs(normal.dot(axis)))),
+          ).toBeGreaterThan(0.9999)
+        }
+        expectedQuads += timingMastQuads
       }
 
       expect(positions.count).toBe(expectedQuads * 4)
@@ -322,14 +449,33 @@ describe('circuit visual geometry', () => {
         )
         return sum + Math.ceil((postTopY - postBaseY) / 1)
       }, 0)
-      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.crossbarFront]).toBe(expectedBarPanels)
-      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.upright]).toBe(expectedPostPanels * 4)
-      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.underside]).toBe(expectedBarPanels)
+      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.crossbarFront]).toBe(
+        expectedBarPanels + timingMastBarPanels,
+      )
+      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.upright]).toBe(
+        expectedPostPanels * 4
+          + barrierPostPanels * TRACKSIDE_BARRIER_POST_LAYOUT.count * 2 * 4
+          + timingMastPolePanels * 4,
+      )
+      expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.underside]).toBe(
+        expectedBarPanels + timingMastBarPanels,
+      )
       expect(variantCounts[GANTRY_STRUCTURE_VARIANTS.serviceBackEnd]).toBe(
-        expectedBarPanels * 2 + layouts.length * 2 + expectedPostPanels * 4,
+        expectedBarPanels * 2
+          + layouts.length * 2
+          + expectedPostPanels * 4
+          + TRACKSIDE_BARRIER_POST_LAYOUT.count * 2
+          + (preset.venue === 'apex'
+            ? timingMastBarPanels * 2
+              + APEX_TIMING_MAST_LAYOUT.crossbars.length * 2
+              + 1
+            : 0),
       )
       expect(geometry.boundingBox.min.y).toBeCloseTo(0, 5)
-      expect(geometry.boundingBox.max.y).toBeCloseTo(7.562, 5)
+      expect(geometry.boundingBox.max.y).toBeCloseTo(
+        preset.venue === 'apex' ? 17.337 : 7.562,
+        5,
+      )
       geometry.dispose()
     }
   })
@@ -685,11 +831,23 @@ describe('circuit visual geometry', () => {
         ? Math.ceil(layout.pitWall.size[2] / layout.pitWall.maxPanelLength)
         : 0
       const pitWallFaces = layout.pitWall ? pitWallPanels * 2 + 2 : 0
+      const extraBoxTints = preset.venue === 'apex'
+        ? Array.from(
+            { length: MARSHAL_POST_PROGRESS.length },
+            () => APEX_MARSHAL_POST_ROOF.color,
+          )
+        : preset.venue === 'temple'
+          ? [
+              TEMPLE_TIMING_TOWER_CAP.color,
+              ...TEMPLE_TIMING_TOWER_FLOOR_BANDS.map(band => band.color),
+            ]
+          : []
+      const extraBoxCount = extraBoxTints.length
       const expectedQuadrants = {
         '0,1': buildingPanels * 2,
-        '1,1': 2 + roofPanels * 2 + 2 + pitWallFaces,
-        '0,0': roofPanels,
-        '1,0': roofPanels,
+        '1,1': 2 + roofPanels * 2 + 2 + pitWallFaces + extraBoxCount * 4,
+        '0,0': roofPanels + extraBoxCount,
+        '1,0': roofPanels + extraBoxCount,
       }
       const faceCount = Object.values(expectedQuadrants).reduce(
         (count, value) => count + value,
@@ -702,11 +860,13 @@ describe('circuit visual geometry', () => {
       const positions = geometry.getAttribute('position')
       const normals = geometry.getAttribute('normal')
       const uvs = geometry.getAttribute('uv')
+      const colors = geometry.getAttribute('color')
       const quadrantCounts = { '0,1': 0, '1,1': 0, '0,0': 0, '1,0': 0 }
 
       expect(positions.count).toBe(faceCount * 4)
       expect(normals.count).toBe(positions.count)
       expect(uvs.count).toBe(positions.count)
+      expect(colors.count).toBe(positions.count)
       expect(geometry.getIndex().count).toBe(faceCount * 6)
       expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
       expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
@@ -714,8 +874,13 @@ describe('circuit visual geometry', () => {
         Number.isFinite(value) && value > 0 && value < 1
       ))).toBe(true)
       expect(geometry.boundingBox.min.y).toBeCloseTo(0, 4)
+      const expectedMaxY = preset.venue === 'temple'
+        ? TEMPLE_TIMING_TOWER_CAP.centerY
+          + TEMPLE_TIMING_TOWER_CAP.size[1] / 2
+          + 0.012
+        : layout.roof.centerY + layout.roof.size[1] / 2 + 0.012
       expect(geometry.boundingBox.max.y).toBeCloseTo(
-        layout.roof.centerY + layout.roof.size[1] / 2 + 0.012,
+        expectedMaxY,
         4,
       )
 
@@ -733,6 +898,7 @@ describe('circuit visual geometry', () => {
         const row = Math.min(...faceV) > 0.5 ? 1 : 0
         const quadrant = `${column},${row}`
         const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+        const color = new THREE.Color().fromBufferAttribute(colors, vertex)
         quadrantCounts[quadrant] += 1
 
         expect((Math.max(...faceU) < 0.5) || (Math.min(...faceU) > 0.5)).toBe(true)
@@ -740,13 +906,39 @@ describe('circuit visual geometry', () => {
         if (quadrant === '0,0') expect(normal.y).toBeGreaterThan(0.99)
         else if (quadrant === '1,0') expect(normal.y).toBeLessThan(-0.99)
         else expect(Math.abs(normal.y)).toBeLessThan(0.01)
+        if (face >= faceCount - extraBoxCount * 6) {
+          const extraFace = face - (faceCount - extraBoxCount * 6)
+          const tint = new THREE.Color(extraBoxTints[Math.floor(extraFace / 6)])
+          expect(color.r).toBeCloseTo(tint.r, 6)
+          expect(color.g).toBeCloseTo(tint.g, 6)
+          expect(color.b).toBeCloseTo(tint.b, 6)
+        } else {
+          expect(color.r).toBeCloseTo(1, 6)
+          expect(color.g).toBeCloseTo(1, 6)
+          expect(color.b).toBeCloseTo(1, 6)
+        }
       }
 
       expect(quadrantCounts).toEqual(expectedQuadrants)
+      if (preset.venue === 'apex' || preset.venue === 'temple') {
+        const scenery = createCircuitSceneryGeometry(
+          preset.curve,
+          preset.venue,
+          preset.roadWidth,
+        )
+        const expectedCombined = preset.venue === 'apex'
+          ? { positions: 21_012, indices: 36_708 }
+          : { positions: 14_864, indices: 26_424 }
+        expect(positions.count + scenery.getAttribute('position').count)
+          .toBe(expectedCombined.positions)
+        expect(geometry.getIndex().count + scenery.getIndex().count)
+          .toBe(expectedCombined.indices)
+        scenery.dispose()
+      }
       totalFaceCount += faceCount
       geometry.dispose()
     }
-    expect(totalFaceCount).toBe(140)
+    expect(totalFaceCount).toBe(206)
   })
 
   it('replaces every low-poly palm crown with one road-facing atlas billboard', () => {
@@ -883,60 +1075,147 @@ describe('circuit visual geometry', () => {
     geometry.dispose()
   })
 
-  it('maps every Apex main-straight tent canopy to one atlas quadrant', () => {
+  it('maps every Apex tent, tower crown, and hospitality roof to the canopy atlas', () => {
     const apex = TRACK_PRESETS.find(track => track.venue === 'apex')
     const geometry = createApexTentCanopyGeometry(apex.curve)
     const positions = geometry.getAttribute('position')
     const normals = geometry.getAttribute('normal')
     const uvs = geometry.getAttribute('uv')
-    const template = new THREE.ConeGeometry(1, 1, 4)
-    const verticesPerCanopy = template.getAttribute('position').count
-    const indicesPerCanopy = template.getIndex().count
-    template.dispose()
+    const tentTemplate = new THREE.ConeGeometry(1, 1, 4)
+    const crownTemplate = new THREE.ConeGeometry(1, 1, 10)
+    const roofTemplate = new THREE.BoxGeometry(1, 1, 1)
+    const tentVertices = tentTemplate.getAttribute('position').count
+    const tentIndices = tentTemplate.getIndex().count
+    const crownVertices = crownTemplate.getAttribute('position').count
+    const crownIndices = crownTemplate.getIndex().count
+    const roofVertices = roofTemplate.getAttribute('position').count
+    const roofIndices = roofTemplate.getIndex().count
+    tentTemplate.dispose()
+    crownTemplate.dispose()
+    roofTemplate.dispose()
+    const tower = APEX_VENUE_FACADE_LAYOUT.tower
+    const crown = tower.crown
+    const hospitality = APEX_VENUE_FACADE_LAYOUT.hospitality
+    const expectedVertices = (
+      APEX_TENT_CANOPY_LAYOUT.length * tentVertices
+      + crown.count * crownVertices
+      + hospitality.length * roofVertices
+    )
+    const expectedIndices = (
+      APEX_TENT_CANOPY_LAYOUT.length * tentIndices
+      + crown.count * crownIndices
+      + hospitality.length * roofIndices
+    )
+    const atlasInset = 1 / 1024
 
     expect(Object.isFrozen(APEX_TENT_CANOPY_LAYOUT)).toBe(true)
     expect(APEX_TENT_CANOPY_LAYOUT).toHaveLength(9)
     expect(APEX_TENT_CANOPY_LAYOUT.every(Object.isFrozen)).toBe(true)
-    expect(positions.count).toBe(APEX_TENT_CANOPY_LAYOUT.length * verticesPerCanopy)
+    expect(Object.isFrozen(crown)).toBe(true)
+    expect(Object.isFrozen(crown.variants)).toBe(true)
+    expect(crown.count).toBe(8)
+    expect(crown.variants).toHaveLength(crown.count)
+    expect(hospitality).toHaveLength(4)
+    expect(hospitality.every(building => Object.isFrozen(building.roof))).toBe(true)
+    expect(hospitality.every(building => Object.isFrozen(building.roof.size))).toBe(true)
+    expect(expectedVertices).toBe(611)
+    expect(expectedIndices).toBe(840)
+    expect(positions.count).toBe(expectedVertices)
     expect(normals.count).toBe(positions.count)
     expect(uvs.count).toBe(positions.count)
-    expect(geometry.getIndex().count).toBe(
-      APEX_TENT_CANOPY_LAYOUT.length * indicesPerCanopy,
-    )
+    expect(geometry.getIndex().count).toBe(expectedIndices)
     expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
     expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
     expect(Array.from(uvs.array).every(value => (
       Number.isFinite(value) && value > 0 && value < 1
     ))).toBe(true)
 
-    for (let index = 0; index < APEX_TENT_CANOPY_LAYOUT.length; index += 1) {
-      const canopy = APEX_TENT_CANOPY_LAYOUT[index]
-      const vertexStart = index * verticesPerCanopy
-      const faceU = Array.from(
-        { length: verticesPerCanopy },
+    const indices = geometry.getIndex()
+    for (let triangle = 0; triangle < indices.count; triangle += 3) {
+      const indexA = indices.getX(triangle)
+      const indexB = indices.getX(triangle + 1)
+      const indexC = indices.getX(triangle + 2)
+      const pointA = new THREE.Vector3().fromBufferAttribute(positions, indexA)
+      const pointB = new THREE.Vector3().fromBufferAttribute(positions, indexB)
+      const pointC = new THREE.Vector3().fromBufferAttribute(positions, indexC)
+      const geometricNormal = pointB.sub(pointA).cross(pointC.sub(pointA)).normalize()
+      const vertexNormal = new THREE.Vector3()
+        .fromBufferAttribute(normals, indexA)
+        .add(new THREE.Vector3().fromBufferAttribute(normals, indexB))
+        .add(new THREE.Vector3().fromBufferAttribute(normals, indexC))
+        .normalize()
+      expect(geometricNormal.dot(vertexNormal)).toBeGreaterThan(0)
+    }
+
+    const expectPrimitive = ({ vertexStart, vertexCount, variant, minY, maxY }) => {
+      const primitiveU = Array.from(
+        { length: vertexCount },
         (_, offset) => uvs.getX(vertexStart + offset),
       )
-      const faceV = Array.from(
-        { length: verticesPerCanopy },
+      const primitiveV = Array.from(
+        { length: vertexCount },
         (_, offset) => uvs.getY(vertexStart + offset),
       )
-      const faceY = Array.from(
-        { length: verticesPerCanopy },
+      const primitiveY = Array.from(
+        { length: vertexCount },
         (_, offset) => positions.getY(vertexStart + offset),
       )
-      const expectedColumn = canopy.variant % 2
-      const expectedAtlasRow = Math.floor(canopy.variant / 2)
+      const column = variant % 2
+      const row = Math.floor(variant / 2)
 
-      expect(Math.min(...faceU)).toBeGreaterThan(expectedColumn * 0.5)
-      expect(Math.max(...faceU)).toBeLessThan((expectedColumn + 1) * 0.5)
-      if (expectedAtlasRow === 0) {
-        expect(Math.min(...faceV)).toBeGreaterThan(0.5)
-      } else {
-        expect(Math.max(...faceV)).toBeLessThan(0.5)
-      }
-      expect(Math.min(...faceY)).toBeCloseTo(canopy.centerY - canopy.height / 2, 5)
-      expect(Math.max(...faceY)).toBeCloseTo(canopy.centerY + canopy.height / 2, 5)
+      expect(Math.min(...primitiveU)).toBeCloseTo(column * 0.5 + atlasInset, 6)
+      expect(Math.max(...primitiveU)).toBeCloseTo(
+        (column + 1) * 0.5 - atlasInset,
+        6,
+      )
+      expect(Math.min(...primitiveV)).toBeCloseTo(
+        (row === 0 ? 0.5 : 0) + atlasInset,
+        6,
+      )
+      expect(Math.max(...primitiveV)).toBeCloseTo(
+        (row === 0 ? 1 : 0.5) - atlasInset,
+        6,
+      )
+      expect(Math.min(...primitiveY)).toBeCloseTo(minY, 5)
+      expect(Math.max(...primitiveY)).toBeCloseTo(maxY, 5)
     }
+
+    let vertexStart = 0
+    for (let index = 0; index < APEX_TENT_CANOPY_LAYOUT.length; index += 1) {
+      const canopy = APEX_TENT_CANOPY_LAYOUT[index]
+      expectPrimitive({
+        vertexStart,
+        vertexCount: tentVertices,
+        variant: canopy.variant,
+        minY: canopy.centerY - canopy.height / 2,
+        maxY: canopy.centerY + canopy.height / 2,
+      })
+      vertexStart += tentVertices
+    }
+
+    for (let peak = 0; peak < crown.count; peak += 1) {
+      expectPrimitive({
+        vertexStart,
+        vertexCount: crownVertices,
+        variant: crown.variants[peak],
+        minY: crown.centerY - crown.height / 2,
+        maxY: crown.centerY + crown.height / 2,
+      })
+      vertexStart += crownVertices
+    }
+
+    for (const building of hospitality) {
+      const [, roofHeight] = building.roof.size
+      expectPrimitive({
+        vertexStart,
+        vertexCount: roofVertices,
+        variant: building.roof.variant,
+        minY: building.roof.centerY - roofHeight / 2,
+        maxY: building.roof.centerY + roofHeight / 2,
+      })
+      vertexStart += roofVertices
+    }
+    expect(vertexStart).toBe(positions.count)
 
     expect(APEX_TENT_CANOPY_LAYOUT.map(canopy => canopy.along)).toEqual([
       -28, -21, -14, -7, 0, 7, 14, 21, 28,
@@ -944,6 +1223,15 @@ describe('circuit visual geometry', () => {
     expect(APEX_TENT_CANOPY_LAYOUT.map(canopy => canopy.variant)).toEqual([
       0, 1, 2, 3, 0, 1, 2, 3, 0,
     ])
+    expect(crown.variants).toEqual([0, 3, 0, 3, 0, 3, 0, 3])
+    expect(hospitality.map(building => building.roof.variant)).toEqual([0, 3, 0, 3])
+    expect(geometry.name).toBe('apex-canopy-surface-geometry')
+    expect(geometry.boundingBox.min.x).toBeCloseTo(-161.857025, 5)
+    expect(geometry.boundingBox.min.y).toBeCloseTo(3.595, 5)
+    expect(geometry.boundingBox.min.z).toBeCloseTo(-70.43837, 5)
+    expect(geometry.boundingBox.max.x).toBeCloseTo(88.163956, 5)
+    expect(geometry.boundingBox.max.y).toBeCloseTo(30.25, 5)
+    expect(geometry.boundingBox.max.z).toBeCloseTo(175.946945, 5)
 
     geometry.dispose()
   })
@@ -1041,9 +1329,22 @@ describe('circuit visual geometry', () => {
       temple: 18,
     }
     let totalBoardCount = 0
+    const totalSurfaceCounts = {
+      front: 0,
+      rear: 0,
+      nearEnd: 0,
+      farEnd: 0,
+      bottom: 0,
+      top: 0,
+    }
 
     for (const preset of TRACK_PRESETS) {
-      const layout = getBrakingBoardLayout(
+      const boardLayout = getBrakingBoardLayout(
+        preset.curve,
+        preset.venue,
+        preset.roadWidth,
+      )
+      const graphicsLayout = getBrakingBoardGraphicsLayout(
         preset.curve,
         preset.venue,
         preset.roadWidth,
@@ -1057,24 +1358,27 @@ describe('circuit visual geometry', () => {
       const normals = geometry.getAttribute('normal')
       const uvs = geometry.getAttribute('uv')
 
-      expect(Object.isFrozen(layout)).toBe(true)
-      expect(layout).toHaveLength(expectedBoardCounts[preset.venue])
-      expect(layout.every(Object.isFrozen)).toBe(true)
-      expect(positions.count).toBe(layout.length * 4)
+      expect(Object.isFrozen(boardLayout)).toBe(true)
+      expect(boardLayout).toHaveLength(expectedBoardCounts[preset.venue])
+      expect(boardLayout.every(Object.isFrozen)).toBe(true)
+      expect(Object.isFrozen(graphicsLayout)).toBe(true)
+      expect(graphicsLayout).toHaveLength(boardLayout.length * 6)
+      expect(graphicsLayout.every(Object.isFrozen)).toBe(true)
+      expect(positions.count).toBe(graphicsLayout.length * 4)
       expect(normals.count).toBe(positions.count)
       expect(uvs.count).toBe(positions.count)
-      expect(geometry.getIndex().count).toBe(layout.length * 6)
+      expect(geometry.getIndex().count).toBe(graphicsLayout.length * 6)
       expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
       expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
       expect(Array.from(uvs.array).every(value => (
         Number.isFinite(value) && value > 0 && value < 1
       ))).toBe(true)
 
-      for (let index = 0; index < layout.length; index += 1) {
-        const board = layout[index]
+      for (let index = 0; index < graphicsLayout.length; index += 1) {
+        const panel = graphicsLayout[index]
         const vertex = index * 4
-        const expectedColumn = board.variant % 2
-        const expectedAtlasRow = Math.floor(board.variant / 2)
+        const expectedColumn = panel.variant % 2
+        const expectedAtlasRow = Math.floor(panel.variant / 2)
         const faceU = Array.from(
           { length: 4 },
           (_, offset) => uvs.getX(vertex + offset),
@@ -1083,17 +1387,24 @@ describe('circuit visual geometry', () => {
           { length: 4 },
           (_, offset) => uvs.getY(vertex + offset),
         )
-        const approachNormal = preset.curve.getTangentAt(board.progress)
-          .normalize()
-          .multiplyScalar(-1)
+        const tangent = preset.curve.getTangentAt(panel.progress).normalize()
+        const side = new THREE.Vector3(tangent.z, 0, -tangent.x).normalize()
+        const expectedNormal = panel.normalAxis === 'lateral'
+          ? side.multiplyScalar(panel.normalSign)
+          : panel.normalAxis === 'along'
+            ? tangent.multiplyScalar(panel.normalSign)
+            : new THREE.Vector3(0, panel.normalSign, 0)
         const actualNormal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
         const distanceBeforeCorner = (
-          ((board.cornerProgress - board.progress) % 1 + 1) % 1
+          ((panel.cornerProgress - panel.progress) % 1 + 1) % 1
         ) * preset.length
 
-        expect(board.label).toBe(BRAKING_BOARD_LABELS[board.variant])
+        expect(BRAKING_BOARD_LABELS).toContain(panel.label)
+        expect(panel.variant).toBe(panel.surface === 'front'
+          ? BRAKING_BOARD_LABELS.indexOf(panel.label)
+          : 3)
         expect(distanceBeforeCorner).toBeCloseTo(
-          board.label * BRAKING_BOARD_WORLD_SCALE,
+          panel.label * BRAKING_BOARD_WORLD_SCALE,
           5,
         )
         expect(Math.min(...faceU)).toBeGreaterThan(expectedColumn * 0.5)
@@ -1103,41 +1414,88 @@ describe('circuit visual geometry', () => {
         } else {
           expect(Math.max(...faceV)).toBeLessThan(0.5)
         }
-        expect(actualNormal.dot(approachNormal)).toBeGreaterThan(0.99)
-        expect(Math.min(
-          ...Array.from(
-            { length: 4 },
-            (_, offset) => positions.getY(vertex + offset),
-          ),
-        )).toBeCloseTo(BRAKING_BOARD_PANEL.centerY - BRAKING_BOARD_PANEL.height / 2, 5)
+        expect(actualNormal.dot(expectedNormal)).toBeGreaterThan(0.99)
+        const faceY = Array.from(
+          { length: 4 },
+          (_, offset) => positions.getY(vertex + offset),
+        )
+        if (panel.normalAxis === 'vertical') {
+          expect(faceY.every(y => Math.abs(y - panel.centerY) < 0.00001)).toBe(true)
+        } else {
+          expect(Math.min(...faceY)).toBeCloseTo(panel.centerY - panel.height / 2, 5)
+        }
+        if (panel.atlasCropU || panel.atlasCropV) {
+          const uvAspect = (Math.max(...faceU) - Math.min(...faceU))
+            / (Math.max(...faceV) - Math.min(...faceV))
+          expect(uvAspect).toBeCloseTo(panel.width / panel.height, 4)
+        }
+        totalSurfaceCounts[panel.surface] += 1
       }
 
-      for (let index = 0; index < layout.length; index += BRAKING_BOARD_LABELS.length) {
-        expect(layout.slice(index, index + BRAKING_BOARD_LABELS.length)
+      for (let index = 0; index < boardLayout.length; index += BRAKING_BOARD_LABELS.length) {
+        expect(boardLayout.slice(index, index + BRAKING_BOARD_LABELS.length)
           .map(board => board.label)).toEqual(BRAKING_BOARD_LABELS)
       }
+      for (let index = 0; index < graphicsLayout.length; index += 6) {
+        expect(graphicsLayout.slice(index, index + 6).map(panel => panel.surface)).toEqual([
+          'front',
+          'rear',
+          'nearEnd',
+          'farEnd',
+          'bottom',
+          'top',
+        ])
+        expect(new Set(graphicsLayout.slice(index, index + 6).map(panel => panel.label)).size)
+          .toBe(1)
+      }
 
-      totalBoardCount += layout.length
+      totalBoardCount += boardLayout.length
       geometry.dispose()
     }
 
     expect(totalBoardCount).toBe(54)
+    expect(totalSurfaceCounts).toEqual({
+      front: 54,
+      rear: 54,
+      nearEnd: 54,
+      farEnd: 54,
+      bottom: 54,
+      top: 54,
+    })
   })
 
-  it('maps every player-facing trackside operations panel to its atlas module', () => {
+  it('maps every player-visible trackside operations box face to its atlas module', () => {
     const expectedPanelCounts = {
-      apex: 27,
-      harbour: 8,
-      temple: 8,
+      apex: 134,
+      harbour: 44,
+      temple: 44,
     }
-    const totalKindCounts = {
+    const totalFrontKindCounts = {
       marshalPost: 0,
       broadcastLens: 0,
       pitWallDisplay: 0,
       broadcastCabinet: 0,
     }
+    const totalKindSurfaceCounts = {
+      marshalPost: 0,
+      broadcastLens: 0,
+      pitWallDisplay: 0,
+      broadcastCabinet: 0,
+    }
+    const totalSurfaceCounts = {
+      front: 0,
+      rear: 0,
+      nearEnd: 0,
+      farEnd: 0,
+      top: 0,
+      bottom: 0,
+    }
 
     expect(Object.isFrozen(TRACKSIDE_OPERATIONS_VARIANTS)).toBe(true)
+    expect(Object.isFrozen(TRACKSIDE_OPERATIONS_BODY_LAYOUTS)).toBe(true)
+    expect(Object.values(TRACKSIDE_OPERATIONS_BODY_LAYOUTS).every(
+      body => Object.isFrozen(body) && Object.isFrozen(body.size),
+    )).toBe(true)
     expect(Object.isFrozen(APEX_PIT_WALL_DISPLAY_LAYOUT)).toBe(true)
     expect(APEX_PIT_WALL_DISPLAY_LAYOUT).toHaveLength(14)
     expect(APEX_PIT_WALL_DISPLAY_LAYOUT.every(Object.isFrozen)).toBe(true)
@@ -1189,10 +1547,18 @@ describe('circuit visual geometry', () => {
           new THREE.Vector3(0, 1, 0),
           tangent,
         ).normalize()
-        const expectedNormal = side.multiplyScalar(panel.normalLateralSign)
+        const expectedNormal = panel.normalAxis === 'lateral'
+          ? side.multiplyScalar(panel.normalSign)
+          : panel.normalAxis === 'along'
+            ? tangent.multiplyScalar(panel.normalSign)
+            : new THREE.Vector3(0, panel.normalSign, 0)
         const actualNormal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
 
-        expect(panel.variant).toBe(TRACKSIDE_OPERATIONS_VARIANTS[panel.kind])
+        expect(panel.variant).toBe(
+          panel.surface === 'front'
+            ? TRACKSIDE_OPERATIONS_VARIANTS[panel.kind]
+            : TRACKSIDE_OPERATIONS_VARIANTS.broadcastCabinet,
+        )
         expect(Math.min(...faceU)).toBeGreaterThan(expectedColumn * 0.5)
         expect(Math.max(...faceU)).toBeLessThan((expectedColumn + 1) * 0.5)
         if (expectedAtlasRow === 0) {
@@ -1201,36 +1567,76 @@ describe('circuit visual geometry', () => {
           expect(Math.max(...faceV)).toBeLessThan(0.5)
         }
         expect(actualNormal.dot(expectedNormal)).toBeGreaterThan(0.99)
-        expect(Math.min(
-          ...Array.from(
-            { length: 4 },
-            (_, offset) => positions.getY(vertex + offset),
-          ),
-        )).toBeCloseTo(panel.centerY - panel.height / 2, 5)
-        totalKindCounts[panel.kind] += 1
+        const faceYs = Array.from(
+          { length: 4 },
+          (_, offset) => positions.getY(vertex + offset),
+        )
+        if (panel.normalAxis === 'vertical') {
+          expect(Math.min(...faceYs)).toBeCloseTo(panel.centerY, 5)
+          expect(Math.max(...faceYs)).toBeCloseTo(panel.centerY, 5)
+        } else {
+          expect(Math.min(...faceYs)).toBeCloseTo(panel.centerY - panel.height / 2, 5)
+          expect(Math.max(...faceYs)).toBeCloseTo(panel.centerY + panel.height / 2, 5)
+        }
+        if (panel.cropToPhysicalAspect) {
+          expect(
+            (Math.max(...faceU) - Math.min(...faceU))
+            / (Math.max(...faceV) - Math.min(...faceV)),
+          ).toBeCloseTo(panel.width / panel.height, 5)
+        }
+        if (panel.surface === 'front') totalFrontKindCounts[panel.kind] += 1
+        totalKindSurfaceCounts[panel.kind] += 1
+        totalSurfaceCounts[panel.surface] += 1
       }
 
       geometry.dispose()
     }
 
-    expect(totalKindCounts).toEqual({
+    expect(totalFrontKindCounts).toEqual({
       marshalPost: 5,
       broadcastLens: 12,
       pitWallDisplay: 14,
       broadcastCabinet: 12,
     })
+    expect(totalKindSurfaceCounts).toEqual({
+      marshalPost: 20,
+      broadcastLens: 72,
+      pitWallDisplay: 70,
+      broadcastCabinet: 60,
+    })
+    expect(totalSurfaceCounts).toEqual({
+      front: 43,
+      rear: 43,
+      nearEnd: 43,
+      farEnd: 43,
+      top: 38,
+      bottom: 12,
+    })
   })
 
   it('maps all start signals, floodlight faces, and tunnel luminaires to one atlas', () => {
-    const expectedPanelCounts = { apex: 38, harbour: 22, temple: 10 }
+    const expectedPanelCounts = { apex: 94, harbour: 22, temple: 10 }
     const totalKindCounts = {
       floodlightFront: 0,
       startSignal: 0,
       tunnelLuminaire: 0,
       floodlightRear: 0,
     }
+    const apexFloodlightSurfaceCounts = {
+      front: 0,
+      rear: 0,
+      nearEnd: 0,
+      farEnd: 0,
+      top: 0,
+      bottom: 0,
+    }
 
     expect(Object.isFrozen(TRACK_LIGHTING_GRAPHICS_VARIANTS)).toBe(true)
+    expect(Object.isFrozen(APEX_FLOODLIGHT_LAYOUT)).toBe(true)
+    expect(Object.isFrozen(APEX_FLOODLIGHT_LAYOUT.pole)).toBe(true)
+    expect(Object.isFrozen(APEX_FLOODLIGHT_LAYOUT.pole.size)).toBe(true)
+    expect(Object.isFrozen(APEX_FLOODLIGHT_LAYOUT.head)).toBe(true)
+    expect(Object.isFrozen(APEX_FLOODLIGHT_LAYOUT.head.size)).toBe(true)
 
     for (const preset of TRACK_PRESETS) {
       const layout = getTrackLightingGraphicsLayout(
@@ -1274,11 +1680,13 @@ describe('circuit visual geometry', () => {
           (_, offset) => uvs.getY(vertex + offset),
         )
         const actualNormal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
-        const expectedNormal = panel.orientation === 'down'
-          ? new THREE.Vector3(0, -1, 0)
-          : preset.curve.getTangentAt(panel.progress)
-            .normalize()
-            .multiplyScalar(panel.normalTangentSign)
+        const tangent = preset.curve.getTangentAt(panel.progress).normalize()
+        const side = new THREE.Vector3(tangent.z, 0, -tangent.x).normalize()
+        const expectedNormal = panel.normalAxis === 'lateral'
+          ? side.multiplyScalar(panel.normalSign)
+          : panel.normalAxis === 'along'
+            ? tangent.multiplyScalar(panel.normalSign)
+            : new THREE.Vector3(0, panel.normalSign, 0)
 
         expect(panel.variant).toBe(TRACK_LIGHTING_GRAPHICS_VARIANTS[panel.kind])
         expect(Math.min(...faceU)).toBeGreaterThan(expectedColumn * 0.5)
@@ -1289,7 +1697,7 @@ describe('circuit visual geometry', () => {
           expect(Math.max(...faceV)).toBeLessThan(0.5)
         }
         expect(actualNormal.dot(expectedNormal)).toBeGreaterThan(0.99)
-        if (panel.orientation === 'down') {
+        if (panel.normalAxis === 'vertical') {
           expect(Array.from(
             { length: 4 },
             (_, offset) => positions.getY(vertex + offset),
@@ -1300,7 +1708,15 @@ describe('circuit visual geometry', () => {
             (_, offset) => positions.getY(vertex + offset),
           ))).toBeCloseTo(panel.centerY - panel.height / 2, 5)
         }
+        if (panel.atlasCropU || panel.atlasCropV) {
+          const uvAspect = (Math.max(...faceU) - Math.min(...faceU))
+            / (Math.max(...faceV) - Math.min(...faceV))
+          expect(uvAspect).toBeCloseTo(panel.width / panel.height, 4)
+        }
         totalKindCounts[panel.kind] += 1
+        if (preset.venue === 'apex' && panel.kind.startsWith('floodlight')) {
+          apexFloodlightSurfaceCounts[panel.surface] += 1
+        }
       }
 
       geometry.dispose()
@@ -1310,7 +1726,15 @@ describe('circuit visual geometry', () => {
       floodlightFront: 14,
       startSignal: 30,
       tunnelLuminaire: 12,
-      floodlightRear: 14,
+      floodlightRear: 70,
+    })
+    expect(apexFloodlightSurfaceCounts).toEqual({
+      front: 14,
+      rear: 14,
+      nearEnd: 14,
+      farEnd: 14,
+      top: 14,
+      bottom: 14,
     })
   })
 
@@ -1378,6 +1802,222 @@ describe('circuit visual geometry', () => {
     expect(START_LIGHT_LATERALS).toEqual([...START_LIGHT_LATERALS].sort((a, b) => a - b))
     expect(new Set(START_LIGHT_LATERALS).size).toBe(5)
     expect(START_LIGHT_LATERALS.every(lateral => Math.abs(lateral) < ROAD_WIDTH / 2)).toBe(true)
+  })
+
+  it('moves every kerb box into one tintable, physically scaled atlas geometry', () => {
+    const atlasInset = 1 / 1024
+    const palettes = {
+      apex: ['#d23d43', '#fff4df'],
+      harbour: ['#d23d43', '#fff4df'],
+      temple: ['#d23d43', '#fff4df', '#168447'],
+    }
+    const expectedBounds = {
+      apex: {
+        min: [-208.322662, 0.055, -105.40168],
+        max: [172.451538, 0.185, 143.954956],
+      },
+      harbour: {
+        min: [-202.361298, 0, -82.232239],
+        max: [177.152832, 0.185, 78.410667],
+      },
+      temple: {
+        min: [-253.606476, 0.055, -143.407776],
+        max: [282.978638, 0.185, 132.492737],
+      },
+    }
+    const expectedKinds = {
+      apex: { boundary: 574, corner: 35, chicane: 0 },
+      harbour: { boundary: 574, corner: 25, chicane: 13 },
+      temple: { boundary: 574, corner: 30, chicane: 0 },
+    }
+
+    for (const preset of TRACK_PRESETS) {
+      const layout = getKerbSurfaceLayout(
+        preset.curve,
+        preset.venue,
+        preset.roadWidth,
+      )
+      const geometry = createKerbSurfaceGeometry(
+        preset.curve,
+        preset.venue,
+        preset.roadWidth,
+      )
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+      const colors = geometry.getAttribute('color')
+      const indices = geometry.getIndex()
+      const boxCount = layout.length
+      const kindCounts = Object.fromEntries(
+        ['boundary', 'corner', 'chicane'].map(kind => [
+          kind,
+          layout.filter(kerb => kerb.kind === kind).length,
+        ]),
+      )
+
+      expect(geometry.name).toBe('shared-kerb-surface-geometry')
+      expect(kindCounts).toEqual(expectedKinds[preset.venue])
+      expect(positions.count).toBe(boxCount * 24)
+      expect(normals.count).toBe(positions.count)
+      expect(uvs.count).toBe(positions.count)
+      expect(colors.count).toBe(positions.count)
+      expect(indices.count).toBe(boxCount * 36)
+      expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(uvs.array).every(value => (
+        Number.isFinite(value) && value > 0 && value < 1
+      ))).toBe(true)
+      expect(Array.from(colors.array).every(Number.isFinite)).toBe(true)
+
+      for (let segment = 0; segment < CURB_SEGMENTS; segment += 1) {
+        const expectedTint = new THREE.Color(
+          palettes[preset.venue][Math.floor(segment / 2) % palettes[preset.venue].length],
+        )
+        for (const sideIndex of [0, 1]) {
+          const kerbIndex = segment * 2 + sideIndex
+          const colorVertex = kerbIndex * 24
+          expect(layout[kerbIndex].kind).toBe('boundary')
+          expect(colors.getX(colorVertex)).toBeCloseTo(expectedTint.r, 5)
+          expect(colors.getY(colorVertex)).toBeCloseTo(expectedTint.g, 5)
+          expect(colors.getZ(colorVertex)).toBeCloseTo(expectedTint.b, 5)
+        }
+      }
+
+      for (const [kerbIndex, kerb] of layout.entries()) {
+        const expectedTint = new THREE.Color(kerb.color)
+        const colorVertex = kerbIndex * 24
+        expect(colors.getX(colorVertex)).toBeCloseTo(expectedTint.r, 5)
+        expect(colors.getY(colorVertex)).toBeCloseTo(expectedTint.g, 5)
+        expect(colors.getZ(colorVertex)).toBeCloseTo(expectedTint.b, 5)
+        expect(kerb.size.every(value => Number.isFinite(value) && value > 0)).toBe(true)
+        expect([
+          KERB_SURFACE_VARIANTS.ribbedTread,
+          KERB_SURFACE_VARIANTS.smoothTread,
+        ]).toContain(kerb.topVariant)
+      }
+
+      const sampledBoxes = new Set([0, 1, CURB_SEGMENTS * 2 - 2, CURB_SEGMENTS * 2 - 1])
+      for (const kind of ['corner', 'chicane']) {
+        const first = layout.findIndex(kerb => kerb.kind === kind)
+        const last = layout.findLastIndex(kerb => kerb.kind === kind)
+        if (first >= 0) sampledBoxes.add(first)
+        if (last >= 0) sampledBoxes.add(last)
+      }
+
+      for (const boxIndex of sampledBoxes) {
+        const kerb = layout[boxIndex]
+        const progress = ((kerb.progress % 1) + 1) % 1
+        const tangent = preset.curve.getTangentAt(progress).normalize()
+        const side = new THREE.Vector3().crossVectors(
+          new THREE.Vector3(0, 1, 0),
+          tangent,
+        ).normalize()
+        const [width, height, length] = kerb.size
+        const physicalCrop = (physicalU, physicalV) => {
+          const maxDimension = Math.max(physicalU, physicalV)
+          return [physicalU / maxDimension, physicalV / maxDimension]
+        }
+        const [sideCropU, sideCropV] = physicalCrop(length, height)
+        const [topCropU, topCropV] = physicalCrop(width, length)
+        const [endCropU, endCropV] = physicalCrop(width, height)
+        const faces = [
+          {
+            vertex: 0,
+            variant: KERB_SURFACE_VARIANTS.edgeFascia,
+            normal: side,
+            cropU: sideCropU,
+            cropV: sideCropV,
+          },
+          {
+            vertex: 4,
+            variant: KERB_SURFACE_VARIANTS.edgeFascia,
+            normal: side.clone().multiplyScalar(-1),
+            cropU: sideCropU,
+            cropV: sideCropV,
+          },
+          {
+            vertex: 8,
+            variant: kerb.topVariant,
+            normal: new THREE.Vector3(0, 1, 0),
+            cropU: topCropU,
+            cropV: topCropV,
+          },
+          {
+            vertex: 12,
+            variant: KERB_SURFACE_VARIANTS.endService,
+            normal: new THREE.Vector3(0, -1, 0),
+            cropU: topCropU,
+            cropV: topCropV,
+          },
+          {
+            vertex: 16,
+            variant: KERB_SURFACE_VARIANTS.endService,
+            normal: tangent,
+            cropU: endCropU,
+            cropV: endCropV,
+          },
+          {
+            vertex: 20,
+            variant: KERB_SURFACE_VARIANTS.endService,
+            normal: tangent.clone().multiplyScalar(-1),
+            cropU: endCropU,
+            cropV: endCropV,
+          },
+        ]
+
+        for (const [faceIndex, face] of faces.entries()) {
+          const vertex = boxIndex * 24 + face.vertex
+          const triangle = boxIndex * 36 + faceIndex * 6
+          const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+          const pointA = new THREE.Vector3().fromBufferAttribute(
+            positions,
+            indices.getX(triangle),
+          )
+          const pointB = new THREE.Vector3().fromBufferAttribute(
+            positions,
+            indices.getX(triangle + 1),
+          )
+          const pointC = new THREE.Vector3().fromBufferAttribute(
+            positions,
+            indices.getX(triangle + 2),
+          )
+          const windingNormal = pointB.sub(pointA).cross(pointC.sub(pointA)).normalize()
+          const column = face.variant % 2
+          const centerU = column * 0.5 + 0.25
+          const centerV = face.variant < 2 ? 0.75 : 0.25
+          const spanU = (0.5 - atlasInset * 2) * face.cropU
+          const spanV = (0.5 - atlasInset * 2) * face.cropV
+          const faceU = Array.from(
+            { length: 4 },
+            (_, offset) => uvs.getX(vertex + offset),
+          )
+          const faceV = Array.from(
+            { length: 4 },
+            (_, offset) => uvs.getY(vertex + offset),
+          )
+
+          expect(normal.dot(face.normal)).toBeGreaterThan(0.99)
+          expect(windingNormal.dot(normal)).toBeGreaterThan(0.99)
+          expect(Math.min(...faceU)).toBeCloseTo(centerU - spanU / 2, 6)
+          expect(Math.max(...faceU)).toBeCloseTo(centerU + spanU / 2, 6)
+          expect(Math.min(...faceV)).toBeCloseTo(centerV - spanV / 2, 6)
+          expect(Math.max(...faceV)).toBeCloseTo(centerV + spanV / 2, 6)
+        }
+      }
+
+      for (const [axis, component] of ['x', 'y', 'z'].entries()) {
+        expect(geometry.boundingBox.min[component]).toBeCloseTo(
+          expectedBounds[preset.venue].min[axis],
+          5,
+        )
+        expect(geometry.boundingBox.max[component]).toBeCloseTo(
+          expectedBounds[preset.venue].max[axis],
+          5,
+        )
+      }
+
+      geometry.dispose()
+    }
   })
 
   it('keeps both kerb ribbons closed through bends at length-scaled density', () => {
@@ -1882,6 +2522,214 @@ describe('circuit visual geometry', () => {
     geometry.dispose()
   })
 
+  it('moves every Harbour apartment roof, balcony, and glass box into one atlas geometry', () => {
+    const harbour = TRACK_PRESETS.find(track => track.venue === 'harbour')
+    const geometry = createHarbourApartmentUpperSurfaceGeometry(harbour.curve)
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const colors = geometry.getAttribute('color')
+    const indices = geometry.getIndex()
+    const atlasInset = 1 / 1024
+    const worldUp = new THREE.Vector3(0, 1, 0)
+    const expectedFloorCounts = [6, 9, 8, 10, 7, 6, 10, 5, 8, 7, 9, 9, 8, 7]
+    const expectedBoxes = []
+
+    for (const [buildingIndex, building] of HARBOUR_BUILDINGS.entries()) {
+      expectedBoxes.push({
+        kind: 'roof',
+        progress: building.progress,
+        lateral: building.lateral,
+        centerY: building.height + 0.45,
+        size: [building.width + 1.1, 0.7, 14],
+        color: '#b9694e',
+      })
+
+      let floorCount = 0
+      for (let floor = 3; floor < building.height - 1; floor += 3.2) {
+        const sideSign = Math.sign(building.lateral) || 1
+        expectedBoxes.push({
+          kind: 'glass',
+          progress: building.progress,
+          lateral: building.lateral - sideSign * (building.width / 2 + 0.08),
+          centerY: floor,
+          size: [0.12, 0.24, 10.8],
+          color: '#172629',
+        })
+        expectedBoxes.push({
+          kind: 'balcony',
+          progress: building.progress,
+          lateral: building.lateral - sideSign * (building.width / 2 + 0.52),
+          centerY: floor - 0.58,
+          size: [1.15, 0.16, 14.2],
+          color: '#d4d0c4',
+        })
+        floorCount += 1
+      }
+      expect(floorCount).toBe(expectedFloorCounts[buildingIndex])
+    }
+
+    const kindCounts = Object.fromEntries(
+      ['roof', 'glass', 'balcony'].map(kind => [
+        kind,
+        expectedBoxes.filter(box => box.kind === kind).length,
+      ]),
+    )
+    expect(HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS).toEqual({
+      roofTop: 0,
+      roofFasciaSoffit: 1,
+      balconyStone: 2,
+      glassBand: 3,
+    })
+    expect(kindCounts).toEqual({ roof: 14, glass: 109, balcony: 109 })
+    expect(expectedBoxes).toHaveLength(232)
+    expect(geometry.name).toBe('harbour-apartment-upper-surface-geometry')
+    expect(positions.count).toBe(5_568)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(colors.count).toBe(positions.count)
+    expect(indices.count).toBe(8_352)
+    expect(indices.count / 3).toBe(2_784)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value > 0 && value < 1
+    ))).toBe(true)
+    expect(Array.from(colors.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(indices.array).every(index => (
+      Number.isInteger(index) && index >= 0 && index < positions.count
+    ))).toBe(true)
+
+    for (const [boxIndex, box] of expectedBoxes.entries()) {
+      const point = harbour.curve.getPointAt(box.progress)
+      const tangent = harbour.curve.getTangentAt(box.progress).normalize()
+      const side = new THREE.Vector3().crossVectors(worldUp, tangent).normalize()
+      const center = point.clone()
+        .addScaledVector(side, box.lateral)
+        .addScaledVector(worldUp, box.centerY)
+      const boxVertex = boxIndex * 24
+      const expectedTint = new THREE.Color(box.color)
+      const axes = [side, worldUp, tangent]
+
+      for (const [axisIndex, axis] of axes.entries()) {
+        const projected = Array.from({ length: 24 }, (_, vertexOffset) => (
+          new THREE.Vector3()
+            .fromBufferAttribute(positions, boxVertex + vertexOffset)
+            .sub(center)
+            .dot(axis)
+        ))
+        expect(Math.min(...projected)).toBeCloseTo(-box.size[axisIndex] / 2, 4)
+        expect(Math.max(...projected)).toBeCloseTo(box.size[axisIndex] / 2, 4)
+      }
+
+      for (let vertexOffset = 0; vertexOffset < 24; vertexOffset += 1) {
+        const vertex = boxVertex + vertexOffset
+        expect(colors.getX(vertex)).toBeCloseTo(expectedTint.r, 5)
+        expect(colors.getY(vertex)).toBeCloseTo(expectedTint.g, 5)
+        expect(colors.getZ(vertex)).toBeCloseTo(expectedTint.b, 5)
+      }
+
+      const defaultVariant = box.kind === 'balcony'
+        ? HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS.balconyStone
+        : HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS.glassBand
+      const faceVariants = box.kind === 'roof'
+        ? [
+          HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS.roofFasciaSoffit,
+          HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS.roofFasciaSoffit,
+          HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS.roofTop,
+          HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS.roofFasciaSoffit,
+          HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS.roofFasciaSoffit,
+          HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS.roofFasciaSoffit,
+        ]
+        : Array.from({ length: 6 }, () => defaultVariant)
+      const [width, height, length] = box.size
+      const faceDimensions = [
+        [length, height],
+        [length, height],
+        [width, length],
+        [width, length],
+        [width, height],
+        [width, height],
+      ]
+      const faceNormals = [
+        side,
+        side.clone().multiplyScalar(-1),
+        worldUp,
+        worldUp.clone().multiplyScalar(-1),
+        tangent,
+        tangent.clone().multiplyScalar(-1),
+      ]
+
+      for (let face = 0; face < 6; face += 1) {
+        const vertex = boxVertex + face * 4
+        const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+        const variant = faceVariants[face]
+        const column = variant % 2
+        const centerU = column * 0.5 + 0.25
+        const centerV = variant < 2 ? 0.75 : 0.25
+        const [physicalU, physicalV] = faceDimensions[face]
+        const maxDimension = Math.max(physicalU, physicalV)
+        const spanU = (0.5 - atlasInset * 2) * physicalU / maxDimension
+        const spanV = (0.5 - atlasInset * 2) * physicalV / maxDimension
+        const faceU = Array.from(
+          { length: 4 },
+          (_, offset) => uvs.getX(vertex + offset),
+        )
+        const faceV = Array.from(
+          { length: 4 },
+          (_, offset) => uvs.getY(vertex + offset),
+        )
+
+        expect(normal.dot(faceNormals[face])).toBeGreaterThan(0.99)
+        expect(Math.min(...faceU)).toBeCloseTo(centerU - spanU / 2, 6)
+        expect(Math.max(...faceU)).toBeCloseTo(centerU + spanU / 2, 6)
+        expect(Math.min(...faceV)).toBeCloseTo(centerV - spanV / 2, 6)
+        expect(Math.max(...faceV)).toBeCloseTo(centerV + spanV / 2, 6)
+      }
+    }
+
+    for (let triangle = 0; triangle < indices.count; triangle += 3) {
+      const vertexA = indices.getX(triangle)
+      const vertexB = indices.getX(triangle + 1)
+      const vertexC = indices.getX(triangle + 2)
+      const pointA = new THREE.Vector3().fromBufferAttribute(positions, vertexA)
+      const pointB = new THREE.Vector3().fromBufferAttribute(positions, vertexB)
+      const pointC = new THREE.Vector3().fromBufferAttribute(positions, vertexC)
+      const geometricNormal = pointB.clone()
+        .sub(pointA)
+        .cross(pointC.clone().sub(pointA))
+        .normalize()
+      const averagedNormal = new THREE.Vector3()
+        .fromBufferAttribute(normals, vertexA)
+        .add(new THREE.Vector3().fromBufferAttribute(normals, vertexB))
+        .add(new THREE.Vector3().fromBufferAttribute(normals, vertexC))
+        .normalize()
+      expect(geometricNormal.dot(averagedNormal)).toBeGreaterThan(0.99)
+    }
+
+    expect(geometry.boundingBox.min.x).toBeCloseTo(-215.229736, 5)
+    expect(geometry.boundingBox.min.y).toBeCloseTo(2.34, 5)
+    expect(geometry.boundingBox.min.z).toBeCloseTo(-96.879921, 5)
+    expect(geometry.boundingBox.max.x).toBeCloseTo(203.885284, 5)
+    expect(geometry.boundingBox.max.y).toBeCloseTo(36.8, 5)
+    expect(geometry.boundingBox.max.z).toBeCloseTo(93.008812, 5)
+
+    const scenery = createCircuitSceneryGeometry(
+      harbour.curve,
+      harbour.venue,
+      harbour.roadWidth,
+    )
+    expect(scenery.getAttribute('position').count).toBe(14_940)
+    expect(scenery.getIndex().count).toBe(26_688)
+    expect(scenery.getIndex().count / 3).toBe(8_896)
+    expect(scenery.getAttribute('position').count + positions.count).toBe(20_508)
+    expect(scenery.getIndex().count + indices.count).toBe(35_040)
+    expect((scenery.getIndex().count + indices.count) / 3).toBe(11_680)
+
+    scenery.dispose()
+    geometry.dispose()
+  })
+
   it('covers every player-visible face of the Harbour retaining structures', () => {
     const harbour = TRACK_PRESETS.find(track => track.venue === 'harbour')
     const geometry = createHarbourRetainingWallFacadeGeometry(
@@ -2228,6 +3076,150 @@ describe('circuit visual geometry', () => {
     geometry.dispose()
   })
 
+  it('covers every player-visible yacht upper surface with tinted atlas panels', () => {
+    const geometry = createHarbourYachtUpperSurfaceGeometry()
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const colors = geometry.getAttribute('color')
+    const indices = geometry.getIndex()
+    const atlasInset = 1 / 1024
+    const facesPerYacht = 7
+    const faceCount = HARBOUR_YACHT_LAYOUT.boats.length * facesPerYacht
+    const white = new THREE.Color('#fff4df')
+    const red = new THREE.Color('#d23d43')
+    const cyan = new THREE.Color('#42a9bf')
+
+    expect(positions.count).toBe(faceCount * 4)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(colors.count).toBe(positions.count)
+    expect(indices.count).toBe(faceCount * 6)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(colors.array).every(Number.isFinite)).toBe(true)
+
+    for (const [yachtIndex, yacht] of HARBOUR_YACHT_LAYOUT.boats.entries()) {
+      const yachtFace = yachtIndex * facesPerYacht
+      const right = new THREE.Vector3(
+        Math.cos(yacht.yaw),
+        0,
+        -Math.sin(yacht.yaw),
+      )
+      const forward = new THREE.Vector3(
+        Math.sin(yacht.yaw),
+        0,
+        Math.cos(yacht.yaw),
+      )
+      const equipmentTint = yachtIndex % 2 === 0 ? red : cyan
+      const faces = [
+        {
+          offset: 0,
+          expectedNormal: new THREE.Vector3(0, 1, 0),
+          variant: YACHT_UPPER_SURFACE_VARIANTS.deckTop,
+          tint: white,
+          expectedY: 0.842,
+        },
+        {
+          offset: 1,
+          expectedNormal: new THREE.Vector3(0, 1, 0),
+          variant: YACHT_UPPER_SURFACE_VARIANTS.cabinRoof,
+          tint: white,
+          expectedY: 1.967,
+        },
+        {
+          offset: 2,
+          expectedNormal: new THREE.Vector3(0, 1, 0),
+          variant: YACHT_UPPER_SURFACE_VARIANTS.serviceRoof,
+          tint: equipmentTint,
+          expectedY: 2.342,
+        },
+        {
+          offset: 3,
+          expectedNormal: right.clone().multiplyScalar(-1),
+          variant: YACHT_UPPER_SURFACE_VARIANTS.serviceFascia,
+          tint: equipmentTint,
+        },
+        {
+          offset: 4,
+          expectedNormal: right,
+          variant: YACHT_UPPER_SURFACE_VARIANTS.serviceFascia,
+          tint: equipmentTint,
+        },
+        {
+          offset: 5,
+          expectedNormal: forward.clone().multiplyScalar(-1),
+          variant: YACHT_UPPER_SURFACE_VARIANTS.serviceFascia,
+          tint: equipmentTint,
+        },
+        {
+          offset: 6,
+          expectedNormal: forward,
+          variant: YACHT_UPPER_SURFACE_VARIANTS.serviceFascia,
+          tint: equipmentTint,
+        },
+      ]
+
+      for (const face of faces) {
+        const faceIndex = yachtFace + face.offset
+        const vertex = faceIndex * 4
+        const triangle = faceIndex * 6
+        const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+        const pointA = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          indices.getX(triangle),
+        )
+        const pointB = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          indices.getX(triangle + 1),
+        )
+        const pointC = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          indices.getX(triangle + 2),
+        )
+        const windingNormal = pointB.sub(pointA).cross(pointC.sub(pointA)).normalize()
+        const tint = new THREE.Color(
+          colors.getX(vertex),
+          colors.getY(vertex),
+          colors.getZ(vertex),
+        )
+        const column = face.variant % 2
+        const isTopRow = face.variant < 2
+        const faceU = Array.from({ length: 4 }, (_, index) => uvs.getX(vertex + index))
+        const faceV = Array.from({ length: 4 }, (_, index) => uvs.getY(vertex + index))
+
+        expect(normal.dot(face.expectedNormal)).toBeGreaterThan(0.99)
+        expect(windingNormal.dot(normal)).toBeGreaterThan(0.99)
+        expect(tint.r).toBeCloseTo(face.tint.r, 5)
+        expect(tint.g).toBeCloseTo(face.tint.g, 5)
+        expect(tint.b).toBeCloseTo(face.tint.b, 5)
+        expect(Math.min(...faceU)).toBeCloseTo(column * 0.5 + atlasInset, 6)
+        expect(Math.max(...faceU)).toBeCloseTo((column + 1) * 0.5 - atlasInset, 6)
+        expect(Math.min(...faceV)).toBeCloseTo(
+          (isTopRow ? 0.5 : 0) + atlasInset,
+          6,
+        )
+        expect(Math.max(...faceV)).toBeCloseTo(
+          (isTopRow ? 1 : 0.5) - atlasInset,
+          6,
+        )
+        if (Number.isFinite(face.expectedY)) {
+          expect(positions.getY(vertex)).toBeCloseTo(face.expectedY, 5)
+        }
+      }
+    }
+
+    expect(geometry.boundingBox.min.x).toBeCloseTo(-113.947563, 5)
+    expect(geometry.boundingBox.min.y).toBeCloseTo(0.842, 5)
+    expect(geometry.boundingBox.min.z).toBeCloseTo(97.12043, 5)
+    expect(geometry.boundingBox.max.x).toBeCloseTo(163.947556, 5)
+    expect(geometry.boundingBox.max.y).toBeCloseTo(2.342, 5)
+    expect(geometry.boundingBox.max.z).toBeCloseTo(132.879562, 5)
+
+    geometry.dispose()
+  })
+
   it('keeps every Monaco apartment footprint clear of every road branch', () => {
     const harbour = TRACK_PRESETS.find(track => track.venue === 'harbour')
     const sampleCount = 16_384
@@ -2372,6 +3364,351 @@ describe('circuit visual geometry', () => {
     geometry.dispose()
   })
 
+  it('maps both full-lap Temple grass verges with physical-scale generated turf', () => {
+    const temple = TRACK_PRESETS.find(track => track.venue === 'temple')
+    const geometry = createTempleGrassVergeGeometry(
+      temple.curve,
+      temple.roadWidth,
+    )
+    const scenery = createCircuitSceneryGeometry(
+      temple.curve,
+      temple.venue,
+      temple.roadWidth,
+    )
+    const gravelRunoff = createTempleGravelRunoffGeometry(
+      temple.curve,
+      temple.roadWidth,
+    )
+    const pitStructure = createPitComplexStructureGeometry(
+      temple.curve,
+      temple.venue,
+      temple.roadWidth,
+    )
+    const templeVenue = createTempleVenueFacadeGeometry(
+      temple.curve,
+      temple.roadWidth,
+    )
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const colors = geometry.getAttribute('color')
+    const indices = geometry.getIndex()
+    const verticesPerVerge = (LOW_DETAIL_SURFACE_SEGMENTS + 1) * 2
+    const indicesPerVerge = LOW_DETAIL_SURFACE_SEGMENTS * 6
+    const expectedColor = new THREE.Color('#376638')
+
+    expect(geometry.name).toBe('temple-grass-verge-geometry')
+    expect(positions.count).toBe(verticesPerVerge * 2)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(colors.count).toBe(positions.count)
+    expect(indices.count).toBe(indicesPerVerge * 2)
+    expect(indices.count / 3).toBe(692)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(colors.array).every(Number.isFinite)).toBe(true)
+    expect(geometry.boundingBox.min.toArray()).toEqual([
+      -259.2823181152344,
+      0.052000001072883606,
+      -149.3540802001953,
+    ])
+    expect(geometry.boundingBox.max.toArray()).toEqual([
+      288.8153076171875,
+      0.052000001072883606,
+      138.50193786621094,
+    ])
+
+    for (let vertex = 0; vertex < positions.count; vertex += 1) {
+      expect(normals.getY(vertex)).toBeGreaterThan(0.999)
+      expect(colors.getX(vertex)).toBeCloseTo(expectedColor.r, 6)
+      expect(colors.getY(vertex)).toBeCloseTo(expectedColor.g, 6)
+      expect(colors.getZ(vertex)).toBeCloseTo(expectedColor.b, 6)
+    }
+
+    for (let verge = 0; verge < 2; verge += 1) {
+      const vertexOffset = verge * verticesPerVerge
+      const phase = verge * 0.37
+      expect(uvs.getX(vertexOffset) * INFIELD_ALBEDO_REPEAT).toBeCloseTo(phase, 6)
+      expect(
+        uvs.getX(vertexOffset + 1) * INFIELD_ALBEDO_REPEAT,
+      ).toBeCloseTo(phase + 5.5 / TEMPLE_TURF_WORLD_TILE_SIZE, 6)
+
+      for (let sample = 1; sample <= LOW_DETAIL_SURFACE_SEGMENTS; sample += 1) {
+        const previousVertex = vertexOffset + (sample - 1) * 2
+        const currentVertex = vertexOffset + sample * 2
+        const previousCenter = new THREE.Vector3()
+          .fromBufferAttribute(positions, previousVertex)
+          .add(new THREE.Vector3().fromBufferAttribute(positions, previousVertex + 1))
+          .multiplyScalar(0.5)
+        const currentCenter = new THREE.Vector3()
+          .fromBufferAttribute(positions, currentVertex)
+          .add(new THREE.Vector3().fromBufferAttribute(positions, currentVertex + 1))
+          .multiplyScalar(0.5)
+        const mappedDistance = (
+          uvs.getY(currentVertex) - uvs.getY(previousVertex)
+        ) * INFIELD_ALBEDO_REPEAT * TEMPLE_TURF_WORLD_TILE_SIZE
+        expect(mappedDistance).toBeCloseTo(previousCenter.distanceTo(currentCenter), 3)
+      }
+    }
+
+    for (let index = 0; index < indices.count; index += 3) {
+      const aIndex = indices.getX(index)
+      const bIndex = indices.getX(index + 1)
+      const cIndex = indices.getX(index + 2)
+      const a = new THREE.Vector3().fromBufferAttribute(positions, aIndex)
+      const b = new THREE.Vector3().fromBufferAttribute(positions, bIndex)
+      const c = new THREE.Vector3().fromBufferAttribute(positions, cIndex)
+      const geometricNormal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
+      const averageNormal = new THREE.Vector3()
+        .fromBufferAttribute(normals, aIndex)
+        .add(new THREE.Vector3().fromBufferAttribute(normals, bIndex))
+        .add(new THREE.Vector3().fromBufferAttribute(normals, cIndex))
+        .normalize()
+      expect(
+        geometricNormal.dot(averageNormal),
+        `Temple verge triangle ${index / 3}`,
+      ).toBeGreaterThan(0.999)
+    }
+
+    expect(
+      scenery.getAttribute('position').count
+      + positions.count
+      + gravelRunoff.getAttribute('position').count
+      + pitStructure.getAttribute('position').count
+      + templeVenue.getAttribute('position').count,
+    ).toBe(17_576)
+    expect(
+      scenery.getIndex().count
+      + indices.count
+      + gravelRunoff.getIndex().count
+      + pitStructure.getIndex().count
+      + templeVenue.getIndex().count,
+    ).toBe(31_524)
+    expect(
+      (
+        scenery.getIndex().count
+        + indices.count
+        + gravelRunoff.getIndex().count
+        + pitStructure.getIndex().count
+        + templeVenue.getIndex().count
+      ) / 3,
+    ).toBe(10_508)
+
+    geometry.dispose()
+    scenery.dispose()
+    gravelRunoff.dispose()
+    pitStructure.dispose()
+    templeVenue.dispose()
+  })
+
+  it('maps every Temple corner gravel block at a consistent physical texture scale', () => {
+    const temple = TRACK_PRESETS.find(track => track.venue === 'temple')
+    const layout = getTempleGravelRunoffLayout(temple.curve, temple.roadWidth)
+    const geometry = createTempleGravelRunoffGeometry(temple.curve, temple.roadWidth)
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const colors = geometry.getAttribute('color')
+    const indices = geometry.getIndex()
+    const expectedColor = new THREE.Color('#b9a67c')
+
+    expect(layout).toHaveLength(78)
+    expect(geometry.name).toBe('temple-gravel-runoff-geometry')
+    expect(positions.count).toBe(1_872)
+    expect(normals.count).toBe(1_872)
+    expect(uvs.count).toBe(1_872)
+    expect(colors.count).toBe(1_872)
+    expect(indices.count).toBe(2_808)
+    expect(indices.count / 3).toBe(936)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(colors.array).every(Number.isFinite)).toBe(true)
+    expect(geometry.boundingBox.min.x).toBeCloseTo(-242.332916, 5)
+    expect(geometry.boundingBox.min.y).toBeCloseTo(0, 8)
+    expect(geometry.boundingBox.min.z).toBeCloseTo(-145.584381, 5)
+    expect(geometry.boundingBox.max.x).toBeCloseTo(287.514557, 5)
+    expect(geometry.boundingBox.max.y).toBeCloseTo(0.07, 6)
+    expect(geometry.boundingBox.max.z).toBeCloseTo(108.925278, 5)
+
+    const facePhysicalSizes = [
+      [0.92, 0.07],
+      [0.92, 0.07],
+      [5.2, 0.92],
+      [5.2, 0.92],
+      [5.2, 0.07],
+      [5.2, 0.07],
+    ]
+    for (let box = 0; box < layout.length; box += 1) {
+      for (let vertex = box * 24; vertex < box * 24 + 24; vertex += 1) {
+        expect(colors.getX(vertex)).toBeCloseTo(expectedColor.r, 6)
+        expect(colors.getY(vertex)).toBeCloseTo(expectedColor.g, 6)
+        expect(colors.getZ(vertex)).toBeCloseTo(expectedColor.b, 6)
+        expect(new THREE.Vector3().fromBufferAttribute(normals, vertex).length()).toBeCloseTo(1, 6)
+      }
+      for (let face = 0; face < 6; face += 1) {
+        const uvStart = box * 24 + face * 4
+        const faceUvs = Array.from({ length: 4 }, (_, vertex) => ({
+          u: uvs.getX(uvStart + vertex),
+          v: uvs.getY(uvStart + vertex),
+        }))
+        const spanU = Math.max(...faceUvs.map(uv => uv.u)) - Math.min(...faceUvs.map(uv => uv.u))
+        const spanV = Math.max(...faceUvs.map(uv => uv.v)) - Math.min(...faceUvs.map(uv => uv.v))
+        expect(spanU * TEMPLE_GRAVEL_WORLD_TILE_SIZE).toBeCloseTo(
+          facePhysicalSizes[face][0],
+          5,
+        )
+        expect(spanV * TEMPLE_GRAVEL_WORLD_TILE_SIZE).toBeCloseTo(
+          facePhysicalSizes[face][1],
+          5,
+        )
+      }
+    }
+
+    for (let index = 0; index < indices.count; index += 3) {
+      const aIndex = indices.getX(index)
+      const bIndex = indices.getX(index + 1)
+      const cIndex = indices.getX(index + 2)
+      const a = new THREE.Vector3().fromBufferAttribute(positions, aIndex)
+      const b = new THREE.Vector3().fromBufferAttribute(positions, bIndex)
+      const c = new THREE.Vector3().fromBufferAttribute(positions, cIndex)
+      const geometricNormal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
+      const averageNormal = new THREE.Vector3()
+        .fromBufferAttribute(normals, aIndex)
+        .add(new THREE.Vector3().fromBufferAttribute(normals, bIndex))
+        .add(new THREE.Vector3().fromBufferAttribute(normals, cIndex))
+        .normalize()
+      expect(geometricNormal.dot(averageNormal)).toBeGreaterThan(0.999)
+    }
+
+    geometry.dispose()
+  })
+
+  it('moves every Apex corner and pit-straight runoff block into one generated surface', () => {
+    const apex = TRACK_PRESETS.find(track => track.venue === 'apex')
+    const layout = getApexGravelRunoffLayout(apex.curve, apex.roadWidth)
+    const pitStraightLayout = getApexPitStraightRunoffLayout(apex.roadWidth)
+    const geometry = createApexGravelRunoffGeometry(apex.curve, apex.roadWidth)
+    const scenery = createCircuitSceneryGeometry(apex.curve, apex.venue, apex.roadWidth)
+    const pitStructure = createPitComplexStructureGeometry(
+      apex.curve,
+      apex.venue,
+      apex.roadWidth,
+    )
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const colors = geometry.getAttribute('color')
+    const indices = geometry.getIndex()
+
+    expect(Object.isFrozen(layout)).toBe(true)
+    expect(layout).toHaveLength(97)
+    expect(layout.filter(runoff => runoff.kind === 'corner')).toHaveLength(91)
+    expect(layout.filter(runoff => runoff.kind === 'pitStraight')).toHaveLength(6)
+    expect(Object.isFrozen(pitStraightLayout)).toBe(true)
+    expect(pitStraightLayout).toEqual(layout.slice(-6))
+    for (const [index, lateral] of [
+      -9.65,
+      -10.67,
+      -11.69,
+      9.65,
+      10.67,
+      11.69,
+    ].entries()) {
+      expect(pitStraightLayout[index].lateral).toBeCloseTo(lateral, 8)
+    }
+    expect(layout.every(Object.isFrozen)).toBe(true)
+    expect(layout.every(runoff => Object.isFrozen(runoff.size))).toBe(true)
+    expect(geometry.name).toBe('apex-gravel-runoff-geometry')
+    expect(positions.count).toBe(2_328)
+    expect(normals.count).toBe(2_328)
+    expect(uvs.count).toBe(2_328)
+    expect(colors.count).toBe(2_328)
+    expect(indices.count).toBe(3_492)
+    expect(indices.count / 3).toBe(1_164)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(colors.array).every(Number.isFinite)).toBe(true)
+    expect(geometry.boundingBox.min.x).toBeCloseTo(-208.81749, 5)
+    expect(geometry.boundingBox.min.y).toBeCloseTo(0, 8)
+    expect(geometry.boundingBox.min.z).toBeCloseTo(-109.377037, 5)
+    expect(geometry.boundingBox.max.x).toBeCloseTo(148.975647, 5)
+    expect(geometry.boundingBox.max.y).toBeCloseTo(0.0825, 6)
+    expect(geometry.boundingBox.max.z).toBeCloseTo(148.07074, 5)
+    expect(
+      positions.count
+      + scenery.getAttribute('position').count
+      + pitStructure.getAttribute('position').count,
+    ).toBe(23_340)
+    expect(
+      indices.count
+      + scenery.getIndex().count
+      + pitStructure.getIndex().count,
+    ).toBe(40_200)
+
+    for (let box = 0; box < layout.length; box += 1) {
+      const runoff = layout[box]
+      const [width, height, length] = runoff.size
+      const expectedColor = new THREE.Color(runoff.color)
+      const facePhysicalSizes = [
+        [length, height],
+        [length, height],
+        [width, length],
+        [width, length],
+        [width, height],
+        [width, height],
+      ]
+      for (let vertex = box * 24; vertex < box * 24 + 24; vertex += 1) {
+        expect(colors.getX(vertex)).toBeCloseTo(expectedColor.r, 6)
+        expect(colors.getY(vertex)).toBeCloseTo(expectedColor.g, 6)
+        expect(colors.getZ(vertex)).toBeCloseTo(expectedColor.b, 6)
+        expect(new THREE.Vector3().fromBufferAttribute(normals, vertex).length())
+          .toBeCloseTo(1, 6)
+      }
+      for (let face = 0; face < 6; face += 1) {
+        const uvStart = box * 24 + face * 4
+        const faceUvs = Array.from({ length: 4 }, (_, vertex) => ({
+          u: uvs.getX(uvStart + vertex),
+          v: uvs.getY(uvStart + vertex),
+        }))
+        const spanU = Math.max(...faceUvs.map(uv => uv.u))
+          - Math.min(...faceUvs.map(uv => uv.u))
+        const spanV = Math.max(...faceUvs.map(uv => uv.v))
+          - Math.min(...faceUvs.map(uv => uv.v))
+        expect(spanU * TEMPLE_GRAVEL_WORLD_TILE_SIZE).toBeCloseTo(
+          facePhysicalSizes[face][0],
+          5,
+        )
+        expect(spanV * TEMPLE_GRAVEL_WORLD_TILE_SIZE).toBeCloseTo(
+          facePhysicalSizes[face][1],
+          5,
+        )
+      }
+    }
+
+    for (let index = 0; index < indices.count; index += 3) {
+      const aIndex = indices.getX(index)
+      const bIndex = indices.getX(index + 1)
+      const cIndex = indices.getX(index + 2)
+      const a = new THREE.Vector3().fromBufferAttribute(positions, aIndex)
+      const b = new THREE.Vector3().fromBufferAttribute(positions, bIndex)
+      const c = new THREE.Vector3().fromBufferAttribute(positions, cIndex)
+      const geometricNormal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
+      const averageNormal = new THREE.Vector3()
+        .fromBufferAttribute(normals, aIndex)
+        .add(new THREE.Vector3().fromBufferAttribute(normals, bIndex))
+        .add(new THREE.Vector3().fromBufferAttribute(normals, cIndex))
+        .normalize()
+      expect(geometricNormal.dot(averageNormal)).toBeGreaterThan(0.999)
+    }
+
+    geometry.dispose()
+    scenery.dispose()
+    pitStructure.dispose()
+  })
+
   it('joins the historic Monza banking arms, deck, supports, and cap beam', () => {
     const temple = TRACK_PRESETS.find(track => track.venue === 'temple')
     const banking = TEMPLE_BANKING_LAYOUT
@@ -2436,7 +3773,8 @@ describe('circuit visual geometry', () => {
     const uvs = geometry.getAttribute('uv')
     const bankingFaces = 26
     const towerFaces = 4
-    const facadeCount = bankingFaces + towerFaces
+    const glassFaces = 6
+    const facadeCount = bankingFaces + towerFaces + glassFaces
 
     expect(positions.count).toBe(facadeCount * 4)
     expect(normals.count).toBe(positions.count)
@@ -2493,6 +3831,61 @@ describe('circuit visual geometry', () => {
     expect(towerNormals[2].dot(towerNormals[3])).toBeLessThan(-0.99)
     expect(Math.abs(towerNormals[0].dot(towerNormals[2]))).toBeLessThan(0.01)
     expect(TEMPLE_TIMING_TOWER_LAYOUT.size[1]).toBe(18)
+
+    const glassFirstFace = towerFirstFace + towerFaces
+    const glassNormals = Array.from({ length: glassFaces }, (_, face) => (
+      new THREE.Vector3().fromBufferAttribute(
+        normals,
+        (glassFirstFace + face) * 4,
+      )
+    ))
+    expect(glassNormals[0].dot(glassNormals[1])).toBeLessThan(-0.99)
+    expect(glassNormals[2].dot(glassNormals[3])).toBeLessThan(-0.99)
+    expect(glassNormals[4].y).toBeLessThan(-0.99)
+    expect(glassNormals[5].y).toBeGreaterThan(0.99)
+
+    const [glassWidth, glassHeight, glassLength] = TEMPLE_TIMING_TOWER_GLASS.size
+    for (const [face, physicalU, physicalV] of [
+      [glassFirstFace + 2, glassWidth, glassHeight],
+      [glassFirstFace + 3, glassWidth, glassHeight],
+      [glassFirstFace + 4, glassWidth, glassLength],
+      [glassFirstFace + 5, glassWidth, glassLength],
+    ]) {
+      const faceU = Array.from(
+        { length: 4 },
+        (_, index) => uvs.getX(face * 4 + index),
+      )
+      const faceV = Array.from(
+        { length: 4 },
+        (_, index) => uvs.getY(face * 4 + index),
+      )
+      const mappedAspect = (
+        (Math.max(...faceU) - Math.min(...faceU))
+        / (Math.max(...faceV) - Math.min(...faceV))
+      )
+      expect(mappedAspect).toBeCloseTo(physicalU / physicalV, 6)
+    }
+
+    const indices = geometry.getIndex()
+    for (
+      let index = glassFirstFace * 6;
+      index < facadeCount * 6;
+      index += 3
+    ) {
+      const aIndex = indices.getX(index)
+      const bIndex = indices.getX(index + 1)
+      const cIndex = indices.getX(index + 2)
+      const a = new THREE.Vector3().fromBufferAttribute(positions, aIndex)
+      const b = new THREE.Vector3().fromBufferAttribute(positions, bIndex)
+      const c = new THREE.Vector3().fromBufferAttribute(positions, cIndex)
+      const geometricNormal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
+      const averageNormal = new THREE.Vector3()
+        .fromBufferAttribute(normals, aIndex)
+        .add(new THREE.Vector3().fromBufferAttribute(normals, bIndex))
+        .add(new THREE.Vector3().fromBufferAttribute(normals, cIndex))
+        .normalize()
+      expect(geometricNormal.dot(averageNormal)).toBeGreaterThan(0.999)
+    }
 
     geometry.dispose()
   })

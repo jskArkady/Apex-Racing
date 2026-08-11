@@ -3,6 +3,17 @@ import { getTrackVisualCue } from './trackVisualCues'
 
 const GANTRY_CAPTURE_DISTANCE = 28
 const APEX_MEDIA_GANTRY_PROGRESS = 0.245
+const APEX_TOWER_CHASE_PROGRESS = 0.4375
+const APEX_HOSPITALITY_CHASE_PROGRESS = 0.095
+const KERB_CHASE_PROGRESS = Object.freeze({
+  apex_gp: 0.135,
+  harbour_street: 0.59,
+  temple_speedway: 0.695,
+})
+const GRAVEL_CHASE_PROGRESS = Object.freeze({
+  apex_gp: 0.13,
+  temple_speedway: 0.18,
+})
 
 export function parseVisualCaptureRequest(search, enabled = true) {
   if (!enabled || typeof search !== 'string') return null
@@ -21,6 +32,49 @@ export function parseVisualCaptureRequest(search, enabled = true) {
       cameraMode: 'chase',
       gameMode: 'single',
       targetSpeed: 120,
+    })
+  }
+
+  if (view === 'kerb-chase') {
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: KERB_CHASE_PROGRESS[trackId],
+    })
+  }
+
+  if (view === 'gravel-chase') {
+    const captureProgress = GRAVEL_CHASE_PROGRESS[trackId]
+    if (!Number.isFinite(captureProgress)) return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'pit-runoff-chase') {
+    if (trackId !== 'apex_gp') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.99,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'timing-tower-cap-chase') {
+    if (trackId !== 'temple_speedway') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.97,
+      cameraHeight: 3.6,
     })
   }
 
@@ -61,6 +115,107 @@ export function parseVisualCaptureRequest(search, enabled = true) {
       targetProgress: APEX_MEDIA_GANTRY_PROGRESS,
       targetLateral: 0,
       targetHeight: 4.6,
+    })
+  }
+
+  if (view === 'yacht-chase') {
+    if (trackId !== 'harbour_street') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.79,
+    })
+  }
+
+  if (view === 'apartment-chase') {
+    if (trackId !== 'harbour_street') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.125,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'tower-chase') {
+    if (trackId !== 'apex_gp') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: APEX_TOWER_CHASE_PROGRESS,
+    })
+  }
+
+  if (view === 'timing-mast-chase') {
+    if (trackId !== 'apex_gp') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.665,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'floodlight-chase') {
+    if (trackId !== 'apex_gp') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.145,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'braking-board-chase') {
+    const captureProgress = {
+      apex_gp: 0.105,
+      harbour_street: 0.19,
+      temple_speedway: 0.16,
+    }[trackId]
+    if (!Number.isFinite(captureProgress)) return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'marshal-post-chase') {
+    if (trackId !== 'apex_gp') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.105,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'broadcast-chase') {
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.055,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'hospitality-chase') {
+    if (trackId !== 'apex_gp') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: APEX_HOSPITALITY_CHASE_PROGRESS,
+      cameraHeight: 3.6,
     })
   }
 

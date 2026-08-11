@@ -320,11 +320,13 @@ describe('Adversarial Testing Suite: Track Component', () => {
     expect(rigidBodies.length).toBe(3);
 
     const meshes = container.querySelectorAll('mesh');
-    expect(meshes.length).toBe(20);
+    expect(meshes.length).toBe(22);
     expect(container.querySelector('[name="track-barrier-graphics"]')).toBeTruthy();
     expect(container.querySelector('[name="track-braking-distance-boards"]')).toBeTruthy();
     expect(container.querySelector('[name="trackside-operations-graphics"]')).toBeTruthy();
     expect(container.querySelector('[name="track-lighting-signal-graphics"]')).toBeTruthy();
+    expect(container.querySelector('[name="track-kerb-surfaces"]')).toBeTruthy();
+    expect(container.querySelector('[name="track-apex-gravel-runoff"]')).toBeTruthy();
     expect(container.querySelector('[name="track-apex-race-control-facades"]')).toBeTruthy();
     expect(container.querySelector('[name="track-crowd-panels"]')).toBeTruthy();
     expect(container.querySelector('[name="track-grandstand-structure-surfaces"]')).toBeTruthy();
