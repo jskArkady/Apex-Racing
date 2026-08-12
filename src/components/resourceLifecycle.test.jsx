@@ -47,9 +47,9 @@ describe('owned Three.js resource lifecycle', () => {
 
     view.unmount()
 
-    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(27)
-    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(27)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(26)
+    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(32)
+    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(32)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(31)
   })
 
   it.each([
@@ -63,6 +63,7 @@ describe('owned Three.js resource lifecycle', () => {
       'apex-night-pit-garage-facade-1024.webp',
       'apex-night-gantry-display-1024.webp',
       'apex-night-tower-hospitality-atlas-1024.webp',
+      'apex-tower-ring-surface-atlas-1024.webp',
       'apex-pit-lane-staff-sprite-atlas-1024.webp',
       'apex-tent-canopy-surface-atlas-1024.webp',
       null,
@@ -76,7 +77,9 @@ describe('owned Three.js resource lifecycle', () => {
       null,
       null,
       null,
+      null,
       'shared-palm-tree-sprite-atlas-1024.webp',
+      'shared-palm-trunk-surface-atlas-1024.webp',
       null,
       'apex-desert-infield-albedo-512.webp',
     ],
@@ -93,6 +96,7 @@ describe('owned Three.js resource lifecycle', () => {
       null,
       null,
       null,
+      null,
       'harbour-tunnel-wall-atlas-1024.webp',
       'harbour-tunnel-ceiling-portal-atlas-1024.webp',
       'harbour-apartment-facade-atlas-1024.webp',
@@ -103,7 +107,9 @@ describe('owned Three.js resource lifecycle', () => {
       'harbour-open-water-ripple-height-1024.webp',
       'harbour-yacht-facade-atlas-1024.webp',
       'harbour-yacht-upper-surface-atlas-1024.webp',
+      'harbour-yacht-rig-surface-atlas-1024.webp',
       'shared-palm-tree-sprite-atlas-1024.webp',
+      'shared-palm-trunk-surface-atlas-1024.webp',
       null,
       null,
     ],
@@ -119,7 +125,10 @@ describe('owned Three.js resource lifecycle', () => {
       null,
       null,
       null,
+      null,
       'temple-day-banking-timing-atlas-1024.webp',
+      null,
+      null,
       null,
       null,
       null,
@@ -144,6 +153,7 @@ describe('owned Three.js resource lifecycle', () => {
     pitGarageFacadeFile,
     gantryDisplayFile,
     apexVenueFacadeFile,
+    apexTowerRingSurfaceFile,
     apexPitStaffBillboardFile,
     apexTentCanopyFile,
     templeVenueFacadeFile,
@@ -157,7 +167,9 @@ describe('owned Three.js resource lifecycle', () => {
     openWaterRippleFile,
     yachtFacadeFile,
     yachtUpperSurfaceFile,
+    yachtRigSurfaceFile,
     palmTreeBillboardFile,
+    palmTrunkSurfaceFile,
     treeBillboardFile,
     gravelRunoffFile,
   ) => {
@@ -165,10 +177,11 @@ describe('owned Three.js resource lifecycle', () => {
     const view = render(<Track track={getTrackPreset(trackId)} />)
 
     expect(textureLoad).toHaveBeenCalledTimes(
-      13
+      15
         + Number(Boolean(tunnelWallFile))
         + Number(Boolean(apexVenueFacadeFile))
         + Number(Boolean(apexVenueFacadeFile))
+        + Number(Boolean(apexTowerRingSurfaceFile))
         + Number(Boolean(apexPitStaffBillboardFile))
         + Number(Boolean(apexTentCanopyFile))
         + Number(Boolean(templeVenueFacadeFile))
@@ -181,9 +194,12 @@ describe('owned Three.js resource lifecycle', () => {
         + Number(Boolean(openWaterRippleFile))
         + Number(Boolean(yachtFacadeFile))
         + Number(Boolean(yachtUpperSurfaceFile))
+        + Number(Boolean(yachtRigSurfaceFile))
         + Number(Boolean(palmTreeBillboardFile))
+        + Number(Boolean(palmTrunkSurfaceFile))
         + Number(Boolean(treeBillboardFile))
-        + Number(Boolean(gravelRunoffFile)),
+        + Number(Boolean(gravelRunoffFile))
+        + Number(trackId === 'harbour_street'),
     )
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining('track-asphalt-albedo-512.webp'),
@@ -202,6 +218,12 @@ describe('owned Three.js resource lifecycle', () => {
     )
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining('shared-kerb-surface-atlas-1024.webp'),
+    )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('shared-track-surface-wear-strip-atlas-1024.webp'),
+    )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('shared-barrier-structural-surface-atlas-1024.webp'),
     )
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(infieldFile))
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(barrierAtlasFile))
@@ -231,6 +253,10 @@ describe('owned Three.js resource lifecycle', () => {
       view.container.querySelector('[name="track-pit-complex-structure-surfaces"]'),
     ).toBeTruthy()
     expect(view.container.querySelector('[name="track-kerb-surfaces"]')).toBeTruthy()
+    expect(view.container.querySelector('[name="track-surface-wear"]')).toBeTruthy()
+    expect(
+      view.container.querySelector('[name="track-barrier-structural-surfaces"]'),
+    ).toBeTruthy()
     expect(
       view.container.querySelector('[name="track-gantry-structure-surfaces"]'),
     ).toBeTruthy()
@@ -253,6 +279,18 @@ describe('owned Three.js resource lifecycle', () => {
       ).toBeNull()
       expect(
         view.container.querySelector('[name="track-apex-race-control-facades"]'),
+      ).toBeNull()
+    }
+    if (apexTowerRingSurfaceFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(apexTowerRingSurfaceFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-apex-tower-ring-surfaces"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-apex-tower-ring-surfaces"]'),
       ).toBeNull()
     }
     if (apexPitStaffBillboardFile) {
@@ -408,6 +446,18 @@ describe('owned Three.js resource lifecycle', () => {
         view.container.querySelector('[name="track-harbour-yacht-upper-surfaces"]'),
       ).toBeNull()
     }
+    if (yachtRigSurfaceFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(yachtRigSurfaceFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-harbour-yacht-rig-surfaces"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-harbour-yacht-rig-surfaces"]'),
+      ).toBeNull()
+    }
     if (treeBillboardFile) {
       expect(textureLoad).toHaveBeenCalledWith(
         expect.stringContaining(treeBillboardFile),
@@ -430,6 +480,18 @@ describe('owned Three.js resource lifecycle', () => {
     } else {
       expect(
         view.container.querySelector('[name="track-palm-tree-billboards"]'),
+      ).toBeNull()
+    }
+    if (palmTrunkSurfaceFile) {
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining(palmTrunkSurfaceFile),
+      )
+      expect(
+        view.container.querySelector('[name="track-palm-trunk-surfaces"]'),
+      ).toBeTruthy()
+    } else {
+      expect(
+        view.container.querySelector('[name="track-palm-trunk-surfaces"]'),
       ).toBeNull()
     }
     if (gravelRunoffFile) {
@@ -522,6 +584,143 @@ describe('owned Three.js resource lifecycle', () => {
     expect(material.side).toBe(THREE.FrontSide)
   })
 
+  it('configures the shared repeating track-surface wear strips', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('shared-track-surface-wear-strip-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-shared-track-surface-wear-strip-atlas')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.wrapT).toBe(THREE.RepeatWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(view.container.querySelector('[name="track-surface-wear"]')).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.vertexColors === true
+      && candidate.roughness === 0.91
+      && candidate.metalness === 0
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.side).toBe(THREE.FrontSide)
+  })
+
+  it('configures the shared barrier cap and outer-service atlas', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('shared-barrier-structural-surface-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-shared-barrier-structural-surface-atlas')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(
+      view.container.querySelector('[name="track-barrier-structural-surfaces"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.roughness === 0.48
+      && candidate.metalness === 0.64
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.side).toBe(THREE.FrontSide)
+  })
+
+  it('configures the shared palm-trunk side and cap atlas', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('shared-palm-trunk-surface-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-shared-palm-trunk-surface-atlas')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(
+      view.container.querySelector('[name="track-palm-trunk-surfaces"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.roughness === 0.94
+      && candidate.metalness === 0
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.side).toBe(THREE.FrontSide)
+  })
+
+  it('tints the shared trackside-operations atlas for Apex pit equipment', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('apex_gp')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('shared-trackside-operations-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-shared-trackside-operations-atlas')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(
+      view.container.querySelector('[name="trackside-operations-graphics"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.vertexColors === true
+      && candidate.roughness === 0.74
+      && candidate.metalness === 0.12
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.emissiveMap).toBe(texture)
+    expect(material.emissiveIntensity).toBe(0.24)
+  })
+
   it('tints the shared pit-structure atlas for the Apex marshal-post roofs', () => {
     const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
     const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
@@ -544,6 +743,101 @@ describe('owned Three.js resource lifecycle', () => {
       && candidate.map === texture
       && candidate.vertexColors === true
       && candidate.roughness === 0.86
+      && candidate.metalness === 0.08
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.side).toBe(THREE.DoubleSide)
+  })
+
+  it('tints the generated Apex canopy atlas for the tower flag', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('apex_gp')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('apex-tent-canopy-surface-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-apex-tent-canopy-surface-atlas')
+    expect(
+      view.container.querySelector('[name="track-apex-tent-canopies"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.vertexColors === true
+      && candidate.roughness === 0.96
+      && candidate.metalness === 0
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.emissiveMap).toBe(texture)
+    expect(material.emissiveIntensity).toBe(0.08)
+    expect(material.side).toBe(THREE.DoubleSide)
+  })
+
+  it('configures the generated Apex tower-ring surface atlas', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('apex_gp')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('apex-tower-ring-surface-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-apex-tower-ring-surface-atlas')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(
+      view.container.querySelector('[name="track-apex-tower-ring-surfaces"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.vertexColors === true
+      && candidate.roughness === 0.78
+      && candidate.metalness === 0.12
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.emissiveMap).toBe(texture)
+    expect(material.emissiveIntensity).toBe(0.06)
+    expect(material.side).toBe(THREE.FrontSide)
+  })
+
+  it('tints the shared grandstand atlas for venue accent canopies', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('grandstand-structure-surface-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-grandstand-structure-surface-atlas')
+    expect(
+      view.container.querySelector('[name="track-grandstand-structure-surfaces"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.vertexColors === true
+      && candidate.roughness === 0.84
       && candidate.metalness === 0.08
     ))
     expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
@@ -587,9 +881,9 @@ describe('owned Three.js resource lifecycle', () => {
     ).toBeTruthy()
     view.unmount()
 
-    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(21)
-    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(20)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(18)
+    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(23)
+    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(22)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(20)
     const material = materialDispose.mock.contexts.find(candidate => (
       candidate instanceof THREE.MeshStandardMaterial
       && candidate.map === texture
@@ -637,9 +931,9 @@ describe('owned Three.js resource lifecycle', () => {
     ).toBeTruthy()
     view.unmount()
 
-    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(23)
-    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(22)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(21)
+    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(27)
+    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(26)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(25)
     const gravelMaterial = materialDispose.mock.contexts.find(candidate => (
       candidate instanceof THREE.MeshStandardMaterial
       && candidate.map === gravelTexture
@@ -671,6 +965,42 @@ describe('owned Three.js resource lifecycle', () => {
     expect(texture.anisotropy).toBe(4)
     expect(texture.repeat.toArray()).toEqual([28, 28])
     view.unmount()
+  })
+
+  it('reuses the generated turf tile for the Harbour hairpin island', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url], index) => (
+      url.includes('temple-turf-infield-albedo-512.webp')
+      && textureLoad.mock.results[index]?.value?.name
+        === 'generated-harbour-hairpin-island-turf'
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.RepeatWrapping)
+    expect(texture.wrapT).toBe(THREE.RepeatWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(
+      view.container.querySelector('[name="track-harbour-hairpin-island-surface"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.vertexColors === true
+      && candidate.roughness === 1
+      && candidate.metalness === 0
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.side).toBe(THREE.FrontSide)
   })
 
   it('configures the Harbour apartment upper-surface atlas and material', () => {
@@ -736,6 +1066,41 @@ describe('owned Three.js resource lifecycle', () => {
       && candidate.map === texture
       && candidate.roughness === 0.64
       && candidate.metalness === 0.05
+      && candidate.vertexColors === true
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.side).toBe(THREE.FrontSide)
+  })
+
+  it('configures the Harbour yacht rig atlas as a tintable metal surface', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('harbour-yacht-rig-surface-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-harbour-yacht-rig-surface-atlas')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(
+      view.container.querySelector('[name="track-harbour-yacht-rig-surfaces"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.roughness === 0.48
+      && candidate.metalness === 0.62
       && candidate.vertexColors === true
     ))
     expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
@@ -811,6 +1176,7 @@ describe('owned Three.js resource lifecycle', () => {
     const taperedBeforeUnmount = countNamedDisposals('formula-tapered-shell-geometry')
     const tyreBeforeUnmount = countNamedDisposals('formula-tyre-surface-geometry')
     const coverBeforeUnmount = countNamedDisposals('formula-wheel-cover-surface-geometry')
+    const hardwareBeforeUnmount = countNamedDisposals('formula-wheel-hardware-geometry')
     const cockpitBeforeUnmount = countNamedDisposals(
       'formula-cockpit-mechanical-hero-geometry',
     )
@@ -820,6 +1186,7 @@ describe('owned Three.js resource lifecycle', () => {
     expect(countNamedDisposals('formula-tapered-shell-geometry') - taperedBeforeUnmount).toBe(5)
     expect(countNamedDisposals('formula-tyre-surface-geometry') - tyreBeforeUnmount).toBe(4)
     expect(countNamedDisposals('formula-wheel-cover-surface-geometry') - coverBeforeUnmount).toBe(4)
+    expect(countNamedDisposals('formula-wheel-hardware-geometry') - hardwareBeforeUnmount).toBe(4)
     expect(
       countNamedDisposals('formula-cockpit-mechanical-hero-geometry')
       - cockpitBeforeUnmount,
@@ -966,7 +1333,7 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(
       geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount,
-    ).toBe(16)
+    ).toBe(20)
     expect(
       materialDispose.mock.calls.length - materialDisposalsBeforeUnmount,
     ).toBe(5)
@@ -1039,7 +1406,7 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(
       geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount,
-    ).toBe(16)
+    ).toBe(20)
     expect(
       materialDispose.mock.calls.length - materialDisposalsBeforeUnmount,
     ).toBe(5)

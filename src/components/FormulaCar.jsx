@@ -338,7 +338,7 @@ const floorBodyworkPanels = [
 
 export const PLAYER_BODYWORK_GRAPHICS_LAYOUT = Object.freeze([
   ...FORMULA_BODYWORK_SHELLS.flatMap(shell => (
-    ['top', 'side'].flatMap(facetBand => (
+    ['top', 'side', 'lowerSide', 'bottom'].flatMap(facetBand => (
       [-1, 1].map(sideSign => Object.freeze({
         ...shell,
         key: `${shell.key}-${sideSign < 0 ? 'left' : 'right'}-${facetBand}-facet`,
@@ -346,24 +346,29 @@ export const PLAYER_BODYWORK_GRAPHICS_LAYOUT = Object.freeze([
         sideSign,
         type: 'shell-facet',
       }))
-    ))
+    )).concat([-1, 1].map(endSign => Object.freeze({
+      ...shell,
+      key: `${shell.key}-${endSign < 0 ? 'front' : 'rear'}-cap`,
+      endSign,
+      type: 'shell-cap',
+    })))
   )),
-  ...FORMULA_BODYWORK_SIDEPODS.flatMap(shell => [
-    ...[-1, 1].map(sideSign => Object.freeze({
+  ...FORMULA_BODYWORK_SIDEPODS.flatMap(shell => (
+    ['top', 'side', 'lowerSide', 'bottom'].flatMap(facetBand => (
+      [-1, 1].map(sideSign => Object.freeze({
+        ...shell,
+        key: `${shell.key}-${sideSign < 0 ? 'left' : 'right'}-${facetBand}-facet`,
+        facetBand,
+        sideSign,
+        type: 'shell-facet',
+      }))
+    )).concat([-1, 1].map(endSign => Object.freeze({
       ...shell,
-      key: `${shell.key}-${sideSign < 0 ? 'left' : 'right'}-top-facet`,
-      facetBand: 'top',
-      sideSign,
-      type: 'shell-facet',
-    })),
-    Object.freeze({
-      ...shell,
-      key: `${shell.key}-outer-side-facet`,
-      facetBand: 'side',
-      sideSign: shell.outerSideSign,
-      type: 'shell-facet',
-    }),
-  ]),
+      key: `${shell.key}-${endSign < 0 ? 'front' : 'rear'}-cap`,
+      endSign,
+      type: 'shell-cap',
+    })))
+  )),
   ...frontWingBodyworkPanels,
   ...frontEndplateBodyworkPanels,
   ...floorBodyworkPanels,
@@ -611,6 +616,33 @@ export function createFormulaCockpitMechanicalGeometry({
     parts.push(geometry)
   }
 
+  for (const floorPart of [
+    {
+      geometry: new THREE.BoxGeometry(1.62, 0.11, 3.72),
+      variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.aeroCarbon,
+      position: [0, 0.18, 0.04],
+    },
+    {
+      geometry: new THREE.BoxGeometry(0.34, 0.045, 3.52),
+      variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.tintableComposite,
+      color: '#b8a884',
+      position: [0, 0.105, 0],
+    },
+    ...[-0.58, 0.58].map(x => ({
+      geometry: new THREE.BoxGeometry(0.16, 0.09, 3.05),
+      variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.tintableComposite,
+      color: accent,
+      position: [x, 0.235, 0.18],
+    })),
+    {
+      geometry: new THREE.BoxGeometry(0.13, 0.7, 0.13),
+      variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.aeroCarbon,
+      position: [0, 0.51, 1.83],
+    },
+  ]) {
+    addPart(floorPart)
+  }
+
   if (showRaceDetail) {
     for (const x of FLOOR_FENCES) {
       addPart({
@@ -618,6 +650,22 @@ export function createFormulaCockpitMechanicalGeometry({
         variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.aeroCarbon,
         position: [x, 0.31, -0.72],
         rotation: [0.08, 0, 0],
+      })
+    }
+    for (const x of [-0.61, 0.61]) {
+      addPart({
+        geometry: new THREE.CylinderGeometry(0.26, 0.17, 0.18, 8),
+        variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.aeroCarbon,
+        position: [x, 0.59, -0.36],
+        rotation: [Math.PI / 2, 0, 0],
+      })
+    }
+    for (const x of [-0.86, 0.86]) {
+      addPart({
+        geometry: new THREE.BoxGeometry(0.06, 0.24, 0.5),
+        variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.aeroCarbon,
+        position: [x, 0.44, -2.03],
+        rotation: [0, 0, x > 0 ? 0.18 : -0.18],
       })
     }
   }
@@ -688,6 +736,24 @@ export function createFormulaCockpitMechanicalGeometry({
   })
 
   if (showHeroDetail) {
+    for (const sidepodX of [-0.61, 0.61]) {
+      for (const offset of SIDEPOD_LOUVERS) {
+        addPart({
+          geometry: new THREE.BoxGeometry(0.05, 0.035, 0.24),
+          variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.aeroCarbon,
+          position: [sidepodX, 0.82, -0.22 + offset],
+          rotation: [0, 0, sidepodX > 0 ? -0.18 : 0.18],
+        })
+      }
+    }
+    for (const marker of ACTIVE_AERO_MARKERS.filter(detail => !detail.emissive)) {
+      addPart({
+        geometry: new THREE.BoxGeometry(...marker.size),
+        variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.mechanicalMetal,
+        position: marker.position,
+        rotation: marker.rotation,
+      })
+    }
     for (const x of DIFFUSER_FINS) {
       addPart({
         geometry: new THREE.BoxGeometry(0.05, 0.23, 0.5),
@@ -710,6 +776,108 @@ export function createFormulaCockpitMechanicalGeometry({
     throw new Error('Formula cockpit mechanical geometry could not be merged')
   }
   merged.name = `formula-cockpit-mechanical-${detail}-geometry`
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createFormulaWheelHardwareGeometry(
+  radius,
+  width,
+  side,
+  compact = false,
+) {
+  if (
+    !Number.isFinite(radius)
+    || radius <= 0
+    || !Number.isFinite(width)
+    || width <= 0
+    || ![-1, 1].includes(side)
+  ) {
+    throw new RangeError('Formula wheel hardware requires finite dimensions and a wheel side')
+  }
+
+  const parts = []
+  const addPart = ({
+    geometry,
+    variant,
+    color = '#ffffff',
+    position = null,
+    rotateToAxle = true,
+  }) => {
+    remapGeometryUvVertices(
+      geometry,
+      Array.from(
+        { length: geometry.getAttribute('uv').count },
+        (_, index) => index,
+      ),
+      variant,
+    )
+    tintGeometryVertices(geometry, color)
+    if (rotateToAxle) geometry.rotateZ(Math.PI / 2)
+    if (position) geometry.translate(...position)
+    parts.push(geometry)
+  }
+
+  if (compact) {
+    addPart({
+      geometry: new THREE.CylinderGeometry(
+        radius * 0.34,
+        radius * 0.34,
+        width + 0.018,
+        10,
+      ),
+      variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.mechanicalMetal,
+    })
+  } else {
+    addPart({
+      geometry: new THREE.CylinderGeometry(
+        radius * 0.43,
+        radius * 0.43,
+        width + 0.012,
+        16,
+      ),
+      variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.aeroCarbon,
+    })
+    addPart({
+      geometry: new THREE.CylinderGeometry(
+        radius * 0.31,
+        radius * 0.31,
+        width + 0.02,
+        20,
+      ),
+      variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.mechanicalMetal,
+      color: '#aeb5b1',
+    })
+    addPart({
+      geometry: new THREE.CylinderGeometry(
+        radius * 0.14,
+        radius * 0.14,
+        width + 0.026,
+        12,
+      ),
+      variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.mechanicalMetal,
+      color: '#c3c9c5',
+    })
+    addPart({
+      geometry: new THREE.BoxGeometry(
+        0.035,
+        radius * 0.28,
+        radius * 0.13,
+      ),
+      variant: FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.tintableComposite,
+      color: '#e23c32',
+      position: [side * (width / 2 + 0.022), radius * 0.08, 0],
+      rotateToAxle: false,
+    })
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) throw new Error('Formula wheel hardware geometry could not be merged')
+  merged.name = compact
+    ? 'formula-wheel-hardware-low-geometry'
+    : 'formula-wheel-hardware-geometry'
   merged.computeBoundingBox()
   merged.computeBoundingSphere()
   return merged
@@ -775,7 +943,12 @@ function createBodyworkShellFacetGeometry(panel) {
   const surfaceOffset = 0.002
   const frontZ = position[2] - length / 2
   const rearZ = position[2] + length / 2
-  const sideOffset = facetBand === 'side' ? sideSign * surfaceOffset : 0
+  const sideOffset = ['side', 'lowerSide'].includes(facetBand)
+    ? sideSign * surfaceOffset
+    : 0
+  const verticalOffset = ['lowerSide', 'bottom'].includes(facetBand)
+    ? -surfaceOffset
+    : surfaceOffset
   const frontUpper = [
     position[0] + sideSign * frontWidth * diagonal / 2,
     position[1] + frontHeight * diagonal / 2,
@@ -798,16 +971,37 @@ function createBodyworkShellFacetGeometry(panel) {
     position[1],
     rearZ,
   ]
-  const baseVertices = facetBand === 'side'
-    ? sideSign < 0
-      ? [frontUpper, frontEquator, rearEquator, rearUpper]
-      : [frontEquator, frontUpper, rearUpper, rearEquator]
-    : sideSign < 0
+  const frontLower = [
+    position[0] + sideSign * frontWidth * diagonal / 2,
+    position[1] - frontHeight * diagonal / 2,
+    frontZ,
+  ]
+  const rearLower = [
+    position[0] + sideSign * rearWidth * diagonal / 2,
+    position[1] - rearHeight * diagonal / 2,
+    rearZ,
+  ]
+  const frontBottom = [position[0], position[1] - frontHeight / 2, frontZ]
+  const rearBottom = [position[0], position[1] - rearHeight / 2, rearZ]
+  const facets = {
+    top: sideSign < 0
       ? [frontRidge, frontUpper, rearUpper, rearRidge]
-      : [frontUpper, frontRidge, rearRidge, rearUpper]
+      : [frontUpper, frontRidge, rearRidge, rearUpper],
+    side: sideSign < 0
+      ? [frontUpper, frontEquator, rearEquator, rearUpper]
+      : [frontEquator, frontUpper, rearUpper, rearEquator],
+    lowerSide: sideSign < 0
+      ? [frontEquator, frontLower, rearLower, rearEquator]
+      : [frontLower, frontEquator, rearEquator, rearLower],
+    bottom: sideSign < 0
+      ? [frontLower, frontBottom, rearBottom, rearLower]
+      : [frontBottom, frontLower, rearLower, rearBottom],
+  }
+  const baseVertices = facets[facetBand]
+  if (!baseVertices) throw new RangeError(`Unsupported bodywork facet band: ${facetBand}`)
   const vertices = baseVertices.map(([x, y, z]) => [
     x + sideOffset,
-    y + surfaceOffset,
+    y + verticalOffset,
     z,
   ])
   const { minU, maxU, minV, maxV } = getAtlasModuleBounds(variant)
@@ -819,6 +1013,59 @@ function createBodyworkShellFacetGeometry(panel) {
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices.flat(), 3))
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs.flat(), 2))
   geometry.setIndex([0, 1, 2, 0, 2, 3])
+  geometry.computeVertexNormals()
+  return geometry
+}
+
+function createBodyworkShellCapGeometry(panel) {
+  const {
+    frontWidth,
+    rearWidth,
+    frontHeight,
+    rearHeight,
+    length,
+    position,
+    endSign,
+    variant,
+  } = panel
+  const width = endSign < 0 ? frontWidth : rearWidth
+  const height = endSign < 0 ? frontHeight : rearHeight
+  const z = position[2] + endSign * (length / 2 + 0.002)
+  const vertices = [[position[0], position[1], z]]
+  const sourceUvs = [[0.5, 0.5]]
+  for (let index = 0; index < 8; index += 1) {
+    const angle = index / 8 * Math.PI * 2
+    vertices.push([
+      position[0] + Math.cos(angle) * width / 2,
+      position[1] + Math.sin(angle) * height / 2,
+      z,
+    ])
+    sourceUvs.push([
+      0.5 + Math.cos(angle) * 0.5,
+      0.5 + Math.sin(angle) * 0.5,
+    ])
+  }
+  const indices = []
+  for (let index = 0; index < 8; index += 1) {
+    const current = index + 1
+    const next = (index + 1) % 8 + 1
+    if (endSign < 0) indices.push(0, next, current)
+    else indices.push(0, current, next)
+  }
+  const { minU, maxU, minV, maxV } = getAtlasModuleBounds(variant)
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute(
+    'position',
+    new THREE.Float32BufferAttribute(vertices.flat(), 3),
+  )
+  geometry.setAttribute(
+    'uv',
+    new THREE.Float32BufferAttribute(sourceUvs.flatMap(([u, v]) => [
+      THREE.MathUtils.lerp(minU, maxU, u),
+      THREE.MathUtils.lerp(minV, maxV, v),
+    ]), 2),
+  )
+  geometry.setIndex(indices)
   geometry.computeVertexNormals()
   return geometry
 }
@@ -849,7 +1096,9 @@ export function createPlayerBodyworkGraphicsGeometry(ownerId = 'player') {
   const parts = PLAYER_BODYWORK_GRAPHICS_LAYOUT.map(panel => (
     panel.type === 'shell-facet'
       ? createBodyworkShellFacetGeometry(panel)
-      : createBodyworkPlaneGeometry(panel)
+      : panel.type === 'shell-cap'
+        ? createBodyworkShellCapGeometry(panel)
+        : createBodyworkPlaneGeometry(panel)
   ))
   const merged = mergeGeometries(parts)
   for (const geometry of parts) geometry.dispose()
@@ -954,6 +1203,7 @@ function Wheel({
   radius,
   wheelRefs,
   surfaceAssets,
+  hardwareAssets,
   showTyreTags = true,
   compact = false,
 }) {
@@ -974,10 +1224,13 @@ function Wheel({
             castShadow
           />
         )}
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[radius * 0.34, radius * 0.34, width + 0.018, 10]} />
-          <meshStandardMaterial color={METAL} roughness={0.28} metalness={0.88} />
-        </mesh>
+        {hardwareAssets && (
+          <mesh
+            name="formula-wheel-hardware-surfaces"
+            geometry={hardwareAssets.geometry}
+            material={hardwareAssets.material}
+          />
+        )}
       </group>
     )
   }
@@ -998,14 +1251,15 @@ function Wheel({
           receiveShadow
         />
       )}
-      <mesh rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[radius * 0.43, radius * 0.43, width + 0.012, 16]} />
-        <meshStandardMaterial color={CARBON_EDGE} roughness={0.3} metalness={0.82} />
-      </mesh>
-      <mesh rotation={[0, 0, Math.PI / 2]} position={[0, 0, 0]}>
-        <cylinderGeometry args={[radius * 0.31, radius * 0.31, width + 0.02, 20]} />
-        <meshStandardMaterial color="#6c7370" roughness={0.34} metalness={0.9} />
-      </mesh>
+      {hardwareAssets && (
+        <mesh
+          name="formula-wheel-hardware-surfaces"
+          geometry={hardwareAssets.geometry}
+          material={hardwareAssets.material}
+          castShadow
+          receiveShadow
+        />
+      )}
       {surfaceAssets?.wheelCoverGeometry && (
         <mesh
           name="formula-wheel-cover-surface"
@@ -1015,10 +1269,6 @@ function Wheel({
           material={surfaceAssets.wheelCoverMaterial}
         />
       )}
-      <mesh position={[side * (width / 2 + 0.022), radius * 0.08, 0]}>
-        <boxGeometry args={[0.035, radius * 0.28, radius * 0.13]} />
-        <meshStandardMaterial color="#e23c32" roughness={0.5} metalness={0.4} />
-      </mesh>
       <mesh rotation={[0, side * Math.PI / 2, 0]} position={[side * (width / 2 + 0.008), 0, 0]}>
         <torusGeometry args={[radius * 0.72, 0.018, 5, 28]} />
         <meshStandardMaterial color={TREAD_STRIPE} roughness={0.48} />
@@ -1038,10 +1288,6 @@ function Wheel({
           <meshStandardMaterial color={TREAD_STRIPE} roughness={0.44} />
         </mesh>
       ))}
-      <mesh rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[radius * 0.14, radius * 0.14, width + 0.026, 12]} />
-        <meshStandardMaterial color={METAL} roughness={0.24} metalness={0.92} />
-      </mesh>
     </group>
   )
 }
@@ -1186,14 +1432,26 @@ export default function FormulaCar({
       accent,
       detail: detailTier,
     })
+    const wheelHardwareGeometries = WHEEL_LAYOUT.map(({ radius, side }) => (
+      createFormulaWheelHardwareGeometry(
+        radius,
+        radius > 0.4 ? 0.34 : 0.29,
+        side,
+        isLowDetail,
+      )
+    ))
     const assets = {
       detailTier,
       geometry,
+      wheelHardwareGeometries,
       material: sharedAssets.material,
     }
     setCockpitMechanicalAssets(assets)
     return () => {
       geometry.dispose()
+      for (const wheelGeometry of wheelHardwareGeometries) {
+        wheelGeometry.dispose()
+      }
       releaseSharedFormulaCockpitMechanicalAssets()
     }
   }, [accent, isLowDetail, palette.primary, showHeroDetail])
@@ -1222,21 +1480,7 @@ export default function FormulaCar({
 
   return (
     <group ref={rootRef} name={isPlayer ? 'player-formula-car' : 'ai-formula-car'}>
-      {/* Floor, plank and diffuser establish the very low ground-effect stance. */}
-      <mesh position={[0, 0.18, 0.04]} castShadow receiveShadow>
-        <boxGeometry args={[1.62, 0.11, 3.72]} />
-        <meshStandardMaterial color={CARBON} roughness={0.54} metalness={0.62} />
-      </mesh>
-      <mesh position={[0, 0.105, 0]}>
-        <boxGeometry args={[0.34, 0.045, 3.52]} />
-        <meshStandardMaterial color="#b8a884" roughness={0.8} metalness={0.08} />
-      </mesh>
-      {[-0.58, 0.58].map(x => (
-        <mesh key={`floor-edge-${x}`} position={[x, 0.235, 0.18]}>
-          <boxGeometry args={[0.16, 0.09, 3.05]} />
-          <meshStandardMaterial color={accent} roughness={0.48} metalness={0.35} />
-        </mesh>
-      ))}
+      {/* The generated mechanical atlas owns the floor, plank and edge skins. */}
       {/* Tapered monocoque, nose and sidepods replace the former box chassis. */}
       <TaperedShell
         name="formula-monocoque"
@@ -1281,10 +1525,6 @@ export default function FormulaCar({
           >
             <meshPhysicalMaterial color={palette.shadow} roughness={0.3} metalness={0.38} clearcoat={0.62} />
           </TaperedShell>
-          {showRaceDetail && <mesh position={[x, 0.59, -0.36]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.26, 0.17, 0.18, 8]} />
-            <meshStandardMaterial color={CARBON} roughness={0.78} metalness={0.18} />
-          </mesh>}
           {showRaceDetail && <mesh position={[x, 0.64, 0.06]}>
             <boxGeometry args={[0.48, 0.055, 1.02]} />
             <meshStandardMaterial color={accent} roughness={0.38} metalness={0.34} />
@@ -1298,12 +1538,6 @@ export default function FormulaCar({
             >
               <boxGeometry args={[0.042, 0.08, detail.width]} />
               <meshStandardMaterial color={resolvePaint(detail.material, palette, accent)} roughness={0.36} metalness={0.36} />
-            </mesh>
-          ))}
-          {showHeroDetail && SIDEPOD_LOUVERS.map((offset, index) => (
-            <mesh name="formula-sidepod-louver" key={`sidepod-louver-${x}-${index}`} position={[x, 0.82, -0.22 + offset]} rotation={[0, 0, x > 0 ? -0.18 : 0.18]}>
-              <boxGeometry args={[0.05, 0.035, 0.24]} />
-              <meshStandardMaterial color={CARBON} roughness={0.52} metalness={0.48} />
             </mesh>
           ))}
         </group>
@@ -1357,19 +1591,10 @@ export default function FormulaCar({
           castShadow={index === 0}
         />
       ))}
-      {showHeroDetail && ACTIVE_AERO_MARKERS.filter(detail => detail.key.startsWith('front')).map(detail => (
-        <DetailBox key={detail.key} detail={detail} palette={palette} accent={accent} />
-      ))}
       {[-1.05, 1.05].map(x => (
         <mesh key={`front-endplate-${x}`} position={[x, 0.32, -2.22]}>
           <boxGeometry args={[0.07, 0.31, 0.55]} />
           <meshStandardMaterial color={palette.primary} roughness={0.34} metalness={0.54} />
-        </mesh>
-      ))}
-      {showRaceDetail && [-0.86, 0.86].map(x => (
-        <mesh key={`front-slot-gap-${x}`} position={[x, 0.44, -2.03]} rotation={[0, 0, x > 0 ? 0.18 : -0.18]}>
-          <boxGeometry args={[0.06, 0.24, 0.5]} />
-          <meshStandardMaterial color={CARBON} roughness={0.48} metalness={0.58} />
         </mesh>
       ))}
       {(isLowDetail ? REAR_WING_PLANES.slice(0, 1) : REAR_WING_PLANES)
@@ -1383,7 +1608,7 @@ export default function FormulaCar({
           castShadow={index === 0}
         />
       ))}
-      {showHeroDetail && ACTIVE_AERO_MARKERS.filter(detail => !detail.key.startsWith('front')).map(detail => (
+      {showHeroDetail && ACTIVE_AERO_MARKERS.filter(detail => detail.emissive).map(detail => (
         <DetailBox key={detail.key} detail={detail} palette={palette} accent={accent} />
       ))}
       {[-0.76, 0.76].map(x => (
@@ -1398,10 +1623,6 @@ export default function FormulaCar({
           <meshStandardMaterial color={accent} roughness={0.38} metalness={0.48} />
         </mesh>
       ))}
-      <mesh position={[0, 0.51, 1.83]}>
-        <boxGeometry args={[0.13, 0.7, 0.13]} />
-        <meshStandardMaterial color={CARBON_EDGE} roughness={0.4} metalness={0.7} />
-      </mesh>
       {REAR_LIGHT_STRIPS.filter((_, index) => showRaceDetail || index === 1).map(([x, y, z], index) => (
         <mesh key={`rear-light-${index}`} position={[x, y, z]}>
           <boxGeometry args={index === 1 ? [0.2, 0.09, 0.05] : [0.055, 0.26, 0.05]} />
@@ -1421,6 +1642,12 @@ export default function FormulaCar({
           wheelRefs={wheelRefs}
           surfaceAssets={tyreSurfaceAssets?.compact === isLowDetail
             ? tyreSurfaceAssets.wheels[wheel.index]
+            : null}
+          hardwareAssets={cockpitMechanicalAssets
+            ? {
+                geometry: cockpitMechanicalAssets.wheelHardwareGeometries[wheel.index],
+                material: cockpitMechanicalAssets.material,
+              }
             : null}
           showTyreTags={showHeroDetail}
           compact={isLowDetail}

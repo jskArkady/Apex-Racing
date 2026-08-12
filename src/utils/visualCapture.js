@@ -5,6 +5,7 @@ const GANTRY_CAPTURE_DISTANCE = 28
 const APEX_MEDIA_GANTRY_PROGRESS = 0.245
 const APEX_TOWER_CHASE_PROGRESS = 0.4375
 const APEX_HOSPITALITY_CHASE_PROGRESS = 0.095
+const START_SIGNAL_CHASE_PROGRESS = 0.985
 const KERB_CHASE_PROGRESS = Object.freeze({
   apex_gp: 0.135,
   harbour_street: 0.59,
@@ -13,6 +14,25 @@ const KERB_CHASE_PROGRESS = Object.freeze({
 const GRAVEL_CHASE_PROGRESS = Object.freeze({
   apex_gp: 0.13,
   temple_speedway: 0.18,
+})
+const GRANDSTAND_CHASE_PROGRESS = Object.freeze({
+  apex_gp: 0.99,
+  harbour_street: 0.62,
+  temple_speedway: 0.17,
+})
+const PALM_TRUNK_DETAIL = Object.freeze({
+  apex_gp: Object.freeze({
+    captureProgress: 0.02,
+    targetProgress: 0.04,
+    targetLateral: 31,
+    targetHeight: 2.5,
+  }),
+  harbour_street: Object.freeze({
+    captureProgress: 0.225,
+    targetProgress: 0.234,
+    targetLateral: -9,
+    targetHeight: 3.4,
+  }),
 })
 
 export function parseVisualCaptureRequest(search, enabled = true) {
@@ -52,6 +72,26 @@ export function parseVisualCaptureRequest(search, enabled = true) {
       view,
       cameraMode: 'chase',
       captureProgress,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'grandstand-chase') {
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: GRANDSTAND_CHASE_PROGRESS[trackId],
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'start-signal-chase') {
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: START_SIGNAL_CHASE_PROGRESS,
       cameraHeight: 3.6,
     })
   }
@@ -136,6 +176,38 @@ export function parseVisualCaptureRequest(search, enabled = true) {
       cameraMode: 'chase',
       captureProgress: 0.125,
       cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'tunnel-chase') {
+    if (trackId !== 'harbour_street') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.47,
+    })
+  }
+
+  if (view === 'hairpin-chase') {
+    if (trackId !== 'harbour_street') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.215,
+      cameraHeight: 3.6,
+    })
+  }
+
+  if (view === 'palm-trunk-detail') {
+    const detail = PALM_TRUNK_DETAIL[trackId]
+    if (!detail) return null
+    return Object.freeze({
+      trackId,
+      view,
+      ...detail,
+      cameraHeight: 5.5,
     })
   }
 

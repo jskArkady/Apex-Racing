@@ -320,12 +320,14 @@ describe('Adversarial Testing Suite: Track Component', () => {
     expect(rigidBodies.length).toBe(3);
 
     const meshes = container.querySelectorAll('mesh');
-    expect(meshes.length).toBe(22);
+    expect(meshes.length).toBe(26);
     expect(container.querySelector('[name="track-barrier-graphics"]')).toBeTruthy();
+    expect(container.querySelector('[name="track-barrier-structural-surfaces"]')).toBeTruthy();
     expect(container.querySelector('[name="track-braking-distance-boards"]')).toBeTruthy();
     expect(container.querySelector('[name="trackside-operations-graphics"]')).toBeTruthy();
     expect(container.querySelector('[name="track-lighting-signal-graphics"]')).toBeTruthy();
     expect(container.querySelector('[name="track-kerb-surfaces"]')).toBeTruthy();
+    expect(container.querySelector('[name="track-surface-wear"]')).toBeTruthy();
     expect(container.querySelector('[name="track-apex-gravel-runoff"]')).toBeTruthy();
     expect(container.querySelector('[name="track-apex-race-control-facades"]')).toBeTruthy();
     expect(container.querySelector('[name="track-crowd-panels"]')).toBeTruthy();
@@ -335,9 +337,11 @@ describe('Adversarial Testing Suite: Track Component', () => {
     expect(container.querySelector('[name="track-gantry-displays"]')).toBeTruthy();
     expect(container.querySelector('[name="track-gantry-structure-surfaces"]')).toBeTruthy();
     expect(container.querySelector('[name="track-apex-venue-facades"]')).toBeTruthy();
+    expect(container.querySelector('[name="track-apex-tower-ring-surfaces"]')).toBeTruthy();
     expect(container.querySelector('[name="track-apex-pit-lane-staff-billboards"]')).toBeTruthy();
     expect(container.querySelector('[name="track-apex-tent-canopies"]')).toBeTruthy();
     expect(container.querySelector('[name="track-palm-tree-billboards"]')).toBeTruthy();
+    expect(container.querySelector('[name="track-palm-trunk-surfaces"]')).toBeTruthy();
   });
 
   it('demonstrates useMemo geometry caching across multiple renders', () => {

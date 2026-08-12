@@ -8,6 +8,7 @@ import FormulaCar, {
   PLAYER_BODYWORK_GRAPHICS_LAYOUT,
   PLAYER_LIVERY_GRAPHICS_LAYOUT,
   createFormulaCockpitMechanicalGeometry,
+  createFormulaWheelHardwareGeometry,
   createFormulaTyreSurfaceGeometry,
   createFormulaWheelCoverSurfaceGeometry,
   createPlayerBodyworkGraphicsGeometry,
@@ -38,25 +39,25 @@ describe('FormulaCar visual LOD', () => {
 
     const expectations = {
       hero: {
-        positions: 1511,
-        indices: 4788,
-        min: [-0.83765596, 0.05038971, -1.44133425],
-        max: [0.83765596, 1.34, 2.04204488],
+        positions: 2119,
+        indices: 5736,
+        min: [-0.91099888, 0.05038971, -2.28],
+        max: [0.91099888, 1.34, 2.04204488],
         variants: [0, 1, 2, 3],
       },
       race: {
-        positions: 1095,
-        indices: 4068,
-        min: [-0.82, 0.12889212, -1.24952495],
-        max: [0.82, 1.34, 1.78],
+        positions: 1367,
+        indices: 4512,
+        min: [-0.91099888, 0.0825, -2.28],
+        max: [0.91099888, 1.34, 1.9],
         variants: [0, 1, 2, 3],
       },
       low: {
-        positions: 765,
-        indices: 3180,
-        min: [-0.435, 0.55, -0.65672052],
-        max: [0.435, 1.34, 1.78],
-        variants: [0, 1, 3],
+        positions: 885,
+        indices: 3360,
+        min: [-0.81, 0.0825, -1.82],
+        max: [0.81, 1.34, 1.9],
+        variants: [0, 1, 2, 3],
       },
     }
     const atlasInset = 1 / 1024
@@ -131,6 +132,88 @@ describe('FormulaCar visual LOD', () => {
     expect(() => createFormulaCockpitMechanicalGeometry({
       detail: 'thumbnail',
     })).toThrow(RangeError)
+  })
+
+  it('maps every wheel hub and brake-caliper face into shared hardware modules', () => {
+    for (const side of [-1, 1]) {
+      const radius = 0.42
+      const width = 0.34
+      const geometry = createFormulaWheelHardwareGeometry(
+        radius,
+        width,
+        side,
+      )
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+      const colors = geometry.getAttribute('color')
+      const indices = geometry.getIndex()
+
+      expect(geometry.name).toBe('formula-wheel-hardware-geometry')
+      expect(positions.count).toBe(324)
+      expect(normals.count).toBe(324)
+      expect(uvs.count).toBe(324)
+      expect(colors.count).toBe(324)
+      expect(indices.count).toBe(612)
+      for (const attribute of [positions, normals, uvs, colors]) {
+        expect(Array.from(attribute.array).every(Number.isFinite)).toBe(true)
+      }
+
+      const usedVariants = new Set()
+      for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+        const u = uvs.getX(vertex)
+        const v = uvs.getY(vertex)
+        expect(u).toBeGreaterThan(0)
+        expect(u).toBeLessThan(1)
+        expect(v).toBeGreaterThan(0)
+        expect(v).toBeLessThan(1)
+        usedVariants.add((v > 0.5 ? 0 : 2) + (u > 0.5 ? 1 : 0))
+      }
+      expect([...usedVariants].sort()).toEqual([
+        FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.mechanicalMetal,
+        FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.aeroCarbon,
+        FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS.tintableComposite,
+      ])
+
+      const expectedOuterX = side < 0
+        ? [-width / 2 - 0.0395, width / 2 + 0.013]
+        : [-width / 2 - 0.013, width / 2 + 0.0395]
+      expect(geometry.boundingBox.min.x).toBeCloseTo(expectedOuterX[0], 6)
+      expect(geometry.boundingBox.max.x).toBeCloseTo(expectedOuterX[1], 6)
+      expect(geometry.boundingBox.min.y).toBeCloseTo(-radius * 0.43, 6)
+      expect(geometry.boundingBox.max.y).toBeCloseTo(radius * 0.43, 6)
+      expect(geometry.boundingBox.min.z).toBeCloseTo(-radius * 0.43, 6)
+      expect(geometry.boundingBox.max.z).toBeCloseTo(radius * 0.43, 6)
+
+      for (let index = 0; index < indices.count; index += 3) {
+        const aIndex = indices.getX(index)
+        const bIndex = indices.getX(index + 1)
+        const cIndex = indices.getX(index + 2)
+        const a = new THREE.Vector3().fromBufferAttribute(positions, aIndex)
+        const b = new THREE.Vector3().fromBufferAttribute(positions, bIndex)
+        const c = new THREE.Vector3().fromBufferAttribute(positions, cIndex)
+        const geometricNormal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
+        const averageNormal = new THREE.Vector3()
+          .fromBufferAttribute(normals, aIndex)
+          .add(new THREE.Vector3().fromBufferAttribute(normals, bIndex))
+          .add(new THREE.Vector3().fromBufferAttribute(normals, cIndex))
+          .normalize()
+        expect(geometricNormal.dot(averageNormal)).toBeGreaterThan(0.99)
+      }
+      geometry.dispose()
+    }
+
+    const compact = createFormulaWheelHardwareGeometry(0.35, 0.29, -1, true)
+    expect(compact.name).toBe('formula-wheel-hardware-low-geometry')
+    expect(compact.getAttribute('position').count).toBe(64)
+    expect(compact.getIndex().count).toBe(120)
+    expect(compact.boundingBox.min.x).toBeCloseTo(-(0.29 + 0.018) / 2, 6)
+    expect(compact.boundingBox.max.x).toBeCloseTo((0.29 + 0.018) / 2, 6)
+    expect(compact.boundingBox.min.y).toBeCloseTo(-0.35 * 0.34 * Math.cos(Math.PI / 10), 6)
+    expect(compact.boundingBox.max.y).toBeCloseTo(0.35 * 0.34 * Math.cos(Math.PI / 10), 6)
+    expect(() => createFormulaWheelHardwareGeometry(0, 0.3, 1)).toThrow(RangeError)
+    expect(() => createFormulaWheelHardwareGeometry(0.4, 0.3, 0)).toThrow(RangeError)
+    compact.dispose()
   })
 
   it('maps the tread, both sidewalls, and wheel cover into isolated atlas quadrants', () => {
@@ -219,27 +302,36 @@ describe('FormulaCar visual LOD', () => {
     cover.dispose()
   })
 
-  it('maps twenty-eight bodywork panels across shell sides, sidepods, aero, and floor', () => {
+  it('maps sixty bodywork panels across complete shells, aero, and floor', () => {
     const geometry = createPlayerBodyworkGraphicsGeometry()
     const positions = geometry.getAttribute('position')
     const normals = geometry.getAttribute('normal')
     const uvs = geometry.getAttribute('uv')
 
     expect(Object.isFrozen(PLAYER_BODYWORK_GRAPHICS_LAYOUT)).toBe(true)
-    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT).toHaveLength(28)
-    expect(new Set(PLAYER_BODYWORK_GRAPHICS_LAYOUT.map(panel => panel.key)).size).toBe(28)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT).toHaveLength(60)
+    expect(new Set(PLAYER_BODYWORK_GRAPHICS_LAYOUT.map(panel => panel.key)).size).toBe(60)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.type === 'shell-facet'
-    ))).toHaveLength(18)
+    ))).toHaveLength(40)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.type === 'shell-facet' && panel.facetBand === 'top'
     ))).toHaveLength(10)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.type === 'shell-facet' && panel.facetBand === 'side'
-    ))).toHaveLength(8)
+    ))).toHaveLength(10)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
+      panel.type === 'shell-facet' && panel.facetBand === 'lowerSide'
+    ))).toHaveLength(10)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
+      panel.type === 'shell-facet' && panel.facetBand === 'bottom'
+    ))).toHaveLength(10)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
+      panel.type === 'shell-cap'
+    ))).toHaveLength(10)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.key.startsWith('sidepod-')
-    ))).toHaveLength(6)
+    ))).toHaveLength(20)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.key.startsWith('front-wing-')
     ))).toHaveLength(4)
@@ -249,16 +341,17 @@ describe('FormulaCar visual LOD', () => {
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.key.startsWith('underfloor-')
     ))).toHaveLength(2)
-    expect(positions.count).toBe(112)
-    expect(normals.count).toBe(112)
-    expect(uvs.count).toBe(112)
-    expect(geometry.getIndex().count).toBe(168)
+    expect(positions.count).toBe(290)
+    expect(normals.count).toBe(290)
+    expect(uvs.count).toBe(290)
+    expect(geometry.getIndex().count).toBe(540)
     expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
     expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
     expect(Array.from(uvs.array).every(Number.isFinite)).toBe(true)
 
     const atlasInset = 1 / 1024
-    PLAYER_BODYWORK_GRAPHICS_LAYOUT.forEach((panel, panelIndex) => {
+    let vertexOffset = 0
+    PLAYER_BODYWORK_GRAPHICS_LAYOUT.forEach((panel) => {
       const column = panel.variant % 2
       const row = Math.floor(panel.variant / 2)
       const minU = column * 0.5 + atlasInset
@@ -266,7 +359,8 @@ describe('FormulaCar visual LOD', () => {
       const minV = row === 0 ? 0.5 + atlasInset : atlasInset
       const maxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
       const midU = (minU + maxU) / 2
-      for (let vertex = panelIndex * 4; vertex < panelIndex * 4 + 4; vertex += 1) {
+      const vertexCount = panel.type === 'shell-cap' ? 9 : 4
+      for (let vertex = vertexOffset; vertex < vertexOffset + vertexCount; vertex += 1) {
         expect(uvs.getX(vertex)).toBeGreaterThanOrEqual(minU)
         expect(uvs.getX(vertex)).toBeLessThanOrEqual(maxU)
         expect(uvs.getY(vertex)).toBeGreaterThanOrEqual(minV)
@@ -276,10 +370,17 @@ describe('FormulaCar visual LOD', () => {
           else expect(uvs.getX(vertex)).toBeGreaterThanOrEqual(midU)
           if (panel.facetBand === 'top') {
             expect(normals.getY(vertex)).toBeGreaterThan(0.5)
-          } else {
+          } else if (panel.facetBand === 'side') {
             expect(normals.getY(vertex)).toBeGreaterThan(0.2)
             expect(normals.getX(vertex) * panel.sideSign).toBeGreaterThan(0.8)
+          } else if (panel.facetBand === 'lowerSide') {
+            expect(normals.getY(vertex)).toBeLessThan(-0.2)
+            expect(normals.getX(vertex) * panel.sideSign).toBeGreaterThan(0.8)
+          } else {
+            expect(normals.getY(vertex)).toBeLessThan(-0.5)
           }
+        } else if (panel.type === 'shell-cap') {
+          expect(normals.getZ(vertex) * panel.endSign).toBeGreaterThan(0.99999)
         } else {
           const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
           const expectedNormal = new THREE.Vector3(0, 0, 1).applyEuler(
@@ -288,6 +389,7 @@ describe('FormulaCar visual LOD', () => {
           expect(normal.dot(expectedNormal)).toBeGreaterThan(0.99999)
         }
       }
+      vertexOffset += vertexCount
     })
 
     const indices = geometry.getIndex()
@@ -407,25 +509,27 @@ describe('FormulaCar visual LOD', () => {
     expectCoreRaceSilhouette(view.container)
     expect(countNamed(view.container, 'formula-tyre-tag')).toBe(16)
     expect(countNamed(view.container, 'formula-sidepod-decal')).toBe(6)
-    expect(countNamed(view.container, 'formula-sidepod-louver')).toBe(10)
+    expect(countNamed(view.container, 'formula-sidepod-louver')).toBe(0)
     expect(countNamed(view.container, 'formula-cockpit-mechanical-surfaces')).toBe(1)
     expect(countNamed(view.container, 'formula-diffuser-fin')).toBe(0)
     expect(countNamed(view.container, 'formula-suspension-strut')).toBe(0)
-    expect(countNamed(view.container, 'front-active-hinge-left')).toBe(1)
+    expect(countNamed(view.container, 'front-active-hinge-left')).toBe(0)
     expect(countNamed(view.container, 'rear-overtake-mode-strip')).toBe(1)
     expect(countNamed(view.container, 'player-formula-livery-graphics')).toBe(0)
     expect(countNamed(view.container, 'formula-tyre-surface')).toBe(4)
     expect(countNamed(view.container, 'formula-wheel-cover-surface')).toBe(4)
+    expect(countNamed(view.container, 'formula-wheel-hardware-surfaces')).toBe(4)
 
     view.rerender(<FormulaCar isPlayer detail="race" />)
     expect(view.container.querySelector('[name="player-formula-car"]')).toBeTruthy()
     expect(countNamed(view.container, 'player-formula-livery-graphics')).toBe(1)
     expect(countNamed(view.container, 'player-formula-bodywork-graphics')).toBe(1)
     expect(countNamed(view.container, 'formula-tyre-tag')).toBe(16)
-    expect(countNamed(view.container, 'formula-sidepod-louver')).toBe(10)
+    expect(countNamed(view.container, 'formula-sidepod-louver')).toBe(0)
+    expect(countNamed(view.container, 'formula-wheel-hardware-surfaces')).toBe(4)
   })
 
-  it('cuts the race mesh count by at least 34 percent', () => {
+  it('cuts the race mesh count by at least 28 percent', () => {
     const view = render(<FormulaCar detail="hero" />)
     const heroMeshCount = countMeshes(view.container)
 
@@ -433,7 +537,7 @@ describe('FormulaCar visual LOD', () => {
     const raceMeshCount = countMeshes(view.container)
 
     expect(heroMeshCount).toBeGreaterThan(0)
-    expect(raceMeshCount).toBeLessThanOrEqual(Math.floor(heroMeshCount * 0.66))
+    expect(raceMeshCount).toBeLessThanOrEqual(Math.floor(heroMeshCount * 0.72))
   })
 
   it('retains the race silhouette while omitting hero-only micro geometry', () => {
@@ -451,6 +555,7 @@ describe('FormulaCar visual LOD', () => {
     expect(countNamed(container, 'player-formula-bodywork-graphics')).toBe(0)
     expect(countNamed(container, 'formula-tyre-surface')).toBe(4)
     expect(countNamed(container, 'formula-wheel-cover-surface')).toBe(4)
+    expect(countNamed(container, 'formula-wheel-hardware-surfaces')).toBe(4)
   })
 
   it.each([
@@ -485,6 +590,7 @@ describe('FormulaCar visual LOD', () => {
     expect(countNamed(view.container, 'player-formula-bodywork-graphics')).toBe(0)
     expect(countNamed(view.container, 'formula-tyre-surface')).toBe(4)
     expect(countNamed(view.container, 'formula-wheel-cover-surface')).toBe(0)
+    expect(countNamed(view.container, 'formula-wheel-hardware-surfaces')).toBe(4)
     expect(lowMeshCount).toBeLessThanOrEqual(Math.floor(raceMeshCount * 0.65))
   })
 })

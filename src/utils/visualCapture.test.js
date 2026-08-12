@@ -154,6 +154,54 @@ describe('development visual capture requests', () => {
       '?visualCapture=1&track=apex_gp&view=apartment-chase',
     )).toBeNull()
     expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=harbour_street&view=tunnel-chase',
+    )).toEqual({
+      trackId: 'harbour_street',
+      view: 'tunnel-chase',
+      cameraMode: 'chase',
+      captureProgress: 0.47,
+    })
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=temple_speedway&view=tunnel-chase',
+    )).toBeNull()
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=harbour_street&view=hairpin-chase',
+    )).toEqual({
+      trackId: 'harbour_street',
+      view: 'hairpin-chase',
+      cameraMode: 'chase',
+      captureProgress: 0.215,
+      cameraHeight: 3.6,
+    })
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=apex_gp&view=hairpin-chase',
+    )).toBeNull()
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=apex_gp&view=palm-trunk-detail',
+    )).toEqual({
+      trackId: 'apex_gp',
+      view: 'palm-trunk-detail',
+      captureProgress: 0.02,
+      targetProgress: 0.04,
+      targetLateral: 31,
+      targetHeight: 2.5,
+      cameraHeight: 5.5,
+    })
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=harbour_street&view=palm-trunk-detail',
+    )).toEqual({
+      trackId: 'harbour_street',
+      view: 'palm-trunk-detail',
+      captureProgress: 0.225,
+      targetProgress: 0.234,
+      targetLateral: -9,
+      targetHeight: 3.4,
+      cameraHeight: 5.5,
+    })
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=temple_speedway&view=palm-trunk-detail',
+    )).toBeNull()
+    expect(parseVisualCaptureRequest(
       '?visualCapture=1&track=apex_gp&view=tower-chase',
     )).toEqual({
       trackId: 'apex_gp',
@@ -197,6 +245,32 @@ describe('development visual capture requests', () => {
         view: 'braking-board-chase',
         cameraMode: 'chase',
         captureProgress,
+        cameraHeight: 3.6,
+      })
+    }
+    for (const [trackId, captureProgress] of [
+      ['apex_gp', 0.99],
+      ['harbour_street', 0.62],
+      ['temple_speedway', 0.17],
+    ]) {
+      expect(parseVisualCaptureRequest(
+        `?visualCapture=1&track=${trackId}&view=grandstand-chase`,
+      )).toEqual({
+        trackId,
+        view: 'grandstand-chase',
+        cameraMode: 'chase',
+        captureProgress,
+        cameraHeight: 3.6,
+      })
+    }
+    for (const track of TRACK_PRESETS) {
+      expect(parseVisualCaptureRequest(
+        `?visualCapture=1&track=${track.id}&view=start-signal-chase`,
+      )).toEqual({
+        trackId: track.id,
+        view: 'start-signal-chase',
+        cameraMode: 'chase',
+        captureProgress: 0.985,
         cameraHeight: 3.6,
       })
     }

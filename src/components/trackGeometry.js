@@ -31,18 +31,27 @@ export const START_GRID_BOX = Object.freeze({
 export const START_GANTRY_PROGRESS = START_FINISH_PROGRESS
 export const START_LIGHT_LATERALS = Object.freeze([-5, -2.5, 0, 2.5, 5])
 export const START_LIGHT_ROW_LEVELS = Object.freeze([6.56, 6.9])
+export const START_SIGNAL_BODY = Object.freeze({
+  size: Object.freeze([0.68, 0.22, 0.78]),
+  lensSize: 0.18,
+})
 export const BROADCAST_CAMERA_PROGRESS = Object.freeze([0.075, 0.285, 0.515, 0.815])
 export const TRACK_LIGHTING_GRAPHICS_VARIANTS = Object.freeze({
   floodlightFront: 0,
   startSignal: 1,
   tunnelLuminaire: 2,
+  tunnelLuminaireService: 3,
   floodlightRear: 3,
+  startSignalService: 3,
 })
 export const TRACKSIDE_OPERATIONS_VARIANTS = Object.freeze({
   marshalPost: 0,
   broadcastLens: 1,
   pitWallDisplay: 2,
   broadcastCabinet: 3,
+  broadcastHead: 3,
+  pitLaneCabinet: 3,
+  pitLaneModule: 3,
 })
 export const GANTRY_STRUCTURE_VARIANTS = Object.freeze({
   crossbarFront: 0,
@@ -50,17 +59,47 @@ export const GANTRY_STRUCTURE_VARIANTS = Object.freeze({
   underside: 2,
   serviceBackEnd: 3,
 })
+export const APEX_TOWER_RING_SURFACE_VARIANTS = Object.freeze({
+  ledgeTop: 0,
+  underside: 1,
+  paleFascia: 2,
+  accentFascia: 3,
+})
 export const KERB_SURFACE_VARIANTS = Object.freeze({
   ribbedTread: 0,
   smoothTread: 1,
   edgeFascia: 2,
   endService: 3,
 })
+export const TRACK_SURFACE_WEAR_VARIANTS = Object.freeze({
+  paint: 0,
+  shoulderAsphalt: 1,
+  rubberDeposit: 2,
+  runoffCoating: 3,
+})
+export const BARRIER_STRUCTURAL_SURFACE_VARIANTS = Object.freeze({
+  concreteCap: 0,
+  concreteOuter: 1,
+  steelCap: 2,
+  steelOuter: 3,
+})
 export const YACHT_UPPER_SURFACE_VARIANTS = Object.freeze({
   deckTop: 0,
   cabinRoof: 1,
   serviceRoof: 2,
   serviceFascia: 3,
+})
+export const YACHT_RIG_SURFACE_VARIANTS = Object.freeze({
+  mastSide: 0,
+  boomSide: 1,
+  mastCap: 2,
+  boomEnd: 3,
+})
+export const PALM_TRUNK_SURFACE_VARIANTS = Object.freeze({
+  datePalmBark: 0,
+  fanPalmBark: 1,
+  crownCap: 2,
+  baseCap: 3,
 })
 export const HARBOUR_APARTMENT_UPPER_SURFACE_VARIANTS = Object.freeze({
   roofTop: 0,
@@ -81,6 +120,17 @@ export const HARBOUR_TUNNEL_PANEL_OVERLAP = 1.2
 export const HARBOUR_TUNNEL_LIGHT_COUNT = 6
 export const HARBOUR_TUNNEL_LIGHT_HEIGHT = 5.55
 export const HARBOUR_TUNNEL_LINER_INNER_OFFSET = 0.758
+export const HARBOUR_TUNNEL_LIGHT_FIXTURE = Object.freeze({
+  centerY: HARBOUR_TUNNEL_ROOF_UNDERSIDE + 0.055,
+  size: Object.freeze([1.3, 0.11, 1.05]),
+})
+export const HARBOUR_TUNNEL_STRUCTURAL_RIB = Object.freeze({
+  centerY: HARBOUR_TUNNEL_ROOF_UNDERSIDE + 0.09,
+  height: 0.18,
+  depth: 0.3,
+  widthInset: 1.8,
+  faceOffset: 0.012,
+})
 const HARBOUR_TUNNEL_SIDE_WALL_CENTER_OFFSET = 1.02
 const HARBOUR_TUNNEL_SIDE_WALL_WIDTH = 0.5
 export const HARBOUR_WATER = Object.freeze({
@@ -90,6 +140,16 @@ export const HARBOUR_WATER = Object.freeze({
 export const HARBOUR_WATER_SURFACE_Y = (
   HARBOUR_WATER.position[1] + HARBOUR_WATER.size[1] / 2
 )
+export const HARBOUR_HAIRPIN_ISLAND_LAYOUT = Object.freeze({
+  progress: 0.234,
+  lateralFromTurnCenter: 11.2,
+  centerY: 0.22,
+  radius: 3.4,
+  height: 0.4,
+  segments: 10,
+  tileSize: 3,
+  color: '#19391f',
+})
 export const HARBOUR_MARINA_LAYOUT = Object.freeze({
   quay: Object.freeze({
     size: Object.freeze([300, 1.1, 0.7]),
@@ -121,6 +181,18 @@ export const HARBOUR_YACHT_LAYOUT = Object.freeze({
     centerY: 2.08,
     zOffset: -0.45,
   }),
+  mast: Object.freeze({
+    radius: 0.08,
+    height: 6.6,
+    centerY: 4.35,
+    zOffset: 0.4,
+    segments: 6,
+  }),
+  boom: Object.freeze({
+    size: Object.freeze([0.12, 0.12, 4.4]),
+    centerY: 4.55,
+    zOffset: 0.1,
+  }),
   boats: Object.freeze(
     [-112, -82, -48, -12, 24, 61, 98, 132, 162].map((x, index) => (
       Object.freeze({
@@ -148,6 +220,17 @@ export const APEX_VENUE_FACADE_LAYOUT = Object.freeze({
       segments: 10,
       variants: Object.freeze([0, 3, 0, 3, 0, 3, 0, 3]),
     }),
+    flagPole: Object.freeze({
+      centerY: 31.8,
+      size: Object.freeze([0.18, 6.8, 0.18]),
+    }),
+    flag: Object.freeze({
+      lateralOffset: 1.4,
+      centerY: 34.2,
+      size: Object.freeze([2.8, 1.35, 0.12]),
+      variant: 0,
+      tint: '#d23d43',
+    }),
   }),
   hospitality: Object.freeze(
     [0.12, 0.3, 0.62, 0.84].map((progress, index) => Object.freeze({
@@ -162,6 +245,44 @@ export const APEX_VENUE_FACADE_LAYOUT = Object.freeze({
     })),
   ),
 })
+export const APEX_TOWER_RING_LAYOUT = Object.freeze([
+  ...Array.from({ length: 8 }, (_, floor) => Object.freeze({
+    kind: 'ledge',
+    centerY: 2.15 + floor * 3.15,
+    radius: 7.8,
+    innerRadius: APEX_VENUE_FACADE_LAYOUT.tower.radius,
+    height: 0.38,
+    segments: 20,
+    topVariant: APEX_TOWER_RING_SURFACE_VARIANTS.ledgeTop,
+    undersideVariant: APEX_TOWER_RING_SURFACE_VARIANTS.underside,
+    fasciaVariant: APEX_TOWER_RING_SURFACE_VARIANTS.paleFascia,
+    tint: '#ffffff',
+  })),
+  ...Array.from({ length: 8 }, (_, floor) => Object.freeze({
+    kind: 'accent',
+    centerY: 3.53 + floor * 3.15,
+    radius: 7.38,
+    innerRadius: APEX_VENUE_FACADE_LAYOUT.tower.radius,
+    height: 0.16,
+    segments: 20,
+    topVariant: APEX_TOWER_RING_SURFACE_VARIANTS.underside,
+    undersideVariant: APEX_TOWER_RING_SURFACE_VARIANTS.underside,
+    fasciaVariant: APEX_TOWER_RING_SURFACE_VARIANTS.accentFascia,
+    tint: floor % 2 === 0 ? '#41d6ff' : '#d8b45c',
+  })),
+  Object.freeze({
+    kind: 'crownCap',
+    centerY: 26.3,
+    radius: 8.5,
+    innerRadius: 0,
+    height: 0.45,
+    segments: 20,
+    topVariant: APEX_TOWER_RING_SURFACE_VARIANTS.ledgeTop,
+    undersideVariant: APEX_TOWER_RING_SURFACE_VARIANTS.underside,
+    fasciaVariant: APEX_TOWER_RING_SURFACE_VARIANTS.accentFascia,
+    tint: '#8d9293',
+  }),
+])
 export const APEX_RACE_CONTROL_LAYOUT = Object.freeze({
   progress: 0.35,
   lateralOffsetFromRoad: 15,
@@ -282,10 +403,27 @@ export const TRACKSIDE_OPERATIONS_BODY_LAYOUTS = Object.freeze({
     centerY: 4.26,
     size: Object.freeze([0.18, 0.18, 0.22]),
   }),
+  broadcastHead: Object.freeze({
+    lateralOffsetFromMast: -1.4,
+    centerY: 4.28,
+    size: Object.freeze([0.48, 0.28, 0.42]),
+  }),
   broadcastCabinet: Object.freeze({
     lateralOffsetFromMast: 0.28,
     centerY: 0.86,
     size: Object.freeze([1.28, 1.72, 1.16]),
+  }),
+})
+export const BROADCAST_CAMERA_SUPPORT_LAYOUT = Object.freeze({
+  lateralOffsetFromRoad: 6.2,
+  pole: Object.freeze({
+    centerY: 2.2,
+    size: Object.freeze([0.18, 4.4, 0.18]),
+  }),
+  arm: Object.freeze({
+    lateralOffsetFromMast: -0.7,
+    centerY: 4.35,
+    size: Object.freeze([1.55, 0.16, 0.16]),
   }),
 })
 export const TRACKSIDE_BARRIER_POST_LAYOUT = Object.freeze({
@@ -374,6 +512,110 @@ const COLORS = {
   grass: '#376638',
   tifosi: '#d92f39',
 }
+
+export const TEMPLE_PIT_BAY_TRIM_LAYOUT = Object.freeze(
+  PIT_BAYS.map(bay => Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -16.42,
+    centerY: 2,
+    size: Object.freeze([0.12, 2.7, 3.45]),
+    along: bay * 4.75,
+    color: [COLORS.italianGreen, COLORS.white, COLORS.red][(bay + 6) % 3],
+  })),
+)
+export const APEX_PIT_BAY_SERVICE_LAYOUT = Object.freeze(
+  PIT_BAYS.map(bay => Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -17.15,
+    centerY: 1.45,
+    size: Object.freeze([0.85, 2.5, 4.1]),
+    along: bay * 4.8,
+    color: '#ffffff',
+    verticalModule: Object.freeze([0, 1]),
+  })),
+)
+export const APEX_PIT_BAY_TRIM_LAYOUT = Object.freeze(
+  PIT_BAYS.map(bay => Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -17.08,
+    centerY: 2.65,
+    size: Object.freeze([0.16, 0.18, 4.1]),
+    along: bay * 4.8,
+    color: bay % 2 === 0 ? COLORS.red : COLORS.concrete,
+  })),
+)
+export const APEX_PIT_APRON_LAYOUT = Object.freeze({
+  progress: PIT_STRAIGHT_PROGRESS,
+  lateral: -18,
+  centerY: 0.12,
+  size: Object.freeze([8.5, 0.18, 72]),
+  color: COLORS.concrete,
+})
+export const APEX_PIT_WALL_ACCENT_LAYOUT = Object.freeze({
+  progress: PIT_STRAIGHT_PROGRESS,
+  lateral: -9.2,
+  centerY: 1.08,
+  size: Object.freeze([0.16, 0.12, 74]),
+  color: COLORS.red,
+})
+export const APEX_PIT_SERVICE_PAD_LAYOUT = Object.freeze(
+  PIT_BAYS.map(bay => Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -13.2,
+    centerY: 0.16,
+    size: Object.freeze([1.8, 0.055, 3.1]),
+    along: bay * 4.8,
+    color: bay % 2 === 0 ? COLORS.sandLight : COLORS.navy,
+  })),
+)
+export const APEX_PIT_LANE_EQUIPMENT_LAYOUT = Object.freeze(
+  PIT_BAYS
+    .filter(bay => bay % 2 === 0)
+    .flatMap(bay => {
+      const along = bay * 4.8 + 0.6
+      return [
+        Object.freeze({
+          kind: 'pitLaneCabinet',
+          progress: PIT_STRAIGHT_PROGRESS,
+          lateral: -12.65,
+          centerY: 0.38,
+          size: Object.freeze([0.55, 0.55, 0.9]),
+          along,
+          color: COLORS.panel,
+        }),
+        Object.freeze({
+          kind: 'pitLaneModule',
+          progress: PIT_STRAIGHT_PROGRESS,
+          lateral: -12.62,
+          centerY: 0.72,
+          size: Object.freeze([0.36, 0.2, 0.7]),
+          along,
+          color: COLORS.warm,
+        }),
+      ]
+    }),
+)
+export const APEX_PIT_LANE_LIGHT_LAYOUT = Object.freeze(
+  [-21, 18].map(along => Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    along,
+    pole: Object.freeze({
+      lateral: 10.4,
+      centerY: 2.35,
+      size: Object.freeze([0.18, 4.7, 0.18]),
+    }),
+    arm: Object.freeze({
+      lateral: 10.1,
+      centerY: 4.62,
+      size: Object.freeze([0.18, 0.18, 1.5]),
+    }),
+    head: Object.freeze({
+      lateral: 9.8,
+      centerY: 4.5,
+      size: Object.freeze([0.42, 0.3, 0.48]),
+    }),
+  })),
+)
 export const HARBOUR_SWIMMING_POOL_PANELS = Object.freeze([
   Object.freeze({
     role: 'water',
@@ -457,6 +699,19 @@ const CROWD_PALETTE = Object.freeze([
   COLORS.crowdRed,
   COLORS.crowdPale,
 ])
+export const GRANDSTAND_ACCENT_CANOPY = Object.freeze({
+  centerY: 5.82,
+  width: 11.7,
+  height: 0.18,
+  lengthOverhang: 2.2,
+})
+export const GRANDSTAND_ROOF_RIB = Object.freeze({
+  centerY: 6.36,
+  width: 10.8,
+  height: 0.14,
+  depth: 0.16,
+  count: 5,
+})
 export const GRANDSTAND_LAYOUTS = Object.freeze({
   apex: Object.freeze([
     Object.freeze({
@@ -550,6 +805,33 @@ export const PIT_GARAGE_FACADE_LAYOUTS = Object.freeze({
     panelCount: 3,
     panelGap: 0.25,
   }),
+})
+export const PIT_GARAGE_GLASS_LAYOUTS = Object.freeze({
+  apex: Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -17.7,
+    centerY: 3.3,
+    size: Object.freeze([0.8, 5.6, 57]),
+  }),
+  harbour: Object.freeze({
+    progress: 0.985,
+    lateral: -13.2,
+    centerY: 3.7,
+    size: Object.freeze([0.7, 5.2, 33]),
+  }),
+  temple: Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -16.8,
+    centerY: 3.3,
+    size: Object.freeze([0.7, 5.4, 57]),
+  }),
+})
+export const APEX_PIT_GARAGE_HEADER = Object.freeze({
+  progress: PIT_STRAIGHT_PROGRESS,
+  lateral: -17.2,
+  centerY: 5.65,
+  size: Object.freeze([2.6, 0.28, 58]),
+  color: '#d8b45c',
 })
 export const PIT_COMPLEX_STRUCTURE_LAYOUTS = Object.freeze({
   apex: Object.freeze({
@@ -683,7 +965,9 @@ export const BRAKING_BOARD_PANEL = Object.freeze({
   height: 1.1,
   depth: 0.14,
   poleCenterY: 0.75,
+  poleWidth: 0.12,
   poleHeight: 1.5,
+  poleDepth: 0.12,
   lateralClearance: 2.15,
 })
 
@@ -1052,6 +1336,150 @@ export function createBarrierGraphicsGeometry(
   return merged
 }
 
+export function createBarrierStructuralSurfaceGeometry(
+  curve,
+  venue = 'apex',
+  samples = BARRIER_SEGMENTS,
+  roadWidth = ROAD_WIDTH,
+) {
+  if (!curve || typeof curve.getLength !== 'function') {
+    throw new TypeError('Barrier structural surfaces require a finite track curve')
+  }
+  if (!Number.isInteger(samples) || samples < 3) {
+    throw new RangeError('Barrier structural surfaces require at least three samples')
+  }
+  if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
+    throw new RangeError('Barrier structural surfaces require a usable road width')
+  }
+
+  const length = curve.getLength()
+  if (!Number.isFinite(length) || length <= 0) {
+    throw new RangeError('Barrier structural surfaces require a positive track length')
+  }
+
+  const atlasInset = 1 / 1024
+  const faceOffset = 0.008
+  const barrierWidth = 0.5
+  const topY = 1.35 + faceOffset
+  const outerBottomY = BARRIER_GRAPHICS_BOTTOM_OFFSET
+  const outerTopY = 1.35 - faceOffset
+  const parts = []
+  const topVariant = venue === 'apex'
+    ? BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteCap
+    : BARRIER_STRUCTURAL_SURFACE_VARIANTS.steelCap
+  const outerVariant = venue === 'apex'
+    ? BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteOuter
+    : BARRIER_STRUCTURAL_SURFACE_VARIANTS.steelOuter
+
+  const createMappedQuad = ({ vertices, variant, physicalU, physicalV }) => {
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute(vertices.flatMap(vertex => vertex.toArray()), 3),
+    )
+    geometry.setIndex([0, 2, 1, 2, 3, 1])
+
+    const column = variant % 2
+    const row = Math.floor(variant / 2)
+    const moduleMinU = column * 0.5 + atlasInset
+    const moduleMaxU = (column + 1) * 0.5 - atlasInset
+    const moduleMinV = row === 0 ? 0.5 + atlasInset : atlasInset
+    const moduleMaxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+    const maxDimension = Math.max(physicalU, physicalV)
+    const cropU = physicalU / maxDimension
+    const cropV = physicalV / maxDimension
+    const centerU = (moduleMinU + moduleMaxU) / 2
+    const centerV = (moduleMinV + moduleMaxV) / 2
+    const spanU = (moduleMaxU - moduleMinU) * cropU
+    const spanV = (moduleMaxV - moduleMinV) * cropV
+    const minU = centerU - spanU / 2
+    const maxU = centerU + spanU / 2
+    const minV = centerV - spanV / 2
+    const maxV = centerV + spanV / 2
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute([
+      minU, minV,
+      maxU, minV,
+      minU, maxV,
+      maxU, maxV,
+    ], 2))
+    geometry.computeVertexNormals()
+    parts.push(geometry)
+  }
+
+  for (let panelIndex = 0; panelIndex < samples; panelIndex += 1) {
+    const startProgress = panelIndex / samples
+    const endProgress = (panelIndex + 1) / samples
+    const start = new THREE.Vector3()
+    const startTangent = new THREE.Vector3()
+    const startSide = new THREE.Vector3()
+    const end = new THREE.Vector3()
+    const endTangent = new THREE.Vector3()
+    const endSide = new THREE.Vector3()
+    getTrackFrame(curve, startProgress, start, startTangent, startSide)
+    getTrackFrame(curve, endProgress, end, endTangent, endSide)
+    const panelLength = start.distanceTo(end)
+
+    for (const sideSign of [-1, 1]) {
+      const innerLateral = sideSign * roadWidth / 2
+      const outerLateral = sideSign * (roadWidth / 2 + barrierWidth)
+      const startInner = start.clone()
+        .addScaledVector(startSide, innerLateral)
+        .setY(topY)
+      const startOuter = start.clone()
+        .addScaledVector(startSide, outerLateral)
+        .setY(topY)
+      const endInner = end.clone()
+        .addScaledVector(endSide, innerLateral)
+        .setY(topY)
+      const endOuter = end.clone()
+        .addScaledVector(endSide, outerLateral)
+        .setY(topY)
+      createMappedQuad({
+        vertices: sideSign > 0
+          ? [startInner, startOuter, endInner, endOuter]
+          : [startOuter, startInner, endOuter, endInner],
+        variant: topVariant,
+        physicalU: barrierWidth,
+        physicalV: panelLength,
+      })
+
+      const outerFaceLateral = sideSign * (
+        roadWidth / 2 + barrierWidth + faceOffset
+      )
+      const startOuterFace = start.clone().addScaledVector(
+        startSide,
+        outerFaceLateral,
+      )
+      const endOuterFace = end.clone().addScaledVector(
+        endSide,
+        outerFaceLateral,
+      )
+      const startTop = startOuterFace.clone().setY(outerTopY)
+      const endTop = endOuterFace.clone().setY(outerTopY)
+      const startBottom = startOuterFace.clone().setY(outerBottomY)
+      const endBottom = endOuterFace.clone().setY(outerBottomY)
+      createMappedQuad({
+        vertices: sideSign > 0
+          ? [endTop, startTop, endBottom, startBottom]
+          : [startTop, endTop, startBottom, endBottom],
+        variant: outerVariant,
+        physicalU: panelLength,
+        physicalV: outerTopY - outerBottomY,
+      })
+    }
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) {
+    throw new Error('Barrier structural surface geometry could not be merged')
+  }
+  merged.name = 'shared-barrier-structural-surface-geometry'
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
 function addVertexColor(geometry, color) {
   const rgb = new THREE.Color(color)
   const count = geometry.getAttribute('position').count
@@ -1076,14 +1504,6 @@ function pushBox(parts, size, position, quaternion, color) {
 function pushWorldBox(parts, size, position, color, yaw = 0) {
   const quaternion = new THREE.Quaternion().setFromAxisAngle(WORLD_UP, yaw)
   pushBox(parts, size, new THREE.Vector3(...position), quaternion, color)
-}
-
-function pushWorldCylinder(parts, radius, height, position, color, segments = 8) {
-  const geometry = new THREE.CylinderGeometry(radius, radius, height, segments)
-  _matrix.compose(new THREE.Vector3(...position), new THREE.Quaternion(), _scale)
-  geometry.applyMatrix4(_matrix)
-  addVertexColor(geometry, color)
-  parts.push(geometry)
 }
 
 function pushTrackBox(parts, curve, progress, lateral, y, size, color, along = 0) {
@@ -1265,6 +1685,62 @@ export function getPalmTreeLayout(curve, venue = 'apex') {
   ])
 }
 
+export function createHarbourHairpinIslandSurfaceGeometry(curve) {
+  if (!curve || typeof curve.getPointAt !== 'function') {
+    throw new TypeError('Harbour hairpin island requires a finite track curve')
+  }
+
+  const layout = HARBOUR_HAIRPIN_ISLAND_LAYOUT
+  const geometry = new THREE.CylinderGeometry(
+    layout.radius,
+    layout.radius,
+    layout.height,
+    layout.segments,
+  )
+  const positions = geometry.getAttribute('position')
+  const normals = geometry.getAttribute('normal')
+  const uvs = geometry.getAttribute('uv')
+  const circumferenceRepeat = Math.PI * 2 * layout.radius / layout.tileSize
+  for (let vertex = 0; vertex < positions.count; vertex += 1) {
+    const x = positions.getX(vertex)
+    const y = positions.getY(vertex)
+    const z = positions.getZ(vertex)
+    if (Math.abs(normals.getY(vertex)) > 0.9) {
+      uvs.setXY(
+        vertex,
+        (x + layout.radius) / layout.tileSize,
+        (z + layout.radius) / layout.tileSize,
+      )
+    } else {
+      const angle = Math.atan2(z, x)
+      uvs.setXY(
+        vertex,
+        (angle / (Math.PI * 2) + 0.5) * circumferenceRepeat,
+        (y + layout.height / 2) / layout.tileSize,
+      )
+    }
+  }
+  uvs.needsUpdate = true
+  addVertexColor(geometry, layout.color)
+
+  const point = new THREE.Vector3()
+  const tangent = new THREE.Vector3()
+  const side = new THREE.Vector3()
+  getTrackFrame(curve, layout.progress, point, tangent, side)
+  point.addScaledVector(
+    side,
+    getTurnSide(curve, layout.progress) * layout.lateralFromTurnCenter,
+  )
+  point.y += layout.centerY
+  const matrix = new THREE.Matrix4().makeBasis(side, WORLD_UP, tangent)
+  matrix.setPosition(point)
+  geometry.applyMatrix4(matrix)
+  geometry.name = 'harbour-hairpin-island-surface-geometry'
+  geometry.computeBoundingBox()
+  geometry.computeBoundingSphere()
+  return geometry
+}
+
 function getOffsetTrackPoint(curve, progress, lateralOffset, target) {
   const tangent = new THREE.Vector3()
   const side = new THREE.Vector3()
@@ -1291,42 +1767,133 @@ export function getCurbSegmentLength(curve, segmentIndex, lateralOffset) {
   return Math.max(previous.distanceTo(center), center.distanceTo(next)) * CURB_LENGTH_FACTOR
 }
 
+function getSurfaceWearStripBounds(variant) {
+  const atlasInset = 1 / 1024
+  return {
+    minU: variant * 0.25 + atlasInset,
+    maxU: (variant + 1) * 0.25 - atlasInset,
+  }
+}
+
+function remapSurfaceWearRibbon(geometry, variant) {
+  const { minU, maxU } = getSurfaceWearStripBounds(variant)
+  const uvs = geometry.getAttribute('uv')
+  for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+    uvs.setX(
+      vertex,
+      THREE.MathUtils.lerp(minU, maxU, vertex % 2),
+    )
+  }
+  uvs.needsUpdate = true
+  return geometry
+}
+
+function remapSurfaceWearBox(geometry, variant, size) {
+  const { minU, maxU } = getSurfaceWearStripBounds(variant)
+  const [width, height, length] = size
+  const faceDimensions = [
+    [length, height],
+    [length, height],
+    [width, length],
+    [width, length],
+    [width, height],
+    [width, height],
+  ]
+  const indices = geometry.getIndex()
+  const uvs = geometry.getAttribute('uv')
+
+  for (const group of geometry.groups) {
+    const [physicalU, physicalV] = faceDimensions[group.materialIndex]
+    const vertices = new Set()
+    for (let offset = group.start; offset < group.start + group.count; offset += 1) {
+      vertices.add(indices.getX(offset))
+    }
+    const shortSpan = Math.max(Math.min(physicalU, physicalV), 0.12)
+    const longSpan = Math.max(physicalU, physicalV)
+    const repeatV = Math.max(longSpan / (shortSpan * 4), 0.25)
+    const rotate = physicalU > physicalV
+    for (const vertex of vertices) {
+      const rawU = uvs.getX(vertex)
+      const rawV = uvs.getY(vertex)
+      const sourceU = rotate ? rawV : rawU
+      const sourceV = (rotate ? rawU : rawV) * repeatV
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, sourceU),
+        sourceV,
+      )
+    }
+  }
+  uvs.needsUpdate = true
+  return geometry
+}
+
+function pushTrackSurfaceWearBox(
+  parts,
+  curve,
+  progress,
+  lateral,
+  y,
+  size,
+  color,
+  variant,
+  along = 0,
+) {
+  const geometry = remapSurfaceWearBox(
+    new THREE.BoxGeometry(...size),
+    variant,
+    size,
+  )
+  pushTrackPrimitive(
+    parts,
+    curve,
+    progress,
+    lateral,
+    y,
+    geometry,
+    color,
+    along,
+  )
+}
+
 function addSurfaceGuides(parts, curve, roadWidth = ROAD_WIDTH) {
   const shoulderCenterOffset = roadWidth / 2 - 1.45
   const edgeLineOffset = roadWidth / 2 - 0.92
   // A broad, low-contrast shoulder on each side makes the full driving width
-  // legible. The bright edge lines then define the limit, not a centre lane.
+  // legible. Its generated aggregate keeps the strip related to the road.
   for (const lateralOffset of [-shoulderCenterOffset, shoulderCenterOffset]) {
-    parts.push(buildSurfaceRibbon(curve, {
+    parts.push(remapSurfaceWearRibbon(buildSurfaceRibbon(curve, {
       samples: LOW_DETAIL_SURFACE_SEGMENTS,
       lateralOffset,
       width: SHOULDER_WIDTH,
       yOffset: SURFACE_LEVELS.shoulder,
-      color: COLORS.shoulder,
-    }))
+      color: '#d7d7d2',
+      uvWorldScale: 2.88,
+    }), TRACK_SURFACE_WEAR_VARIANTS.shoulderAsphalt))
   }
 
-  // Thin continuous paint reads more cleanly than hundreds of separate boxes
-  // and remains a single draw call after the final geometry merge.
+  // Thin continuous paint reads more cleanly than hundreds of separate boxes.
   for (const lateralOffset of [-edgeLineOffset, edgeLineOffset]) {
-    parts.push(buildSurfaceRibbon(curve, {
+    parts.push(remapSurfaceWearRibbon(buildSurfaceRibbon(curve, {
       lateralOffset,
       width: EDGE_LINE_WIDTH,
       color: COLORS.white,
-    }))
+      uvWorldScale: 2.4,
+    }), TRACK_SURFACE_WEAR_VARIANTS.paint))
   }
 
   // Twin tyre traces imply use across the road without creating a false
   // centre-line that could make normal lateral movement look off-course.
   for (const lateralOffset of [-1.45, 1.45]) {
-    parts.push(buildSurfaceRibbon(curve, {
+    parts.push(remapSurfaceWearRibbon(buildSurfaceRibbon(curve, {
       samples: LOW_DETAIL_SURFACE_SEGMENTS,
       lateralOffset,
       width: 0.42,
       yOffset: SURFACE_LEVELS.tyreTrace,
-      color: COLORS.groove,
+      color: '#959a98',
       offsetAt: progress => Math.sin(progress * Math.PI * 10) * 0.24,
-    }))
+      uvWorldScale: 3.6,
+    }), TRACK_SURFACE_WEAR_VARIANTS.rubberDeposit))
   }
 }
 
@@ -1337,7 +1904,7 @@ function addCornerReadability(parts, curve, venue, roadWidth = ROAD_WIDTH) {
     const outside = -turnSide * (roadWidth / 2 + 2.05)
 
     if (venue === 'apex' || venue === 'temple') {
-      pushTrackBox(
+      pushTrackSurfaceWearBox(
         parts,
         curve,
         progress,
@@ -1345,12 +1912,22 @@ function addCornerReadability(parts, curve, venue, roadWidth = ROAD_WIDTH) {
         0.085,
         [0.65, 0.04, 12],
         venue === 'temple' ? COLORS.italianGreen : COLORS.runoffGreen,
+        TRACK_SURFACE_WEAR_VARIANTS.runoffCoating,
       )
     }
 
     // Paired rubber marks tell the driver where heavy braking begins.
     for (const lateral of [-0.78, 0.78]) {
-      pushTrackBox(parts, curve, progress - 0.018, lateral, 0.114, [0.34, 0.022, 8], COLORS.groove)
+      pushTrackSurfaceWearBox(
+        parts,
+        curve,
+        progress - 0.018,
+        lateral,
+        0.114,
+        [0.34, 0.022, 8],
+        '#959a98',
+        TRACK_SURFACE_WEAR_VARIANTS.rubberDeposit,
+      )
     }
   }
 }
@@ -1404,7 +1981,15 @@ function addCircuitLandmarks(parts, curve, venue, roadWidth = ROAD_WIDTH) {
   // generic floodlights. They stay inside the existing merged scenery draw.
   for (const lateral of START_LIGHT_LATERALS) {
     for (const rowLevel of START_LIGHT_ROW_LEVELS) {
-      pushTrackBox(parts, curve, START_GANTRY_PROGRESS, lateral, rowLevel, [0.68, 0.22, 0.78], COLORS.red)
+      pushTrackBox(
+        parts,
+        curve,
+        START_GANTRY_PROGRESS,
+        lateral,
+        rowLevel,
+        START_SIGNAL_BODY.size,
+        COLORS.red,
+      )
     }
   }
 
@@ -1484,10 +2069,9 @@ function addBroadcastCameras(parts, curve, roadWidth = ROAD_WIDTH) {
   // give the street circuit a stronger event-production silhouette.
   for (const [index, progress] of BROADCAST_CAMERA_PROGRESS.entries()) {
     const side = index % 2 === 0 ? 1 : -1
-    const lateral = side * (roadWidth / 2 + 6.2)
-    pushTrackBox(parts, curve, progress, lateral, 2.2, [0.18, 4.4, 0.18], COLORS.steel)
-    pushTrackBox(parts, curve, progress, lateral - side * 0.7, 4.35, [1.55, 0.16, 0.16], COLORS.steel)
-    pushTrackBox(parts, curve, progress, lateral - side * 1.4, 4.28, [0.48, 0.28, 0.42], COLORS.panel)
+    const lateral = side * (
+      roadWidth / 2 + BROADCAST_CAMERA_SUPPORT_LAYOUT.lateralOffsetFromRoad
+    )
     pushTrackBox(
       parts,
       curve,
@@ -1754,7 +2338,17 @@ function addFinishStripe(parts, curve, roadWidth = ROAD_WIDTH) {
     for (let column = 0; column < gridColumns; column += 1) {
       const lateral = -roadWidth / 2 + (column + 0.5) * (roadWidth / gridColumns)
       const color = (row + column) % 2 === 0 ? COLORS.white : COLORS.dark
-      pushTrackBox(parts, curve, START_FINISH_PROGRESS, lateral, FINISH_LINE_LEVEL, [roadWidth / gridColumns, 0.025, 0.8], color, row * 0.8 - 0.4)
+      pushTrackSurfaceWearBox(
+        parts,
+        curve,
+        START_FINISH_PROGRESS,
+        lateral,
+        FINISH_LINE_LEVEL,
+        [roadWidth / gridColumns, 0.025, 0.8],
+        color,
+        TRACK_SURFACE_WEAR_VARIANTS.paint,
+        row * 0.8 - 0.4,
+      )
     }
   }
 }
@@ -1770,7 +2364,7 @@ function addStartGridMarkings(parts, curve) {
     const pose = getStartGridPose(racerId, 'single', curve, gridTrackLength)
     const frontColor = racerId === 'player' ? COLORS.lime : COLORS.white
     for (const along of [-halfGridLength, halfGridLength]) {
-      pushTrackBox(
+      pushTrackSurfaceWearBox(
         parts,
         curve,
         pose.progress,
@@ -1778,11 +2372,12 @@ function addStartGridMarkings(parts, curve) {
         START_GRID_BOX.level,
         [START_GRID_BOX.width, 0.025, START_GRID_BOX.lineWidth],
         along === halfGridLength ? frontColor : COLORS.white,
+        TRACK_SURFACE_WEAR_VARIANTS.paint,
         along,
       )
     }
     for (const side of [-1, 1]) {
-      pushTrackBox(
+      pushTrackSurfaceWearBox(
         parts,
         curve,
         pose.progress,
@@ -1790,10 +2385,11 @@ function addStartGridMarkings(parts, curve) {
         START_GRID_BOX.level,
         [START_GRID_BOX.lineWidth, 0.025, START_GRID_BOX.length],
         COLORS.white,
+        TRACK_SURFACE_WEAR_VARIANTS.paint,
       )
     }
     for (const mark of GRID_SLOT_LABEL_PATTERNS[racerId] ?? []) {
-      pushTrackBox(
+      pushTrackSurfaceWearBox(
         parts,
         curve,
         pose.progress,
@@ -1801,10 +2397,51 @@ function addStartGridMarkings(parts, curve) {
         START_GRID_BOX.level + 0.008,
         [0.16, 0.024, 0.78],
         racerId === 'player' ? COLORS.lime : COLORS.warm,
+        TRACK_SURFACE_WEAR_VARIANTS.paint,
         -0.82,
       )
     }
   }
+}
+
+export function createTrackSurfaceWearGeometry(
+  curve,
+  venue = 'apex',
+  roadWidth = ROAD_WIDTH,
+) {
+  if (!curve || typeof curve.getLength !== 'function') {
+    throw new TypeError('Track surface-wear graphics require a finite curve')
+  }
+  if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
+    throw new RangeError('Track surface-wear graphics require a usable road width')
+  }
+
+  const parts = []
+  addSurfaceGuides(parts, curve, roadWidth)
+  addCornerReadability(parts, curve, venue, roadWidth)
+  addFinishStripe(parts, curve, roadWidth)
+  addStartGridMarkings(parts, curve)
+  const pitExitColor = venue === 'temple'
+    ? COLORS.italianGreen
+    : venue === 'harbour' ? COLORS.white : COLORS.runoffGreen
+  pushTrackSurfaceWearBox(
+    parts,
+    curve,
+    0.055,
+    -roadWidth / 2 + 1.25,
+    0.11,
+    [0.12, 0.03, 18],
+    pitExitColor,
+    TRACK_SURFACE_WEAR_VARIANTS.paint,
+  )
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) throw new Error('Track surface-wear geometry could not be merged')
+  merged.name = 'track-surface-wear-geometry'
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
 }
 
 export function getApexPitStraightRunoffLayout(roadWidth = ROAD_WIDTH) {
@@ -1839,7 +2476,11 @@ function addBrakingBoards(parts, curve, venue, roadWidth = ROAD_WIDTH) {
       board.progress,
       board.lateral,
       BRAKING_BOARD_PANEL.poleCenterY,
-      [0.12, BRAKING_BOARD_PANEL.poleHeight, 0.12],
+      [
+        BRAKING_BOARD_PANEL.poleWidth,
+        BRAKING_BOARD_PANEL.poleHeight,
+        BRAKING_BOARD_PANEL.poleDepth,
+      ],
       COLORS.steel,
     )
     pushTrackBox(
@@ -1954,29 +2595,6 @@ function addTracksideInfrastructure(parts, curve, venue, roadWidth = ROAD_WIDTH)
     )
   }
   if (venue !== 'apex') return
-  for (let i = 0; i < FLOODLIGHT_COUNT; i += 1) {
-    const progress = i / FLOODLIGHT_COUNT + APEX_FLOODLIGHT_LAYOUT.progressOffset
-    const lateral = (i % 2 === 0 ? -1 : 1)
-      * (roadWidth / 2 + APEX_FLOODLIGHT_LAYOUT.lateralOffsetFromRoad)
-    pushTrackBox(
-      parts,
-      curve,
-      progress,
-      lateral,
-      APEX_FLOODLIGHT_LAYOUT.pole.centerY,
-      APEX_FLOODLIGHT_LAYOUT.pole.size,
-      COLORS.steel,
-    )
-    pushTrackBox(
-      parts,
-      curve,
-      progress,
-      lateral,
-      APEX_FLOODLIGHT_LAYOUT.head.centerY,
-      APEX_FLOODLIGHT_LAYOUT.head.size,
-      COLORS.dark,
-    )
-  }
 }
 
 function addPitComplex(parts, curve) {
@@ -1990,8 +2608,6 @@ function addPitComplex(parts, curve) {
     layout.pitWall.size,
     COLORS.concrete,
   )
-  pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -9.2, 1.08, [0.16, 0.12, 74], COLORS.red)
-  pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -18, 0.12, [8.5, 0.18, 72], COLORS.concrete)
   pushTrackBox(
     parts,
     curve,
@@ -2001,8 +2617,6 @@ function addPitComplex(parts, curve) {
     layout.building.size,
     COLORS.dark,
   )
-  pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -17.7, 3.3, [0.8, 5.6, 57], COLORS.glass)
-  pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -17.2, 5.65, [2.6, 0.28, 58], COLORS.gold)
   pushTrackBox(
     parts,
     curve,
@@ -2012,11 +2626,6 @@ function addPitComplex(parts, curve) {
     layout.roof.size,
     COLORS.steel,
   )
-  for (const bay of PIT_BAYS) {
-    pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -17.15, 1.45, [0.85, 2.5, 4.1], COLORS.dark, bay * 4.8)
-    pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -17.08, 2.65, [0.16, 0.18, 4.1], bay % 2 === 0 ? COLORS.red : COLORS.concrete, bay * 4.8)
-    pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -13.2, 0.16, [1.8, 0.055, 3.1], bay % 2 === 0 ? COLORS.sandLight : COLORS.navy, bay * 4.8)
-  }
   for (const display of APEX_PIT_WALL_DISPLAY_LAYOUT) {
     pushTrackBox(
       parts,
@@ -2028,22 +2637,6 @@ function addPitComplex(parts, curve) {
       COLORS.panel,
       display.along,
     )
-  }
-}
-
-function addPitLaneLife(parts, curve) {
-  // Equipment accompanies a separate generated staff layer. Keeping these
-  // props in the merged scenery preserves depth without box-built people.
-  for (const bay of PIT_BAYS.filter(bay => bay % 2 === 0)) {
-    const along = bay * 4.8
-    pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -12.65, 0.38, [0.55, 0.55, 0.9], COLORS.panel, along + 0.6)
-    pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -12.62, 0.72, [0.36, 0.2, 0.7], COLORS.warm, along + 0.6)
-  }
-
-  for (const along of [-21, 18]) {
-    pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, 10.4, 2.35, [0.18, 4.7, 0.18], COLORS.steel, along)
-    pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, 10.1, 4.62, [0.18, 0.18, 1.5], COLORS.steel, along)
-    pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, 9.8, 4.5, [0.42, 0.3, 0.48], COLORS.panel, along)
   }
 }
 
@@ -2067,11 +2660,13 @@ export function getTracksideOperationsGraphicsLayout(
     frontHeight = size[1],
     includeTop = true,
     includeBottom = false,
+    color = '#ffffff',
   }) => {
     const [width, height, length] = size
     const pushPanel = panel => layout.push(Object.freeze({
       kind,
       progress,
+      color,
       ...panel,
     }))
 
@@ -2162,7 +2757,9 @@ export function getTracksideOperationsGraphicsLayout(
 
   for (const [index, progress] of BROADCAST_CAMERA_PROGRESS.entries()) {
     const sideSign = index % 2 === 0 ? 1 : -1
-    const mastLateral = sideSign * (roadWidth / 2 + 6.2)
+    const mastLateral = sideSign * (
+      roadWidth / 2 + BROADCAST_CAMERA_SUPPORT_LAYOUT.lateralOffsetFromRoad
+    )
     const lens = TRACKSIDE_OPERATIONS_BODY_LAYOUTS.broadcastLens
     pushVisibleBoxSurfaces({
       kind: 'broadcastLens',
@@ -2172,6 +2769,17 @@ export function getTracksideOperationsGraphicsLayout(
       size: lens.size,
       frontNormalLateralSign: -sideSign,
       frontVariant: TRACKSIDE_OPERATIONS_VARIANTS.broadcastLens,
+      includeBottom: true,
+    })
+    const head = TRACKSIDE_OPERATIONS_BODY_LAYOUTS.broadcastHead
+    pushVisibleBoxSurfaces({
+      kind: 'broadcastHead',
+      progress,
+      lateral: mastLateral + sideSign * head.lateralOffsetFromMast,
+      centerY: head.centerY,
+      size: head.size,
+      frontNormalLateralSign: -sideSign,
+      frontVariant: TRACKSIDE_OPERATIONS_VARIANTS.broadcastHead,
       includeBottom: true,
     })
     const cabinet = TRACKSIDE_OPERATIONS_BODY_LAYOUTS.broadcastCabinet
@@ -2200,6 +2808,14 @@ export function getTracksideOperationsGraphicsLayout(
         frontCenterY: display.faceCenterY,
         frontWidth: display.faceWidth,
         frontHeight: display.faceHeight,
+      })
+    }
+    for (const equipment of APEX_PIT_LANE_EQUIPMENT_LAYOUT) {
+      pushVisibleBoxSurfaces({
+        ...equipment,
+        frontNormalLateralSign: 1,
+        frontVariant: TRACKSIDE_OPERATIONS_VARIANTS[equipment.kind],
+        includeBottom: true,
       })
     }
   }
@@ -2284,6 +2900,7 @@ export function createTracksideOperationsGraphicsGeometry(
     matrix.setPosition(center)
     geometry.applyMatrix4(matrix)
     remapAtlasModule(geometry, panel)
+    addVertexColor(geometry, panel.color)
     parts.push(geometry)
   }
 
@@ -2309,6 +2926,11 @@ export function getTrackLightingGraphicsLayout(
 
   const faceOffset = 0.012
   const layout = []
+  const [signalWidth, signalHeight, signalDepth] = START_SIGNAL_BODY.size
+  const signalFaceWidth = signalWidth - 0.04
+  const signalFaceHeight = signalHeight - 0.04
+  const signalFaceDepth = signalDepth - 0.04
+  const signalHousingOffset = faceOffset - 0.002
 
   for (const lateral of START_LIGHT_LATERALS) {
     for (const centerY of START_LIGHT_ROW_LEVELS) {
@@ -2317,14 +2939,67 @@ export function getTrackLightingGraphicsLayout(
         surface: 'lens',
         progress: START_GANTRY_PROGRESS,
         lateral,
-        along: -(0.78 / 2 + faceOffset),
+        along: -(signalDepth / 2 + faceOffset),
         centerY,
-        width: 0.18,
-        height: 0.18,
+        width: START_SIGNAL_BODY.lensSize,
+        height: START_SIGNAL_BODY.lensSize,
         normalAxis: 'along',
         normalSign: -1,
         variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.startSignal,
       }))
+      for (const serviceFace of [
+        {
+          surface: 'frontHousing',
+          lateral,
+          along: -(signalDepth / 2 + signalHousingOffset),
+          centerY,
+          width: signalFaceWidth,
+          height: signalFaceHeight,
+          normalAxis: 'along',
+          normalSign: -1,
+          atlasCropV: signalFaceHeight / signalFaceWidth,
+        },
+        {
+          surface: 'rear',
+          lateral,
+          along: signalDepth / 2 + faceOffset,
+          centerY,
+          width: signalFaceWidth,
+          height: signalFaceHeight,
+          normalAxis: 'along',
+          normalSign: 1,
+          atlasCropV: signalFaceHeight / signalFaceWidth,
+        },
+        ...[-1, 1].map(normalSign => ({
+          surface: normalSign < 0 ? 'nearEnd' : 'farEnd',
+          lateral: lateral + normalSign * (signalWidth / 2 + faceOffset),
+          along: 0,
+          centerY,
+          width: signalFaceDepth,
+          height: signalFaceHeight,
+          normalAxis: 'lateral',
+          normalSign,
+          atlasCropV: signalFaceHeight / signalFaceDepth,
+        })),
+        ...[-1, 1].map(normalSign => ({
+          surface: normalSign < 0 ? 'bottom' : 'top',
+          lateral,
+          along: 0,
+          centerY: centerY + normalSign * (signalHeight / 2 + faceOffset),
+          width: signalFaceWidth,
+          height: signalFaceDepth,
+          normalAxis: 'vertical',
+          normalSign,
+          atlasCropU: signalFaceWidth / signalFaceDepth,
+        })),
+      ]) {
+        layout.push(Object.freeze({
+          kind: 'startSignalService',
+          progress: START_GANTRY_PROGRESS,
+          variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.startSignalService,
+          ...serviceFace,
+        }))
+      }
     }
   }
 
@@ -2393,14 +3068,81 @@ export function getTrackLightingGraphicsLayout(
         }))
       }
     }
+    for (const light of APEX_PIT_LANE_LIGHT_LAYOUT) {
+      const [headWidth, headHeight, headDepth] = light.head.size
+      for (const face of [
+        {
+          kind: 'floodlightFront',
+          surface: 'front',
+          lateral: light.head.lateral - (headWidth / 2 + faceOffset),
+          along: light.along,
+          centerY: light.head.centerY,
+          width: headDepth,
+          height: headHeight,
+          normalAxis: 'lateral',
+          normalSign: -1,
+          atlasCropV: headHeight / headDepth,
+          variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.floodlightFront,
+        },
+        {
+          kind: 'floodlightRear',
+          surface: 'rear',
+          lateral: light.head.lateral + (headWidth / 2 + faceOffset),
+          along: light.along,
+          centerY: light.head.centerY,
+          width: headDepth,
+          height: headHeight,
+          normalAxis: 'lateral',
+          normalSign: 1,
+          atlasCropV: headHeight / headDepth,
+          variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.floodlightRear,
+        },
+        ...[-1, 1].map(normalSign => ({
+          kind: 'floodlightRear',
+          surface: normalSign < 0 ? 'nearEnd' : 'farEnd',
+          lateral: light.head.lateral,
+          along: light.along + normalSign * (headDepth / 2 + faceOffset),
+          centerY: light.head.centerY,
+          width: headWidth,
+          height: headHeight,
+          normalAxis: 'along',
+          normalSign,
+          atlasCropV: headHeight / headWidth,
+          variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.floodlightRear,
+        })),
+        ...[-1, 1].map(normalSign => ({
+          kind: 'floodlightRear',
+          surface: normalSign < 0 ? 'bottom' : 'top',
+          lateral: light.head.lateral,
+          along: light.along,
+          centerY: light.head.centerY
+            + normalSign * (headHeight / 2 + faceOffset),
+          width: headWidth,
+          height: headDepth,
+          normalAxis: 'vertical',
+          normalSign,
+          atlasCropU: headWidth / headDepth,
+          variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.floodlightRear,
+        })),
+      ]) {
+        layout.push(Object.freeze({
+          ...face,
+          progress: light.progress,
+        }))
+      }
+    }
   } else if (venue === 'harbour') {
     const tunnelLighting = getHarbourTunnelLightingLayout(curve, roadWidth)
+    const [fixtureWidth, fixtureHeight, fixtureDepth] = (
+      HARBOUR_TUNNEL_LIGHT_FIXTURE.size
+    )
     for (const progress of tunnelLighting.progresses) {
       for (const sideSign of [-1, 1]) {
+        const lateral = sideSign * tunnelLighting.fixtureLateral
         layout.push(Object.freeze({
           kind: 'tunnelLuminaire',
           progress,
-          lateral: sideSign * tunnelLighting.fixtureLateral,
+          lateral,
           along: 0,
           centerY: HARBOUR_TUNNEL_ROOF_UNDERSIDE - faceOffset,
           width: 1.22,
@@ -2410,8 +3152,56 @@ export function getTrackLightingGraphicsLayout(
           surface: 'down',
           variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.tunnelLuminaire,
         }))
+        for (const normalSign of [-1, 1]) {
+          layout.push(Object.freeze({
+            kind: 'tunnelLuminaireService',
+            progress,
+            lateral,
+            along: normalSign * fixtureDepth / 2,
+            centerY: HARBOUR_TUNNEL_LIGHT_FIXTURE.centerY,
+            width: fixtureWidth,
+            height: fixtureHeight,
+            normalAxis: 'along',
+            normalSign,
+            surface: normalSign < 0 ? 'nearEnd' : 'farEnd',
+            atlasCropV: fixtureHeight / fixtureWidth,
+            variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.tunnelLuminaireService,
+          }))
+          layout.push(Object.freeze({
+            kind: 'tunnelLuminaireService',
+            progress,
+            lateral: lateral + normalSign * fixtureWidth / 2,
+            along: 0,
+            centerY: HARBOUR_TUNNEL_LIGHT_FIXTURE.centerY,
+            width: fixtureDepth,
+            height: fixtureHeight,
+            normalAxis: 'lateral',
+            normalSign,
+            surface: normalSign < 0 ? 'left' : 'right',
+            atlasCropV: fixtureHeight / fixtureDepth,
+            variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.tunnelLuminaireService,
+          }))
+          layout.push(Object.freeze({
+            kind: 'tunnelLuminaireService',
+            progress,
+            lateral,
+            along: 0,
+            centerY: (
+              HARBOUR_TUNNEL_LIGHT_FIXTURE.centerY
+              + normalSign * fixtureHeight / 2
+            ),
+            width: fixtureWidth,
+            height: fixtureDepth,
+            normalAxis: 'vertical',
+            normalSign,
+            surface: normalSign < 0 ? 'bottomHousing' : 'top',
+            atlasCropV: fixtureDepth / fixtureWidth,
+            variant: TRACK_LIGHTING_GRAPHICS_VARIANTS.tunnelLuminaireService,
+          }))
+        }
       }
     }
+
   }
 
   return Object.freeze(layout)
@@ -2516,8 +3306,10 @@ export function createApexTentCanopyGeometry(curve) {
     centerY,
     along = 0,
     variant,
+    color = '#ffffff',
   }) => {
     mapAtlasVariant(geometry, variant)
+    addVertexColor(geometry, color)
     const point = new THREE.Vector3()
     const tangent = new THREE.Vector3()
     const side = new THREE.Vector3()
@@ -2570,6 +3362,15 @@ export function createApexTentCanopyGeometry(curve) {
       variant: building.roof.variant,
     })
   }
+
+  addTrackSurface({
+    geometry: new THREE.BoxGeometry(...tower.flag.size),
+    progress: tower.progress,
+    lateral: tower.lateral + tower.flag.lateralOffset,
+    centerY: tower.flag.centerY,
+    variant: tower.flag.variant,
+    color: tower.flag.tint,
+  })
 
   const merged = mergeGeometries(parts)
   for (const geometry of parts) geometry.dispose()
@@ -2644,7 +3445,6 @@ function addGrandstand(parts, curve, {
   seatStart,
   crowdSeats,
   crowdSpacing,
-  accent = COLORS.gold,
 }) {
   for (let tier = 0; tier < tiers; tier += 1) {
     pushTrackBox(
@@ -2658,19 +3458,6 @@ function addGrandstand(parts, curve, {
     )
   }
   pushTrackBox(parts, curve, progress, side * (seatStart + tiers * 1.22 + 0.5), 6.15, [11.5, 0.32, length + 2], COLORS.concrete)
-  pushTrackBox(parts, curve, progress, side * (seatStart + tiers * 1.22 + 0.5), 5.82, [11.7, 0.18, length + 2.2], accent)
-  for (let rib = -2; rib <= 2; rib += 1) {
-    pushTrackBox(
-      parts,
-      curve,
-      progress,
-      side * (seatStart + tiers * 1.22 + 0.45),
-      6.36,
-      [10.8, 0.14, 0.16],
-      COLORS.steel,
-      rib * (length / 5),
-    )
-  }
   for (let tier = 0; tier < tiers; tier += 1) {
     for (let seat = -crowdSeats; seat <= crowdSeats; seat += 1) {
       pushTrackBox(
@@ -2760,28 +3547,49 @@ export function createGrandstandStructureGeometry(curve, venue = 'apex') {
   const faceOffset = 0.012
   const parts = []
 
-  const remapAtlasQuadrant = (geometry, column, row) => {
+  const remapAtlasQuadrant = (
+    geometry,
+    column,
+    row,
+    cropU = 1,
+    cropV = 1,
+  ) => {
     const minU = column * 0.5 + atlasInset
     const maxU = (column + 1) * 0.5 - atlasInset
     const minV = row * 0.5 + atlasInset
     const maxV = (row + 1) * 0.5 - atlasInset
     const uvs = geometry.getAttribute('uv')
     for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      const croppedU = 0.5 + (uvs.getX(vertex) - 0.5) * cropU
+      const croppedV = 0.5 + (uvs.getY(vertex) - 0.5) * cropV
       uvs.setXY(
         vertex,
-        THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
-        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+        THREE.MathUtils.lerp(minU, maxU, croppedU),
+        THREE.MathUtils.lerp(minV, maxV, croppedV),
       )
     }
     uvs.needsUpdate = true
   }
 
-  const addFace = ({ center, across, vertical, normal, width, height, module }) => {
+  const addFace = ({
+    center,
+    across,
+    vertical,
+    normal,
+    width,
+    height,
+    module,
+    color = '#ffffff',
+    preservePhysicalAspect = false,
+  }) => {
     const geometry = new THREE.PlaneGeometry(width, height)
     const matrix = new THREE.Matrix4().makeBasis(across, vertical, normal)
     matrix.setPosition(center)
     geometry.applyMatrix4(matrix)
-    remapAtlasQuadrant(geometry, module[0], module[1])
+    const cropU = preservePhysicalAspect && height > width ? width / height : 1
+    const cropV = preservePhysicalAspect && width > height ? height / width : 1
+    remapAtlasQuadrant(geometry, module[0], module[1], cropU, cropV)
+    addVertexColor(geometry, color)
     parts.push(geometry)
   }
 
@@ -2793,6 +3601,8 @@ export function createGrandstandStructureGeometry(curve, venue = 'apex') {
     sideModule,
     bottomModule,
     topModule,
+    color = '#ffffff',
+    preservePhysicalAspect = false,
   }) => {
     const [width, height, length] = size
     const verticalFaceHeight = Math.max(0.04, height - 0.04)
@@ -2810,6 +3620,8 @@ export function createGrandstandStructureGeometry(curve, venue = 'apex') {
         width: length - 0.06,
         height: verticalFaceHeight,
         module: sideModule,
+        color,
+        preservePhysicalAspect,
       })
     }
 
@@ -2826,6 +3638,8 @@ export function createGrandstandStructureGeometry(curve, venue = 'apex') {
         width: width - 0.06,
         height: verticalFaceHeight,
         module: sideModule,
+        color,
+        preservePhysicalAspect,
       })
     }
 
@@ -2842,6 +3656,8 @@ export function createGrandstandStructureGeometry(curve, venue = 'apex') {
         width: width - 0.06,
         height: length - 0.06,
         module: surfaceSign > 0 ? topModule : bottomModule,
+        color,
+        preservePhysicalAspect,
       })
     }
   }
@@ -2852,6 +3668,7 @@ export function createGrandstandStructureGeometry(curve, venue = 'apex') {
     tiers,
     length,
     seatStart,
+    accent = COLORS.gold,
   } of layouts) {
     const point = new THREE.Vector3()
     const tangent = new THREE.Vector3()
@@ -2886,6 +3703,54 @@ export function createGrandstandStructureGeometry(curve, venue = 'apex') {
       bottomModule: [1, 0],
       topModule: [0, 0],
     })
+
+    addBoxFaces({
+      center: point.clone()
+        .addScaledVector(
+          side,
+          sideSign * (seatStart + tiers * 1.22 + 0.5),
+        )
+        .addScaledVector(WORLD_UP, GRANDSTAND_ACCENT_CANOPY.centerY),
+      localSide: side,
+      localForward: tangent,
+      size: [
+        GRANDSTAND_ACCENT_CANOPY.width,
+        GRANDSTAND_ACCENT_CANOPY.height,
+        length + GRANDSTAND_ACCENT_CANOPY.lengthOverhang,
+      ],
+      sideModule: [1, 1],
+      bottomModule: [1, 0],
+      topModule: [0, 0],
+      color: accent,
+    })
+
+    for (
+      let rib = -(GRANDSTAND_ROOF_RIB.count - 1) / 2;
+      rib <= (GRANDSTAND_ROOF_RIB.count - 1) / 2;
+      rib += 1
+    ) {
+      addBoxFaces({
+        center: point.clone()
+          .addScaledVector(
+            side,
+            sideSign * (seatStart + tiers * 1.22 + 0.45),
+          )
+          .addScaledVector(WORLD_UP, GRANDSTAND_ROOF_RIB.centerY)
+          .addScaledVector(tangent, rib * (length / GRANDSTAND_ROOF_RIB.count)),
+        localSide: side,
+        localForward: tangent,
+        size: [
+          GRANDSTAND_ROOF_RIB.width,
+          GRANDSTAND_ROOF_RIB.height,
+          GRANDSTAND_ROOF_RIB.depth,
+        ],
+        sideModule: [1, 1],
+        bottomModule: [1, 0],
+        topModule: [0, 0],
+        color: COLORS.steel,
+        preservePhysicalAspect: true,
+      })
+    }
   }
 
   const merged = mergeGeometries(parts)
@@ -2897,6 +3762,7 @@ export function createGrandstandStructureGeometry(curve, venue = 'apex') {
 
 export function createPitGarageFacadeGeometry(curve, venue = 'apex') {
   const layout = PIT_GARAGE_FACADE_LAYOUTS[venue] ?? PIT_GARAGE_FACADE_LAYOUTS.apex
+  const glass = PIT_GARAGE_GLASS_LAYOUTS[venue] ?? PIT_GARAGE_GLASS_LAYOUTS.apex
   const {
     progress,
     lateral,
@@ -2917,6 +3783,8 @@ export function createPitGarageFacadeGeometry(curve, venue = 'apex') {
     .crossVectors(panelAcross, WORLD_UP)
     .normalize()
   const panelWidth = (totalWidth - panelGap * (panelCount - 1)) / panelCount
+  const atlasInsetU = 1 / 1024
+  const atlasInsetV = 1 / 256
   const parts = []
 
   for (let panel = 0; panel < panelCount; panel += 1) {
@@ -2930,6 +3798,53 @@ export function createPitGarageFacadeGeometry(curve, venue = 'apex') {
     matrix.setPosition(center)
     geometry.applyMatrix4(matrix)
     parts.push(geometry)
+  }
+
+  const [glassWidth, glassHeight, glassLength] = glass.size
+  const glassPoint = new THREE.Vector3()
+  const glassTangent = new THREE.Vector3()
+  const glassSide = new THREE.Vector3()
+  getTrackFrame(curve, glass.progress, glassPoint, glassTangent, glassSide)
+  const glassCenter = glassPoint
+    .addScaledVector(glassSide, glass.lateral)
+    .addScaledVector(WORLD_UP, glass.centerY)
+  const glassPanelLength = glassLength / panelCount
+  const sourceAspect = 4
+  const mappedAspect = glassPanelLength / glassHeight
+  const availableU = 1 - atlasInsetU * 2
+  const availableV = 1 - atlasInsetV * 2
+  const cropU = Math.min(
+    1,
+    mappedAspect / sourceAspect * availableV / availableU,
+  )
+  const minU = 0.5 - (0.5 - atlasInsetU) * cropU
+  const maxU = 0.5 + (0.5 - atlasInsetU) * cropU
+  const minV = atlasInsetV
+  const maxV = 1 - atlasInsetV
+  for (const faceSign of [-1, 1]) {
+    const normal = glassSide.clone().multiplyScalar(faceSign)
+    const across = glassTangent.clone().multiplyScalar(-faceSign)
+    for (let panel = 0; panel < panelCount; panel += 1) {
+      const along = (panel - (panelCount - 1) / 2) * glassPanelLength
+      const geometry = new THREE.PlaneGeometry(glassPanelLength, glassHeight)
+      const matrix = new THREE.Matrix4().makeBasis(across, WORLD_UP, normal)
+      matrix.setPosition(
+        glassCenter.clone()
+          .addScaledVector(glassSide, faceSign * (glassWidth / 2 + 0.012))
+          .addScaledVector(glassTangent, along),
+      )
+      geometry.applyMatrix4(matrix)
+      const uvs = geometry.getAttribute('uv')
+      for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+        uvs.setXY(
+          vertex,
+          THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
+          THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+        )
+      }
+      uvs.needsUpdate = true
+      parts.push(geometry)
+    }
   }
 
   const merged = mergeGeometries(parts)
@@ -2958,17 +3873,25 @@ export function createPitComplexStructureGeometry(
   const side = new THREE.Vector3()
   getTrackFrame(curve, layout.progress, point, tangent, side)
 
-  const remapAtlasQuadrant = (geometry, column, row) => {
+  const remapAtlasQuadrant = (
+    geometry,
+    column,
+    row,
+    cropU = 1,
+    cropV = 1,
+  ) => {
     const minU = column * 0.5 + atlasInset
     const maxU = (column + 1) * 0.5 - atlasInset
     const minV = row * 0.5 + atlasInset
     const maxV = (row + 1) * 0.5 - atlasInset
     const uvs = geometry.getAttribute('uv')
     for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      const croppedU = 0.5 + (uvs.getX(vertex) - 0.5) * cropU
+      const croppedV = 0.5 + (uvs.getY(vertex) - 0.5) * cropV
       uvs.setXY(
         vertex,
-        THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
-        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+        THREE.MathUtils.lerp(minU, maxU, croppedU),
+        THREE.MathUtils.lerp(minV, maxV, croppedV),
       )
     }
     uvs.needsUpdate = true
@@ -2983,12 +3906,14 @@ export function createPitComplexStructureGeometry(
     height,
     module,
     color = '#ffffff',
+    cropU = 1,
+    cropV = 1,
   }) => {
     const geometry = new THREE.PlaneGeometry(width, height)
     const matrix = new THREE.Matrix4().makeBasis(across, vertical, normal)
     matrix.setPosition(center)
     geometry.applyMatrix4(matrix)
-    remapAtlasQuadrant(geometry, module[0], module[1])
+    remapAtlasQuadrant(geometry, module[0], module[1], cropU, cropV)
     addVertexColor(geometry, color)
     parts.push(geometry)
   }
@@ -3118,12 +4043,58 @@ export function createPitComplexStructureGeometry(
     })
   }
 
+  const glass = PIT_GARAGE_GLASS_LAYOUTS[venue]
+    ?? PIT_GARAGE_GLASS_LAYOUTS.apex
+  const [glassWidth, glassHeight, glassLength] = glass.size
+  const glassPoint = new THREE.Vector3()
+  const glassTangent = new THREE.Vector3()
+  const glassSide = new THREE.Vector3()
+  getTrackFrame(curve, glass.progress, glassPoint, glassTangent, glassSide)
+  const glassCenter = glassPoint
+    .addScaledVector(glassSide, glass.lateral)
+    .addScaledVector(WORLD_UP, glass.centerY)
+  for (const surfaceSign of [-1, 1]) {
+    const normal = WORLD_UP.clone().multiplyScalar(surfaceSign)
+    addFace({
+      center: glassCenter.clone().addScaledVector(
+        normal,
+        glassHeight / 2 + faceOffset,
+      ),
+      across: glassSide,
+      vertical: glassTangent.clone().multiplyScalar(-surfaceSign),
+      normal,
+      width: glassWidth,
+      height: glassLength,
+      module: surfaceSign > 0 ? [0, 0] : [1, 0],
+      cropU: glassWidth / glassLength,
+    })
+  }
+  for (const endSign of [-1, 1]) {
+    const normal = glassTangent.clone().multiplyScalar(endSign)
+    addFace({
+      center: glassCenter.clone().addScaledVector(
+        normal,
+        glassLength / 2 + faceOffset,
+      ),
+      across: glassSide.clone().multiplyScalar(endSign),
+      vertical: WORLD_UP,
+      normal,
+      width: glassWidth,
+      height: glassHeight,
+      module: [1, 1],
+      cropU: glassWidth / glassHeight,
+    })
+  }
+
   const addBoxSurfaces = ({
     progress,
     lateral,
     centerY,
     size,
     color,
+    along = 0,
+    preservePhysicalAspect = false,
+    verticalModule = [1, 1],
   }) => {
     const [roofWidth, roofHeight, roofLength] = size
     const roofPoint = new THREE.Vector3()
@@ -3132,7 +4103,17 @@ export function createPitComplexStructureGeometry(
     getTrackFrame(curve, progress, roofPoint, roofTangent, roofSide)
     const localRoofCenter = roofPoint
       .addScaledVector(roofSide, lateral)
+      .addScaledVector(roofTangent, along)
       .addScaledVector(WORLD_UP, centerY)
+
+    const physicalCrop = (width, height) => {
+      if (!preservePhysicalAspect) return { cropU: 1, cropV: 1 }
+      const maxDimension = Math.max(width, height)
+      return {
+        cropU: width / maxDimension,
+        cropV: height / maxDimension,
+      }
+    }
 
     for (const surfaceSign of [-1, 1]) {
       const normal = WORLD_UP.clone().multiplyScalar(surfaceSign)
@@ -3148,6 +4129,7 @@ export function createPitComplexStructureGeometry(
         height: roofLength,
         module: surfaceSign > 0 ? [0, 0] : [1, 0],
         color,
+        ...physicalCrop(roofWidth, roofLength),
       })
     }
     for (const lateralSign of [-1, 1]) {
@@ -3162,8 +4144,9 @@ export function createPitComplexStructureGeometry(
         normal,
         width: roofLength,
         height: roofHeight,
-        module: [1, 1],
+        module: verticalModule,
         color,
+        ...physicalCrop(roofLength, roofHeight),
       })
     }
     for (const alongSign of [-1, 1]) {
@@ -3178,8 +4161,9 @@ export function createPitComplexStructureGeometry(
         normal,
         width: roofWidth,
         height: roofHeight,
-        module: [1, 1],
+        module: verticalModule,
         color,
+        ...physicalCrop(roofWidth, roofHeight),
       })
     }
   }
@@ -3192,6 +4176,33 @@ export function createPitComplexStructureGeometry(
         ...APEX_MARSHAL_POST_ROOF,
       })
     }
+    addBoxSurfaces(APEX_PIT_GARAGE_HEADER)
+    for (const bay of APEX_PIT_BAY_SERVICE_LAYOUT) {
+      addBoxSurfaces({
+        ...bay,
+        preservePhysicalAspect: true,
+      })
+    }
+    for (const trim of APEX_PIT_BAY_TRIM_LAYOUT) {
+      addBoxSurfaces({
+        ...trim,
+        preservePhysicalAspect: true,
+      })
+    }
+    addBoxSurfaces({
+      ...APEX_PIT_APRON_LAYOUT,
+      preservePhysicalAspect: true,
+    })
+    addBoxSurfaces({
+      ...APEX_PIT_WALL_ACCENT_LAYOUT,
+      preservePhysicalAspect: true,
+    })
+    for (const pad of APEX_PIT_SERVICE_PAD_LAYOUT) {
+      addBoxSurfaces({
+        ...pad,
+        preservePhysicalAspect: true,
+      })
+    }
   } else if (venue === 'temple') {
     addBoxSurfaces({
       progress: TEMPLE_TIMING_TOWER_LAYOUT.progress,
@@ -3200,6 +4211,12 @@ export function createPitComplexStructureGeometry(
     })
     for (const floorBand of TEMPLE_TIMING_TOWER_FLOOR_BANDS) {
       addBoxSurfaces(floorBand)
+    }
+    for (const trim of TEMPLE_PIT_BAY_TRIM_LAYOUT) {
+      addBoxSurfaces({
+        ...trim,
+        preservePhysicalAspect: true,
+      })
     }
   }
 
@@ -3533,6 +4550,69 @@ export function createGantryStructureSurfaceGeometry(
     }
   }
 
+  for (const [boardIndex, board] of getBrakingBoardLayout(
+    curve,
+    venue,
+    roadWidth,
+  ).entries()) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, board.progress, point, tangent, side)
+    const poleCenter = point.clone()
+      .addScaledVector(side, board.lateral)
+      .addScaledVector(WORLD_UP, BRAKING_BOARD_PANEL.poleCenterY)
+    const poleWidth = BRAKING_BOARD_PANEL.poleWidth
+    const poleDepth = BRAKING_BOARD_PANEL.poleDepth
+    const poleHeight = BRAKING_BOARD_PANEL.poleHeight
+
+    for (const tangentSign of [-1, 1]) {
+      addPlane({
+        center: poleCenter.clone().addScaledVector(
+          tangent,
+          tangentSign * (poleDepth / 2 + faceOffset),
+        ),
+        across: side.clone().multiplyScalar(tangentSign),
+        vertical: WORLD_UP,
+        normal: tangent.clone().multiplyScalar(tangentSign),
+        width: poleWidth,
+        height: poleHeight,
+        variant: GANTRY_STRUCTURE_VARIANTS.upright,
+        mirrorU: (boardIndex + tangentSign) % 2 === 0,
+        cropU: poleWidth / poleHeight,
+      })
+    }
+    for (const sideSign of [-1, 1]) {
+      addPlane({
+        center: poleCenter.clone().addScaledVector(
+          side,
+          sideSign * (poleWidth / 2 + faceOffset),
+        ),
+        across: tangent.clone().multiplyScalar(-sideSign),
+        vertical: WORLD_UP,
+        normal: side.clone().multiplyScalar(sideSign),
+        width: poleDepth,
+        height: poleHeight,
+        variant: GANTRY_STRUCTURE_VARIANTS.upright,
+        mirrorU: (boardIndex + sideSign) % 2 !== 0,
+        cropU: poleDepth / poleHeight,
+      })
+    }
+    addPlane({
+      center: poleCenter.clone().addScaledVector(
+        WORLD_UP,
+        poleHeight / 2 + faceOffset,
+      ),
+      across: side,
+      vertical: tangent.clone().multiplyScalar(-1),
+      normal: WORLD_UP,
+      width: poleWidth,
+      height: poleDepth,
+      variant: GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+      mirrorU: boardIndex % 2 === 1,
+    })
+  }
+
   if (venue === 'apex') {
     const point = new THREE.Vector3()
     const tangent = new THREE.Vector3()
@@ -3651,6 +4731,396 @@ export function createGantryStructureSurfaceGeometry(
         })
       }
     }
+
+    const tower = APEX_VENUE_FACADE_LAYOUT.tower
+    const [flagPoleWidth, flagPoleHeight, flagPoleDepth] = tower.flagPole.size
+    const flagPolePanelCount = Math.ceil(flagPoleHeight / maxPostPanelSpan)
+    const flagPolePanelHeight = flagPoleHeight / flagPolePanelCount
+    const flagPoleBaseY = tower.flagPole.centerY - flagPoleHeight / 2
+    const flagPolePoint = new THREE.Vector3()
+    const flagPoleTangent = new THREE.Vector3()
+    const flagPoleSide = new THREE.Vector3()
+    getTrackFrame(
+      curve,
+      tower.progress,
+      flagPolePoint,
+      flagPoleTangent,
+      flagPoleSide,
+    )
+    const flagPoleBase = flagPolePoint.clone().addScaledVector(
+      flagPoleSide,
+      tower.lateral,
+    )
+    for (let panel = 0; panel < flagPolePanelCount; panel += 1) {
+      const segmentCenter = flagPoleBase.clone().addScaledVector(
+        WORLD_UP,
+        flagPoleBaseY + (panel + 0.5) * flagPolePanelHeight,
+      )
+      for (const tangentSign of [-1, 1]) {
+        addPlane({
+          center: segmentCenter.clone().addScaledVector(
+            flagPoleTangent,
+            tangentSign * (flagPoleDepth / 2 + faceOffset),
+          ),
+          across: flagPoleSide.clone().multiplyScalar(tangentSign),
+          vertical: WORLD_UP,
+          normal: flagPoleTangent.clone().multiplyScalar(tangentSign),
+          width: flagPoleWidth,
+          height: flagPolePanelHeight,
+          variant: GANTRY_STRUCTURE_VARIANTS.upright,
+          mirrorU: panel % 2 === 1,
+          cropU: flagPoleWidth / flagPolePanelHeight,
+        })
+      }
+      for (const sideSign of [-1, 1]) {
+        addPlane({
+          center: segmentCenter.clone().addScaledVector(
+            flagPoleSide,
+            sideSign * (flagPoleWidth / 2 + faceOffset),
+          ),
+          across: flagPoleTangent.clone().multiplyScalar(-sideSign),
+          vertical: WORLD_UP,
+          normal: flagPoleSide.clone().multiplyScalar(sideSign),
+          width: flagPoleDepth,
+          height: flagPolePanelHeight,
+          variant: GANTRY_STRUCTURE_VARIANTS.upright,
+          mirrorU: panel % 2 === 0,
+          cropU: flagPoleDepth / flagPolePanelHeight,
+        })
+      }
+    }
+    addPlane({
+      center: flagPoleBase.clone().addScaledVector(
+        WORLD_UP,
+        flagPoleBaseY + flagPoleHeight + faceOffset,
+      ),
+      across: flagPoleSide,
+      vertical: flagPoleTangent.clone().multiplyScalar(-1),
+      normal: WORLD_UP,
+      width: flagPoleWidth,
+      height: flagPoleDepth,
+      variant: GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+    })
+
+    for (const light of APEX_PIT_LANE_LIGHT_LAYOUT) {
+      const lightPoint = new THREE.Vector3()
+      const lightTangent = new THREE.Vector3()
+      const lightSide = new THREE.Vector3()
+      getTrackFrame(
+        curve,
+        light.progress,
+        lightPoint,
+        lightTangent,
+        lightSide,
+      )
+
+      const [poleWidth, poleHeight, poleDepth] = light.pole.size
+      const polePanelCount = Math.ceil(poleHeight / maxPostPanelSpan)
+      const polePanelHeight = poleHeight / polePanelCount
+      const poleBaseY = light.pole.centerY - poleHeight / 2
+      const poleBase = lightPoint.clone()
+        .addScaledVector(lightSide, light.pole.lateral)
+        .addScaledVector(lightTangent, light.along)
+      for (let panel = 0; panel < polePanelCount; panel += 1) {
+        const segmentCenter = poleBase.clone().addScaledVector(
+          WORLD_UP,
+          poleBaseY + (panel + 0.5) * polePanelHeight,
+        )
+        for (const tangentSign of [-1, 1]) {
+          addPlane({
+            center: segmentCenter.clone().addScaledVector(
+              lightTangent,
+              tangentSign * (poleDepth / 2 + faceOffset),
+            ),
+            across: lightSide.clone().multiplyScalar(tangentSign),
+            vertical: WORLD_UP,
+            normal: lightTangent.clone().multiplyScalar(tangentSign),
+            width: poleWidth,
+            height: polePanelHeight,
+            variant: GANTRY_STRUCTURE_VARIANTS.upright,
+            mirrorU: panel % 2 === 1,
+            cropU: poleWidth / polePanelHeight,
+          })
+        }
+        for (const sideSign of [-1, 1]) {
+          addPlane({
+            center: segmentCenter.clone().addScaledVector(
+              lightSide,
+              sideSign * (poleWidth / 2 + faceOffset),
+            ),
+            across: lightTangent.clone().multiplyScalar(-sideSign),
+            vertical: WORLD_UP,
+            normal: lightSide.clone().multiplyScalar(sideSign),
+            width: poleDepth,
+            height: polePanelHeight,
+            variant: GANTRY_STRUCTURE_VARIANTS.upright,
+            mirrorU: panel % 2 === 0,
+            cropU: poleDepth / polePanelHeight,
+          })
+        }
+      }
+      addPlane({
+        center: poleBase.clone().addScaledVector(
+          WORLD_UP,
+          poleBaseY + poleHeight + faceOffset,
+        ),
+        across: lightSide,
+        vertical: lightTangent.clone().multiplyScalar(-1),
+        normal: WORLD_UP,
+        width: poleWidth,
+        height: poleDepth,
+        variant: GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+      })
+
+      const [armWidth, armHeight, armLength] = light.arm.size
+      const armPanelCount = Math.ceil(armLength / maxPostPanelSpan)
+      const armPanelLength = armLength / armPanelCount
+      const armBase = lightPoint.clone()
+        .addScaledVector(lightSide, light.arm.lateral)
+        .addScaledVector(lightTangent, light.along)
+        .addScaledVector(WORLD_UP, light.arm.centerY)
+      for (let panel = 0; panel < armPanelCount; panel += 1) {
+        const segmentAlong = (panel - (armPanelCount - 1) / 2) * armPanelLength
+        const segmentCenter = armBase.clone().addScaledVector(
+          lightTangent,
+          segmentAlong,
+        )
+        for (const sideSign of [-1, 1]) {
+          addPlane({
+            center: segmentCenter.clone().addScaledVector(
+              lightSide,
+              sideSign * (armWidth / 2 + faceOffset),
+            ),
+            across: lightTangent.clone().multiplyScalar(-sideSign),
+            vertical: WORLD_UP,
+            normal: lightSide.clone().multiplyScalar(sideSign),
+            width: armPanelLength,
+            height: armHeight,
+            variant: sideSign < 0
+              ? GANTRY_STRUCTURE_VARIANTS.crossbarFront
+              : GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+            mirrorU: panel % 2 === 1,
+            cropV: armHeight / armPanelLength,
+          })
+        }
+        for (const verticalSign of [-1, 1]) {
+          addPlane({
+            center: segmentCenter.clone().addScaledVector(
+              WORLD_UP,
+              verticalSign * (armHeight / 2 + faceOffset),
+            ),
+            across: lightSide,
+            vertical: lightTangent.clone().multiplyScalar(-verticalSign),
+            normal: WORLD_UP.clone().multiplyScalar(verticalSign),
+            width: armWidth,
+            height: armPanelLength,
+            variant: verticalSign < 0
+              ? GANTRY_STRUCTURE_VARIANTS.underside
+              : GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+            cropU: armWidth / armPanelLength,
+          })
+        }
+      }
+      for (const tangentSign of [-1, 1]) {
+        addPlane({
+          center: armBase.clone().addScaledVector(
+            lightTangent,
+            tangentSign * (armLength / 2 + faceOffset),
+          ),
+          across: lightSide.clone().multiplyScalar(tangentSign),
+          vertical: WORLD_UP,
+          normal: lightTangent.clone().multiplyScalar(tangentSign),
+          width: armWidth,
+          height: armHeight,
+          variant: GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+        })
+      }
+    }
+  }
+
+  if (venue === 'apex') {
+    const [poleWidth, poleHeight, poleDepth] = APEX_FLOODLIGHT_LAYOUT.pole.size
+    const polePanelCount = Math.ceil(poleHeight / maxPostPanelSpan)
+    const polePanelHeight = poleHeight / polePanelCount
+    const poleBaseY = APEX_FLOODLIGHT_LAYOUT.pole.centerY - poleHeight / 2
+    for (let index = 0; index < FLOODLIGHT_COUNT; index += 1) {
+      const progress = (
+        index / FLOODLIGHT_COUNT + APEX_FLOODLIGHT_LAYOUT.progressOffset
+      )
+      const lateral = (index % 2 === 0 ? -1 : 1) * (
+        roadWidth / 2 + APEX_FLOODLIGHT_LAYOUT.lateralOffsetFromRoad
+      )
+      const point = new THREE.Vector3()
+      const tangent = new THREE.Vector3()
+      const side = new THREE.Vector3()
+      getTrackFrame(curve, progress, point, tangent, side)
+      const poleBase = point.clone().addScaledVector(side, lateral)
+      for (let panel = 0; panel < polePanelCount; panel += 1) {
+        const segmentCenter = poleBase.clone().addScaledVector(
+          WORLD_UP,
+          poleBaseY + (panel + 0.5) * polePanelHeight,
+        )
+        for (const tangentSign of [-1, 1]) {
+          addPlane({
+            center: segmentCenter.clone().addScaledVector(
+              tangent,
+              tangentSign * (poleDepth / 2 + faceOffset),
+            ),
+            across: side.clone().multiplyScalar(tangentSign),
+            vertical: WORLD_UP,
+            normal: tangent.clone().multiplyScalar(tangentSign),
+            width: poleWidth,
+            height: polePanelHeight,
+            variant: GANTRY_STRUCTURE_VARIANTS.upright,
+            mirrorU: (index + panel) % 2 === 1,
+            cropU: poleWidth / polePanelHeight,
+          })
+        }
+        for (const sideSign of [-1, 1]) {
+          addPlane({
+            center: segmentCenter.clone().addScaledVector(
+              side,
+              sideSign * (poleWidth / 2 + faceOffset),
+            ),
+            across: tangent.clone().multiplyScalar(-sideSign),
+            vertical: WORLD_UP,
+            normal: side.clone().multiplyScalar(sideSign),
+            width: poleDepth,
+            height: polePanelHeight,
+            variant: GANTRY_STRUCTURE_VARIANTS.upright,
+            mirrorU: (index + panel + sideSign) % 2 === 0,
+            cropU: poleDepth / polePanelHeight,
+          })
+        }
+      }
+    }
+  }
+
+  for (const [cameraIndex, progress] of BROADCAST_CAMERA_PROGRESS.entries()) {
+    const cameraSideSign = cameraIndex % 2 === 0 ? 1 : -1
+    const cameraPoint = new THREE.Vector3()
+    const cameraTangent = new THREE.Vector3()
+    const cameraSide = new THREE.Vector3()
+    getTrackFrame(
+      curve,
+      progress,
+      cameraPoint,
+      cameraTangent,
+      cameraSide,
+    )
+    const mastLateral = cameraSideSign * (
+      roadWidth / 2 + BROADCAST_CAMERA_SUPPORT_LAYOUT.lateralOffsetFromRoad
+    )
+    const pole = BROADCAST_CAMERA_SUPPORT_LAYOUT.pole
+    const [poleWidth, poleHeight, poleDepth] = pole.size
+    const polePanelCount = Math.ceil(poleHeight / maxPostPanelSpan)
+    const polePanelHeight = poleHeight / polePanelCount
+    const poleBaseY = pole.centerY - poleHeight / 2
+    const poleBase = cameraPoint.clone().addScaledVector(cameraSide, mastLateral)
+    for (let panel = 0; panel < polePanelCount; panel += 1) {
+      const segmentCenter = poleBase.clone().addScaledVector(
+        WORLD_UP,
+        poleBaseY + (panel + 0.5) * polePanelHeight,
+      )
+      for (const tangentSign of [-1, 1]) {
+        addPlane({
+          center: segmentCenter.clone().addScaledVector(
+            cameraTangent,
+            tangentSign * (poleDepth / 2 + faceOffset),
+          ),
+          across: cameraSide.clone().multiplyScalar(tangentSign),
+          vertical: WORLD_UP,
+          normal: cameraTangent.clone().multiplyScalar(tangentSign),
+          width: poleWidth,
+          height: polePanelHeight,
+          variant: GANTRY_STRUCTURE_VARIANTS.upright,
+          mirrorU: (cameraIndex + panel) % 2 === 1,
+          cropU: poleWidth / polePanelHeight,
+        })
+      }
+      for (const sideSign of [-1, 1]) {
+        addPlane({
+          center: segmentCenter.clone().addScaledVector(
+            cameraSide,
+            sideSign * (poleWidth / 2 + faceOffset),
+          ),
+          across: cameraTangent.clone().multiplyScalar(-sideSign),
+          vertical: WORLD_UP,
+          normal: cameraSide.clone().multiplyScalar(sideSign),
+          width: poleDepth,
+          height: polePanelHeight,
+          variant: GANTRY_STRUCTURE_VARIANTS.upright,
+          mirrorU: (cameraIndex + panel + sideSign) % 2 === 0,
+          cropU: poleDepth / polePanelHeight,
+        })
+      }
+    }
+
+    const arm = BROADCAST_CAMERA_SUPPORT_LAYOUT.arm
+    const [armWidth, armHeight, armDepth] = arm.size
+    const armPanelCount = Math.ceil(armWidth / maxPostPanelSpan)
+    const armPanelWidth = armWidth / armPanelCount
+    const armCenter = cameraPoint.clone()
+      .addScaledVector(
+        cameraSide,
+        mastLateral + cameraSideSign * arm.lateralOffsetFromMast,
+      )
+      .addScaledVector(WORLD_UP, arm.centerY)
+    for (let panel = 0; panel < armPanelCount; panel += 1) {
+      const segmentCenter = armCenter.clone().addScaledVector(
+        cameraSide,
+        (panel - (armPanelCount - 1) / 2) * armPanelWidth,
+      )
+      for (const tangentSign of [-1, 1]) {
+        addPlane({
+          center: segmentCenter.clone().addScaledVector(
+            cameraTangent,
+            tangentSign * (armDepth / 2 + faceOffset),
+          ),
+          across: cameraSide.clone().multiplyScalar(tangentSign),
+          vertical: WORLD_UP,
+          normal: cameraTangent.clone().multiplyScalar(tangentSign),
+          width: armPanelWidth,
+          height: armHeight,
+          variant: tangentSign < 0
+            ? GANTRY_STRUCTURE_VARIANTS.crossbarFront
+            : GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+          mirrorU: panel % 2 === 1,
+          cropV: armHeight / armPanelWidth,
+        })
+      }
+      for (const verticalSign of [-1, 1]) {
+        addPlane({
+          center: segmentCenter.clone().addScaledVector(
+            WORLD_UP,
+            verticalSign * (armHeight / 2 + faceOffset),
+          ),
+          across: cameraSide,
+          vertical: cameraTangent.clone().multiplyScalar(-verticalSign),
+          normal: WORLD_UP.clone().multiplyScalar(verticalSign),
+          width: armPanelWidth,
+          height: armDepth,
+          variant: verticalSign < 0
+            ? GANTRY_STRUCTURE_VARIANTS.underside
+            : GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+          cropV: armDepth / armPanelWidth,
+        })
+      }
+    }
+    for (const sideSign of [-1, 1]) {
+      addPlane({
+        center: armCenter.clone().addScaledVector(
+          cameraSide,
+          sideSign * (armWidth / 2 + faceOffset),
+        ),
+        across: cameraTangent.clone().multiplyScalar(-sideSign),
+        vertical: WORLD_UP,
+        normal: cameraSide.clone().multiplyScalar(sideSign),
+        width: armDepth,
+        height: armHeight,
+        variant: GANTRY_STRUCTURE_VARIANTS.serviceBackEnd,
+      })
+    }
   }
 
   const merged = mergeGeometries(parts)
@@ -3660,22 +5130,6 @@ export function createGantryStructureSurfaceGeometry(
   merged.computeBoundingBox()
   merged.computeBoundingSphere()
   return merged
-}
-
-function addPalmTrunk(parts, curve, progress, lateral, height = 6, along = 0) {
-  const trunkHeight = height * 0.68
-  pushTrackCylinder(
-    parts,
-    curve,
-    progress,
-    lateral,
-    trunkHeight / 2,
-    0.22,
-    trunkHeight,
-    COLORS.desertRock,
-    along,
-    8,
-  )
 }
 
 export function createPalmTreeBillboardGeometry(curve, venue = 'apex') {
@@ -3742,6 +5196,87 @@ export function createPalmTreeBillboardGeometry(curve, venue = 'apex') {
 
   const merged = mergeGeometries(parts)
   for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createPalmTrunkSurfaceGeometry(curve, venue = 'apex') {
+  if (!curve || typeof curve.getPointAt !== 'function') {
+    throw new TypeError('Palm-trunk surfaces require a finite track curve')
+  }
+  const layout = getPalmTreeLayout(curve, venue)
+  if (layout.length === 0) {
+    throw new RangeError('Palm-trunk surfaces require an Apex or Harbour venue')
+  }
+
+  const atlasInset = 1 / 1024
+  const parts = []
+  const remapGroup = (geometry, materialIndex, variant) => {
+    const group = geometry.groups.find(candidate => (
+      candidate.materialIndex === materialIndex
+    ))
+    if (!group) {
+      throw new Error(`Palm-trunk cylinder is missing material group ${materialIndex}`)
+    }
+    const column = variant % 2
+    const row = Math.floor(variant / 2)
+    const minU = column * 0.5 + atlasInset
+    const maxU = (column + 1) * 0.5 - atlasInset
+    const minV = row === 0 ? 0.5 + atlasInset : atlasInset
+    const maxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+    const indices = geometry.getIndex()
+    const vertices = new Set()
+    for (let offset = group.start; offset < group.start + group.count; offset += 1) {
+      vertices.add(indices.getX(offset))
+    }
+    const uvs = geometry.getAttribute('uv')
+    for (const vertex of vertices) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+  }
+
+  for (const [treeIndex, tree] of layout.entries()) {
+    const trunkHeight = tree.height * 0.68
+    const geometry = new THREE.CylinderGeometry(
+      0.22,
+      0.22,
+      trunkHeight,
+      8,
+    )
+    remapGroup(
+      geometry,
+      0,
+      treeIndex % 2 === 0
+        ? PALM_TRUNK_SURFACE_VARIANTS.datePalmBark
+        : PALM_TRUNK_SURFACE_VARIANTS.fanPalmBark,
+    )
+    remapGroup(geometry, 1, PALM_TRUNK_SURFACE_VARIANTS.crownCap)
+    remapGroup(geometry, 2, PALM_TRUNK_SURFACE_VARIANTS.baseCap)
+
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, tree.progress, point, tangent, side)
+    point
+      .addScaledVector(side, tree.lateral)
+      .addScaledVector(tangent, tree.along)
+      .addScaledVector(WORLD_UP, trunkHeight / 2)
+    const matrix = new THREE.Matrix4().makeBasis(side, WORLD_UP, tangent)
+    matrix.setPosition(point)
+    geometry.applyMatrix4(matrix)
+    parts.push(geometry)
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) throw new Error('Palm-trunk surface geometry could not be merged')
+  merged.name = 'shared-palm-trunk-surface-geometry'
   merged.computeBoundingBox()
   merged.computeBoundingSphere()
   return merged
@@ -4015,6 +5550,74 @@ export function createHarbourTunnelCeilingPortalGeometry(
       moduleCropY: roofFasciaHeight / ceilingWidth,
     })
 
+  }
+
+  // The six pale structural ribs are large, repeated chase-camera anchors.
+  // Reuse the generated portal-casing modules on every face while keeping the
+  // original solid boxes underneath for their established shadow behaviour.
+  const rib = HARBOUR_TUNNEL_STRUCTURAL_RIB
+  const ribWidth = roadWidth - rib.widthInset
+  for (const [ribIndex, progress] of getHarbourTunnelLightingLayout(
+    curve,
+    roadWidth,
+  ).progresses.entries()) {
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, progress, point, tangent, side)
+    const ribCenter = point.clone().addScaledVector(WORLD_UP, rib.centerY)
+    const column = ribIndex % 2
+
+    for (const tangentSign of [-1, 1]) {
+      addAtlasPlane({
+        width: ribWidth,
+        height: rib.height,
+        center: ribCenter.clone().addScaledVector(
+          tangent,
+          tangentSign * (rib.depth / 2 + rib.faceOffset),
+        ),
+        across: side.clone().multiplyScalar(tangentSign),
+        vertical: WORLD_UP,
+        normal: tangent.clone().multiplyScalar(tangentSign),
+        column,
+        row: 1,
+        moduleCropY: rib.height / ribWidth,
+      })
+    }
+
+    for (const sideSign of [-1, 1]) {
+      addAtlasPlane({
+        width: rib.depth,
+        height: rib.height,
+        center: ribCenter.clone().addScaledVector(
+          side,
+          sideSign * (ribWidth / 2 + rib.faceOffset),
+        ),
+        across: tangent.clone().multiplyScalar(-sideSign),
+        vertical: WORLD_UP,
+        normal: side.clone().multiplyScalar(sideSign),
+        column,
+        row: 1,
+        moduleCropY: rib.height / rib.depth,
+      })
+    }
+
+    for (const verticalSign of [-1, 1]) {
+      addAtlasPlane({
+        width: ribWidth,
+        height: rib.depth,
+        center: ribCenter.clone().addScaledVector(
+          WORLD_UP,
+          verticalSign * (rib.height / 2 + rib.faceOffset),
+        ),
+        across: side,
+        vertical: tangent.clone().multiplyScalar(-verticalSign),
+        normal: WORLD_UP.clone().multiplyScalar(verticalSign),
+        column,
+        row: 1,
+        moduleCropY: rib.depth / ribWidth,
+      })
+    }
   }
 
   const merged = mergeGeometries(parts)
@@ -4485,6 +6088,106 @@ export function createApexVenueFacadeGeometry(curve) {
 
   const merged = mergeGeometries(parts)
   for (const geometry of parts) geometry.dispose()
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createApexTowerRingSurfaceGeometry(curve) {
+  if (
+    !curve
+    || typeof curve.getPointAt !== 'function'
+    || typeof curve.getTangentAt !== 'function'
+  ) {
+    throw new TypeError('Apex tower-ring graphics require a finite track curve')
+  }
+
+  const atlasInset = 1 / 1024
+  const faceOffset = 0.012
+  const radialInset = 0.01
+  const parts = []
+  const tower = APEX_VENUE_FACADE_LAYOUT.tower
+  const point = new THREE.Vector3()
+  const tangent = new THREE.Vector3()
+  const side = new THREE.Vector3()
+  getTrackFrame(curve, tower.progress, point, tangent, side)
+  const towerBase = point.clone().addScaledVector(side, tower.lateral)
+
+  const remapAtlasVariant = (geometry, variant) => {
+    const column = variant % 2
+    const row = Math.floor(variant / 2)
+    const minU = column * 0.5 + atlasInset
+    const maxU = (column + 1) * 0.5 - atlasInset
+    const minV = row === 0 ? 0.5 + atlasInset : atlasInset
+    const maxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+    const uvs = geometry.getAttribute('uv')
+    for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+      )
+    }
+    uvs.needsUpdate = true
+  }
+
+  const applyWorldTransform = (geometry, center) => {
+    const matrix = new THREE.Matrix4().makeBasis(side, WORLD_UP, tangent)
+    matrix.setPosition(center)
+    geometry.applyMatrix4(matrix)
+  }
+
+  for (const ring of APEX_TOWER_RING_LAYOUT) {
+    const innerRadius = ring.innerRadius > 0
+      ? ring.innerRadius + radialInset
+      : radialInset
+    const outerRadius = ring.radius - radialInset
+    if (innerRadius >= outerRadius) {
+      throw new RangeError(`Apex tower ring ${ring.kind} has no visible radial span`)
+    }
+
+    for (const surfaceSign of [1, -1]) {
+      const geometry = new THREE.RingGeometry(
+        innerRadius,
+        outerRadius,
+        ring.segments,
+        1,
+      )
+      geometry.rotateX(surfaceSign > 0 ? -Math.PI / 2 : Math.PI / 2)
+      const center = towerBase.clone().addScaledVector(
+        WORLD_UP,
+        ring.centerY + surfaceSign * (ring.height / 2 + faceOffset),
+      )
+      applyWorldTransform(geometry, center)
+      remapAtlasVariant(
+        geometry,
+        surfaceSign > 0 ? ring.topVariant : ring.undersideVariant,
+      )
+      addVertexColor(geometry, ring.tint)
+      parts.push(geometry)
+    }
+
+    const fascia = new THREE.CylinderGeometry(
+      ring.radius + faceOffset,
+      ring.radius + faceOffset,
+      ring.height - faceOffset * 2,
+      ring.segments,
+      1,
+      true,
+    )
+    applyWorldTransform(
+      fascia,
+      towerBase.clone().addScaledVector(WORLD_UP, ring.centerY),
+    )
+    remapAtlasVariant(fascia, ring.fasciaVariant)
+    addVertexColor(fascia, ring.tint)
+    parts.push(fascia)
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) throw new Error('Apex tower-ring surface geometry could not be merged')
+  merged.name = 'apex-tower-ring-surface-geometry'
   merged.computeBoundingBox()
   merged.computeBoundingSphere()
   return merged
@@ -5465,6 +7168,146 @@ export function createHarbourYachtUpperSurfaceGeometry() {
   return merged
 }
 
+export function createHarbourYachtRigSurfaceGeometry() {
+  const atlasInset = 1 / 1024
+  const rigTint = '#d5d8d6'
+  const parts = []
+
+  const getModuleBounds = (variant) => {
+    const column = variant % 2
+    const isTopRow = variant < 2
+    return {
+      minU: column * 0.5 + atlasInset,
+      maxU: (column + 1) * 0.5 - atlasInset,
+      minV: (isTopRow ? 0.5 : 0) + atlasInset,
+      maxV: (isTopRow ? 1 : 0.5) - atlasInset,
+    }
+  }
+
+  const remapGroup = (geometry, materialIndex, variant, transformUv) => {
+    const group = geometry.groups.find(candidate => (
+      candidate.materialIndex === materialIndex
+    ))
+    if (!group) {
+      throw new Error(`Yacht rig primitive is missing material group ${materialIndex}`)
+    }
+
+    const { minU, maxU, minV, maxV } = getModuleBounds(variant)
+    const index = geometry.getIndex()
+    const uvs = geometry.getAttribute('uv')
+    const vertices = new Set()
+    for (let offset = group.start; offset < group.start + group.count; offset += 1) {
+      vertices.add(index.getX(offset))
+    }
+    for (const vertex of vertices) {
+      const [sourceU, sourceV] = transformUv(
+        uvs.getX(vertex),
+        uvs.getY(vertex),
+      )
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, sourceU),
+        THREE.MathUtils.lerp(minV, maxV, sourceV),
+      )
+    }
+    uvs.needsUpdate = true
+  }
+
+  const mast = HARBOUR_YACHT_LAYOUT.mast
+  const boom = HARBOUR_YACHT_LAYOUT.boom
+  const identityUv = (u, v) => [u, v]
+  const rotateUv = (u, v) => [v, u]
+
+  for (const yacht of HARBOUR_YACHT_LAYOUT.boats) {
+    const mastGeometry = new THREE.CylinderGeometry(
+      mast.radius,
+      mast.radius,
+      mast.height,
+      mast.segments,
+    )
+    remapGroup(
+      mastGeometry,
+      0,
+      YACHT_RIG_SURFACE_VARIANTS.mastSide,
+      identityUv,
+    )
+    remapGroup(
+      mastGeometry,
+      1,
+      YACHT_RIG_SURFACE_VARIANTS.mastCap,
+      identityUv,
+    )
+    remapGroup(
+      mastGeometry,
+      2,
+      YACHT_RIG_SURFACE_VARIANTS.mastCap,
+      identityUv,
+    )
+    mastGeometry.translate(
+      yacht.x,
+      mast.centerY,
+      yacht.z + mast.zOffset,
+    )
+    addVertexColor(mastGeometry, rigTint)
+    parts.push(mastGeometry)
+
+    const boomGeometry = new THREE.BoxGeometry(...boom.size)
+    remapGroup(
+      boomGeometry,
+      0,
+      YACHT_RIG_SURFACE_VARIANTS.boomSide,
+      identityUv,
+    )
+    remapGroup(
+      boomGeometry,
+      1,
+      YACHT_RIG_SURFACE_VARIANTS.boomSide,
+      identityUv,
+    )
+    remapGroup(
+      boomGeometry,
+      2,
+      YACHT_RIG_SURFACE_VARIANTS.boomSide,
+      rotateUv,
+    )
+    remapGroup(
+      boomGeometry,
+      3,
+      YACHT_RIG_SURFACE_VARIANTS.boomSide,
+      rotateUv,
+    )
+    remapGroup(
+      boomGeometry,
+      4,
+      YACHT_RIG_SURFACE_VARIANTS.boomEnd,
+      identityUv,
+    )
+    remapGroup(
+      boomGeometry,
+      5,
+      YACHT_RIG_SURFACE_VARIANTS.boomEnd,
+      identityUv,
+    )
+    const quaternion = new THREE.Quaternion().setFromAxisAngle(WORLD_UP, yacht.yaw)
+    _matrix.compose(
+      new THREE.Vector3(yacht.x, boom.centerY, yacht.z + boom.zOffset),
+      quaternion,
+      _scale,
+    )
+    boomGeometry.applyMatrix4(_matrix)
+    addVertexColor(boomGeometry, rigTint)
+    parts.push(boomGeometry)
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) throw new Error('Harbour yacht rig surface geometry could not be merged')
+  merged.name = 'harbour-yacht-rig-surface-geometry'
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
 export function getHarbourTunnelLightingLayout(curve, roadWidth = ROAD_WIDTH) {
   if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
     throw new RangeError('Harbour tunnel lighting requires a usable road width')
@@ -5529,11 +7372,9 @@ function addSakhirSignature(parts, curve) {
     )
   }
   pushTrackCylinder(parts, curve, towerProgress, towerLateral, 26.3, 8.5, 0.45, COLORS.steel, 0, 20)
-  // The crown cones and hospitality roof caps live in the generated canopy
-  // surface geometry so the image atlas owns their visible surfaces without
-  // retaining duplicate solid-colour geometry underneath.
-  pushTrackBox(parts, curve, towerProgress, towerLateral, 31.8, [0.18, 6.8, 0.18], COLORS.steel)
-  pushTrackBox(parts, curve, towerProgress, towerLateral + 1.4, 34.2, [2.8, 1.35, 0.12], COLORS.red)
+  // The crown cones, flag, flagpole, and hospitality roof caps live in the
+  // generated canopy and structural surface geometries so their atlases own
+  // every visible face without duplicate solid-colour geometry underneath.
 
   for (const building of APEX_VENUE_FACADE_LAYOUT.hospitality) {
     pushTrackBox(
@@ -5547,42 +7388,10 @@ function addSakhirSignature(parts, curve) {
     )
   }
 
-  for (const tree of getPalmTreeLayout(curve, 'apex')) {
-    addPalmTrunk(
-      parts,
-      curve,
-      tree.progress,
-      tree.lateral,
-      tree.height,
-      tree.along,
-    )
-  }
-
 }
 
 function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
   // Monaco's hairpin precedes the tunnel, which then opens onto the harbour.
-  const [palmTree] = getPalmTreeLayout(curve, 'harbour')
-  const hairpinSide = getTurnSide(curve, palmTree.progress)
-  pushTrackCylinder(
-    parts,
-    curve,
-    palmTree.progress,
-    hairpinSide * 11.2,
-    0.22,
-    3.4,
-    0.4,
-    COLORS.grass,
-  )
-  addPalmTrunk(
-    parts,
-    curve,
-    palmTree.progress,
-    palmTree.lateral,
-    palmTree.height,
-    palmTree.along,
-  )
-
   const tunnelLayout = getHarbourTunnelLayout(curve)
   for (const progress of tunnelLayout.progresses) {
     pushTrackBox(
@@ -5634,21 +7443,14 @@ function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
       curve,
       progress,
       0,
-      HARBOUR_TUNNEL_ROOF_UNDERSIDE + 0.09,
-      [roadWidth - 1.8, 0.18, 0.3],
+      HARBOUR_TUNNEL_STRUCTURAL_RIB.centerY,
+      [
+        roadWidth - HARBOUR_TUNNEL_STRUCTURAL_RIB.widthInset,
+        HARBOUR_TUNNEL_STRUCTURAL_RIB.height,
+        HARBOUR_TUNNEL_STRUCTURAL_RIB.depth,
+      ],
       COLORS.tunnelRib,
     )
-    for (const side of [-1, 1]) {
-      pushTrackBox(
-        parts,
-        curve,
-        progress,
-        side * tunnelLighting.fixtureLateral,
-        HARBOUR_TUNNEL_ROOF_UNDERSIDE + 0.055,
-        [1.3, 0.11, 1.05],
-        COLORS.steel,
-      )
-    }
   }
 
   pushWorldBox(
@@ -5678,8 +7480,6 @@ function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
       index % 2 === 0 ? COLORS.red : COLORS.marinaLight,
       yaw,
     )
-    pushWorldCylinder(parts, 0.08, 6.6, [x, 4.35, z + 0.4], COLORS.steel, 6)
-    pushWorldBox(parts, [0.12, 0.12, 4.4], [x, 4.55, z + 0.1], COLORS.steel, yaw)
   }
 
   for (const building of HARBOUR_BUILDINGS) {
@@ -5734,7 +7534,6 @@ function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
     pitLayout.building.size,
     COLORS.cream,
   )
-  pushTrackBox(parts, curve, 0.985, -13.2, 3.7, [0.7, 5.2, 33], COLORS.glass)
   pushTrackBox(
     parts,
     curve,
@@ -5911,7 +7710,6 @@ function addTempleSignature(parts, curve, roadWidth = ROAD_WIDTH) {
     pitLayout.building.size,
     COLORS.cream,
   )
-  pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -16.8, 3.3, [0.7, 5.4, 57], COLORS.glass)
   pushTrackBox(
     parts,
     curve,
@@ -5921,18 +7719,6 @@ function addTempleSignature(parts, curve, roadWidth = ROAD_WIDTH) {
     pitLayout.roof.size,
     COLORS.red,
   )
-  for (let bay = -5; bay <= 5; bay += 1) {
-    pushTrackBox(
-      parts,
-      curve,
-      PIT_STRAIGHT_PROGRESS,
-      -16.42,
-      2.0,
-      [0.12, 2.7, 3.45],
-      [COLORS.italianGreen, COLORS.white, COLORS.red][(bay + 6) % 3],
-      bay * 4.75,
-    )
-  }
   pushTrackBox(
     parts,
     curve,
@@ -5957,22 +7743,13 @@ function addVenueSignature(parts, curve, venue, roadWidth = ROAD_WIDTH) {
 export function createCircuitSceneryGeometry(curve, venue = 'apex', roadWidth = ROAD_WIDTH) {
   const parts = []
 
-  addSurfaceGuides(parts, curve, roadWidth)
-  addCornerReadability(parts, curve, venue, roadWidth)
   addCircuitLandmarks(parts, curve, venue, roadWidth)
   if (venue === 'apex') addNightVenueDetails(parts, curve, roadWidth)
   addBroadcastCameras(parts, curve, roadWidth)
-  addFinishStripe(parts, curve, roadWidth)
-  addStartGridMarkings(parts, curve)
-  const pitExitColor = venue === 'temple'
-    ? COLORS.italianGreen
-    : venue === 'harbour' ? COLORS.white : COLORS.runoffGreen
-  pushTrackBox(parts, curve, 0.055, -roadWidth / 2 + 1.25, 0.11, [0.12, 0.03, 18], pitExitColor)
   addBrakingBoards(parts, curve, venue, roadWidth)
   addTracksideInfrastructure(parts, curve, venue, roadWidth)
   if (venue === 'apex') {
     addPitComplex(parts, curve)
-    addPitLaneLife(parts, curve)
     addGrandstands(parts, curve)
   }
   addVenueSignature(parts, curve, venue, roadWidth)
