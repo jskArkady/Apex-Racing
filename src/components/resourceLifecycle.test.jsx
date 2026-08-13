@@ -49,7 +49,7 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(32)
     expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(32)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(31)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(32)
   })
 
   it.each([
@@ -177,7 +177,7 @@ describe('owned Three.js resource lifecycle', () => {
     const view = render(<Track track={getTrackPreset(trackId)} />)
 
     expect(textureLoad).toHaveBeenCalledTimes(
-      15
+      16
         + Number(Boolean(tunnelWallFile))
         + Number(Boolean(apexVenueFacadeFile))
         + Number(Boolean(apexVenueFacadeFile))
@@ -225,6 +225,9 @@ describe('owned Three.js resource lifecycle', () => {
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining('shared-barrier-structural-surface-atlas-1024.webp'),
     )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('shared-catch-fence-mesh-tile-1024.webp'),
+    )
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(infieldFile))
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(barrierAtlasFile))
     expect(textureLoad).toHaveBeenCalledWith(expect.stringContaining(crowdPanelFile))
@@ -259,6 +262,9 @@ describe('owned Three.js resource lifecycle', () => {
     ).toBeTruthy()
     expect(
       view.container.querySelector('[name="track-gantry-structure-surfaces"]'),
+    ).toBeTruthy()
+    expect(
+      view.container.querySelector('[name="track-catch-fence-surfaces"]'),
     ).toBeTruthy()
     if (apexVenueFacadeFile) {
       expect(textureLoad).toHaveBeenCalledWith(
@@ -581,6 +587,7 @@ describe('owned Three.js resource lifecycle', () => {
       && candidate.metalness === 0.02
     ))
     expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.vertexColors).toBe(true)
     expect(material.side).toBe(THREE.FrontSide)
   })
 
@@ -644,11 +651,49 @@ describe('owned Three.js resource lifecycle', () => {
     const material = materialDispose.mock.contexts.find(candidate => (
       candidate instanceof THREE.MeshStandardMaterial
       && candidate.map === texture
+      && candidate.vertexColors === true
       && candidate.roughness === 0.48
       && candidate.metalness === 0.64
     ))
     expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.vertexColors).toBe(true)
     expect(material.side).toBe(THREE.FrontSide)
+  })
+
+  it('configures the shared repeating alpha-cutout catch-fence tile', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('shared-catch-fence-mesh-tile-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-shared-catch-fence-mesh-tile')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.RepeatWrapping)
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(
+      view.container.querySelector('[name="track-catch-fence-surfaces"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.roughness === 0.58
+      && candidate.metalness === 0.62
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.alphaTest).toBe(0.34)
+    expect(material.transparent).toBe(false)
+    expect(material.side).toBe(THREE.DoubleSide)
   })
 
   it('configures the shared palm-trunk side and cap atlas', () => {
@@ -883,7 +928,7 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(23)
     expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(22)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(20)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(21)
     const material = materialDispose.mock.contexts.find(candidate => (
       candidate instanceof THREE.MeshStandardMaterial
       && candidate.map === texture
@@ -933,7 +978,7 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(27)
     expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(26)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(25)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(26)
     const gravelMaterial = materialDispose.mock.contexts.find(candidate => (
       candidate instanceof THREE.MeshStandardMaterial
       && candidate.map === gravelTexture

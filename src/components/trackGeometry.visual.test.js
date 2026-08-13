@@ -28,6 +28,7 @@ import {
   APEX_TENT_CANOPY_LAYOUT,
   BROADCAST_CAMERA_PROGRESS,
   BROADCAST_CAMERA_SUPPORT_LAYOUT,
+  CATCH_FENCE_TEXTURE_WORLD_WIDTH,
   createApexPitStaffBillboardGeometry,
   createApexGravelRunoffGeometry,
   createApexRaceControlFacadeGeometry,
@@ -84,6 +85,7 @@ import {
   FINISH_LINE_LEVEL,
   FLOODLIGHT_COUNT,
   GANTRY_DISPLAY_LAYOUTS,
+  GANTRY_ACCENT_CARRIER_LAYOUTS,
   GANTRY_STRUCTURE_VARIANTS,
   KERB_SURFACE_VARIANTS,
   PALM_TRUNK_SURFACE_VARIANTS,
@@ -149,6 +151,7 @@ import {
   YACHT_RIG_SURFACE_VARIANTS,
   YACHT_UPPER_SURFACE_VARIANTS,
   TEMPLE_PIT_BAY_TRIM_LAYOUT,
+  TEMPLE_START_GANTRY_TRIM_LAYOUT,
   TEMPLE_TURF_WORLD_TILE_SIZE,
   TEMPLE_GRAVEL_WORLD_TILE_SIZE,
   TEMPLE_TIMING_TOWER_LAYOUT,
@@ -300,6 +303,13 @@ describe('circuit visual geometry', () => {
 
       for (let panel = 0; panel < layouts.length; panel += 1) {
         expect(layouts[panel].approachOffset).toBe(panel === 0 ? -0.402 : -0.382)
+        const carrier = GANTRY_ACCENT_CARRIER_LAYOUTS[preset.venue][panel]
+        const carrierApproachFace = -(
+          carrier.size[2] / 2 + carrier.surfaceOffset
+        )
+        expect(layouts[panel].approachOffset).toBeLessThan(
+          carrierApproachFace - 0.005,
+        )
         const tangent = preset.curve
           .getTangentAt(layouts[panel].progress)
           .normalize()
@@ -1064,9 +1074,9 @@ describe('circuit visual geometry', () => {
         preset.roadWidth,
       )
       const expectedCombinedTopology = {
-        apex: { positions: 18_780, indices: 33_360 },
-        harbour: { positions: 14_396, indices: 25_848 },
-        temple: { positions: 14_296, indices: 25_572 },
+        apex: { positions: 18_684, indices: 33_216 },
+        harbour: { positions: 14_228, indices: 25_596 },
+        temple: { positions: 14_200, indices: 25_428 },
       }[preset.venue]
       const yachtRig = preset.venue === 'harbour'
         ? createHarbourYachtRigSurfaceGeometry()
@@ -1309,14 +1319,17 @@ describe('circuit visual geometry', () => {
             APEX_PIT_APRON_LAYOUT.color,
             APEX_PIT_WALL_ACCENT_LAYOUT.color,
             ...APEX_PIT_SERVICE_PAD_LAYOUT.map(pad => pad.color),
+            ...GANTRY_ACCENT_CARRIER_LAYOUTS.apex.map(carrier => carrier.color),
           ]
         : preset.venue === 'temple'
           ? [
               TEMPLE_TIMING_TOWER_CAP.color,
               ...TEMPLE_TIMING_TOWER_FLOOR_BANDS.map(band => band.color),
               ...TEMPLE_PIT_BAY_TRIM_LAYOUT.map(trim => trim.color),
+              ...TEMPLE_START_GANTRY_TRIM_LAYOUT.map(trim => trim.color),
+              ...GANTRY_ACCENT_CARRIER_LAYOUTS.temple.map(carrier => carrier.color),
             ]
-          : []
+          : GANTRY_ACCENT_CARRIER_LAYOUTS.harbour.map(carrier => carrier.color)
       const extraBoxCount = extraBoxTints.length
       const serviceFacadeExtraCount = preset.venue === 'apex'
         ? APEX_PIT_BAY_SERVICE_LAYOUT.length
@@ -1344,6 +1357,12 @@ describe('circuit visual geometry', () => {
         expect(Object.isFrozen(TEMPLE_PIT_BAY_TRIM_LAYOUT)).toBe(true)
         expect(TEMPLE_PIT_BAY_TRIM_LAYOUT).toHaveLength(11)
         for (const trim of TEMPLE_PIT_BAY_TRIM_LAYOUT) {
+          expect(Object.isFrozen(trim)).toBe(true)
+          expect(Object.isFrozen(trim.size)).toBe(true)
+        }
+        expect(Object.isFrozen(TEMPLE_START_GANTRY_TRIM_LAYOUT)).toBe(true)
+        expect(TEMPLE_START_GANTRY_TRIM_LAYOUT).toHaveLength(3)
+        for (const trim of TEMPLE_START_GANTRY_TRIM_LAYOUT) {
           expect(Object.isFrozen(trim)).toBe(true)
           expect(Object.isFrozen(trim.size)).toBe(true)
         }
@@ -1380,11 +1399,17 @@ describe('circuit visual geometry', () => {
         Number.isFinite(value) && value > 0 && value < 1
       ))).toBe(true)
       expect(geometry.boundingBox.min.y).toBeCloseTo(0, 4)
-      const expectedMaxY = preset.venue === 'temple'
+      const priorExpectedMaxY = preset.venue === 'temple'
         ? TEMPLE_TIMING_TOWER_CAP.centerY
           + TEMPLE_TIMING_TOWER_CAP.size[1] / 2
           + 0.012
         : layout.roof.centerY + layout.roof.size[1] / 2 + 0.012
+      const carrierExpectedMaxY = Math.max(
+        ...GANTRY_ACCENT_CARRIER_LAYOUTS[preset.venue].map(carrier => (
+          carrier.centerY + carrier.size[1] / 2 + carrier.surfaceOffset
+        )),
+      )
+      const expectedMaxY = Math.max(priorExpectedMaxY, carrierExpectedMaxY)
       expect(geometry.boundingBox.max.y).toBeCloseTo(
         expectedMaxY,
         4,
@@ -1468,15 +1493,23 @@ describe('circuit visual geometry', () => {
       )
       expect(glassTopNormal.dot(glassBottomNormal)).toBeLessThan(-0.99)
       expect(glassEndA.dot(glassEndB)).toBeLessThan(-0.99)
-      const physicalAspectBoxes = preset.venue === 'apex'
-        ? [
+      const physicalAspectBoxes = [
+        ...(preset.venue === 'apex'
+          ? [
             ...APEX_PIT_BAY_SERVICE_LAYOUT,
             ...APEX_PIT_BAY_TRIM_LAYOUT,
             APEX_PIT_APRON_LAYOUT,
             APEX_PIT_WALL_ACCENT_LAYOUT,
             ...APEX_PIT_SERVICE_PAD_LAYOUT,
           ]
-        : preset.venue === 'temple' ? TEMPLE_PIT_BAY_TRIM_LAYOUT : []
+          : preset.venue === 'temple'
+            ? [
+              ...TEMPLE_PIT_BAY_TRIM_LAYOUT,
+              ...TEMPLE_START_GANTRY_TRIM_LAYOUT,
+            ]
+            : []),
+        ...GANTRY_ACCENT_CARRIER_LAYOUTS[preset.venue],
+      ]
       if (physicalAspectBoxes.length > 0) {
         const firstFace = faceCount - physicalAspectBoxes.length * 6
         for (let boxIndex = 0; boxIndex < physicalAspectBoxes.length; boxIndex += 1) {
@@ -1555,7 +1588,7 @@ describe('circuit visual geometry', () => {
       totalFaceCount += faceCount
       geometry.dispose()
     }
-    expect(totalFaceCount).toBe(500)
+    expect(totalFaceCount).toBe(554)
   })
 
   it('replaces every low-poly palm crown with one road-facing atlas billboard', () => {
@@ -1721,8 +1754,8 @@ describe('circuit visual geometry', () => {
       }
 
       const expectedCombined = preset.venue === 'apex'
-        ? { positions: 13_196, indices: 20_856 }
-        : { positions: 9_124, indices: 13_704 }
+        ? { positions: 13_100, indices: 20_712 }
+        : { positions: 8_956, indices: 13_452 }
       expect(
         scenery.getAttribute('position').count + positions.count,
       ).toBe(expectedCombined.positions)
@@ -1854,14 +1887,14 @@ describe('circuit visual geometry', () => {
         + yachtRig.getAttribute('position').count
         + surfaceWear.getAttribute('position').count
         + palmTrunk.getAttribute('position').count,
-    ).toBe(14_196)
+    ).toBe(14_028)
     expect(
       scenery.getIndex().count
         + geometry.getIndex().count
         + yachtRig.getIndex().count
         + surfaceWear.getIndex().count
         + palmTrunk.getIndex().count,
-    ).toBe(25_572)
+    ).toBe(25_320)
 
     template.dispose()
     scenery.dispose()
@@ -2799,8 +2832,8 @@ describe('circuit visual geometry', () => {
         cornerCount: 7,
         positions: 4_696,
         indices: 11_172,
-        sceneryPositions: 13_196,
-        sceneryIndices: 20_856,
+        sceneryPositions: 13_100,
+        sceneryIndices: 20_712,
         min: [-207.39679, 0.065, -105.301575],
         max: [171.01178, 0.1465, 144.211182],
       },
@@ -2808,8 +2841,8 @@ describe('circuit visual geometry', () => {
         cornerCount: 5,
         positions: 4_432,
         indices: 10_776,
-        sceneryPositions: 9_124,
-        sceneryIndices: 13_704,
+        sceneryPositions: 8_956,
+        sceneryIndices: 13_452,
         min: [-201.381607, 0.094, -81.340172],
         max: [176.30693, 0.1465, 77.560463],
       },
@@ -2817,8 +2850,8 @@ describe('circuit visual geometry', () => {
         cornerCount: 6,
         positions: 4_624,
         indices: 11_064,
-        sceneryPositions: 9_072,
-        sceneryIndices: 13_608,
+        sceneryPositions: 8_976,
+        sceneryIndices: 13_464,
         min: [-252.617859, 0.065, -142.562653],
         max: [283.69162, 0.1465, 131.672531],
       },
@@ -3417,18 +3450,33 @@ describe('circuit visual geometry', () => {
       const outerVariant = preset.venue === 'apex'
         ? BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteOuter
         : BARRIER_STRUCTURAL_SURFACE_VARIANTS.steelOuter
+      const retainingCapFaceCount = preset.venue === 'harbour'
+        ? HARBOUR_RETAINING_WALL_LAYOUT.progresses.length * 6
+        : 0
+      const retainingWallTopFaceCount = preset.venue === 'harbour'
+        ? HARBOUR_RETAINING_WALL_LAYOUT.progresses.length
+        : 0
+      const harbourStructuralFaceCount = retainingCapFaceCount
+        + retainingWallTopFaceCount
 
       expect(geometry.name).toBe('shared-barrier-structural-surface-geometry')
-      expect(positions.count).toBe(panelCount * 2 * 2 * 4)
+      expect(positions.count).toBe(
+        panelCount * 2 * 2 * 4 + harbourStructuralFaceCount * 4,
+      )
       expect(normals.count).toBe(positions.count)
       expect(uvs.count).toBe(positions.count)
-      expect(geometry.getIndex().count).toBe(panelCount * 2 * 2 * 6)
+      expect(geometry.getIndex().count).toBe(
+        panelCount * 2 * 2 * 6 + harbourStructuralFaceCount * 6,
+      )
       expect(geometry.boundingBox.min.y).toBeCloseTo(
         TRACK_CENTERLINE_Y + BARRIER_GRAPHICS_BOTTOM_OFFSET,
         5,
       )
       expect(geometry.boundingBox.max.y).toBeCloseTo(
-        TRACK_CENTERLINE_Y + 1.358,
+        preset.venue === 'harbour'
+          ? HARBOUR_RETAINING_WALL_LAYOUT.capCenterY
+            + HARBOUR_RETAINING_WALL_LAYOUT.capSize[1] / 2
+          : TRACK_CENTERLINE_Y + 1.358,
         5,
       )
 
@@ -3484,6 +3532,81 @@ describe('circuit visual geometry', () => {
         }
       }
 
+      if (preset.venue === 'harbour') {
+        const baseVertex = panelCount * 2 * 2 * 4
+        const capFaceCount = HARBOUR_RETAINING_WALL_LAYOUT.progresses.length * 6
+        const colors = geometry.getAttribute('color')
+        expect(colors.count).toBe(positions.count)
+        for (let face = 0; face < capFaceCount; face += 1) {
+          const vertex = baseVertex + face * 4
+          const capIndex = Math.floor(face / 6)
+          const faceIndex = face % 6
+          const variant = faceIndex === 5
+            ? BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteCap
+            : BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteOuter
+          const expectedTint = new THREE.Color(capIndex % 2 ? '#d23d43' : '#fff4df')
+          const moduleMinU = variant % 2 * 0.5 + atlasInset
+          const moduleMaxU = (variant % 2 + 1) * 0.5 - atlasInset
+          const moduleMinV = variant < 2 ? 0.5 + atlasInset : atlasInset
+          const moduleMaxV = variant < 2 ? 1 - atlasInset : 0.5 - atlasInset
+          const faceUvs = Array.from({ length: 4 }, (_, offset) => [
+            uvs.getX(vertex + offset),
+            uvs.getY(vertex + offset),
+          ])
+
+          expect(Math.min(...faceUvs.map(([u]) => u))).toBeGreaterThanOrEqual(moduleMinU)
+          expect(Math.max(...faceUvs.map(([u]) => u))).toBeLessThanOrEqual(moduleMaxU)
+          expect(Math.min(...faceUvs.map(([, v]) => v))).toBeGreaterThanOrEqual(moduleMinV)
+          expect(Math.max(...faceUvs.map(([, v]) => v))).toBeLessThanOrEqual(moduleMaxV)
+          expect(colors.getX(vertex)).toBeCloseTo(expectedTint.r, 5)
+          expect(colors.getY(vertex)).toBeCloseTo(expectedTint.g, 5)
+          expect(colors.getZ(vertex)).toBeCloseTo(expectedTint.b, 5)
+        }
+
+        const wallTopBaseVertex = baseVertex + capFaceCount * 4
+        const concreteCap = BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteCap
+        const moduleMinU = concreteCap % 2 * 0.5 + atlasInset
+        const moduleMaxU = (concreteCap % 2 + 1) * 0.5 - atlasInset
+        const moduleMinV = 0.5 + atlasInset
+        const moduleMaxV = 1 - atlasInset
+        for (
+          let wall = 0;
+          wall < HARBOUR_RETAINING_WALL_LAYOUT.progresses.length;
+          wall += 1
+        ) {
+          const vertex = wallTopBaseVertex + wall * 4
+          const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+          const faceUvs = Array.from({ length: 4 }, (_, offset) => [
+            uvs.getX(vertex + offset),
+            uvs.getY(vertex + offset),
+          ])
+          const uSpan = Math.max(...faceUvs.map(([u]) => u))
+            - Math.min(...faceUvs.map(([u]) => u))
+          const vSpan = Math.max(...faceUvs.map(([, v]) => v))
+            - Math.min(...faceUvs.map(([, v]) => v))
+
+          expect(normal.dot(up)).toBeGreaterThan(0.99)
+          expect(positions.getY(vertex)).toBeCloseTo(
+            HARBOUR_RETAINING_WALL_LAYOUT.centerY
+              + HARBOUR_RETAINING_WALL_LAYOUT.height / 2
+              + 0.008,
+            5,
+          )
+          expect(Math.min(...faceUvs.map(([u]) => u))).toBeGreaterThanOrEqual(moduleMinU)
+          expect(Math.max(...faceUvs.map(([u]) => u))).toBeLessThanOrEqual(moduleMaxU)
+          expect(Math.min(...faceUvs.map(([, v]) => v))).toBeGreaterThanOrEqual(moduleMinV)
+          expect(Math.max(...faceUvs.map(([, v]) => v))).toBeLessThanOrEqual(moduleMaxV)
+          expect(uSpan / vSpan).toBeCloseTo(
+            HARBOUR_RETAINING_WALL_LAYOUT.width
+              / HARBOUR_RETAINING_WALL_LAYOUT.length,
+            5,
+          )
+          expect(colors.getX(vertex)).toBeCloseTo(1, 5)
+          expect(colors.getY(vertex)).toBeCloseTo(1, 5)
+          expect(colors.getZ(vertex)).toBeCloseTo(1, 5)
+        }
+      }
+
       geometry.dispose()
     }
   })
@@ -3500,16 +3623,97 @@ describe('circuit visual geometry', () => {
     }
   })
 
-  it('builds a finite catch fence above both circuit barriers', () => {
-    const geometry = createCatchFenceGeometry(trackCurve)
+  it('maps a finite repeating catch-fence skin above both circuit barriers', () => {
+    const samples = 64
+    const geometry = createCatchFenceGeometry(trackCurve, samples)
     const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const indices = geometry.getIndex()
 
-    expect(positions.count).toBeGreaterThan(2000)
+    expect(geometry.name).toBe('shared-catch-fence-surface-geometry')
+    expect(positions.count).toBe((samples + 1) * 2 * 2)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(indices.count).toBe(samples * 2 * 6)
     expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
-    expect(geometry.boundingBox.min.y).toBeGreaterThan(1)
-    expect(geometry.boundingBox.max.y).toBeGreaterThan(4.5)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(Number.isFinite)).toBe(true)
+    expect(geometry.boundingBox.min.y).toBeCloseTo(1.28, 5)
+    expect(geometry.boundingBox.max.y).toBeCloseTo(4.7, 5)
     expect(geometry.boundingBox.min.x).toBeLessThan(trackCurve.getPointAt(0).x)
     expect(geometry.boundingBox.max.x).toBeGreaterThan(trackCurve.getPointAt(0).x)
+    expect(uvs.getY(1)).toBe(1)
+
+    const verticesPerSide = (samples + 1) * 2
+    for (const [sideIndex, sideSign] of [-1, 1].entries()) {
+      const sideOffset = sideIndex * verticesPerSide
+      const firstU = uvs.getX(sideOffset)
+      const lastU = uvs.getX(sideOffset + samples * 2)
+      const repeatSpan = lastU - firstU
+      let sideDistance = 0
+      for (let point = 1; point <= samples; point += 1) {
+        const previous = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          sideOffset + (point - 1) * 2,
+        )
+        const current = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          sideOffset + point * 2,
+        )
+        sideDistance += current.distanceTo(previous)
+      }
+      expect(repeatSpan).toBeCloseTo(Math.round(repeatSpan), 5)
+      expect(sideDistance / repeatSpan).toBeCloseTo(
+        CATCH_FENCE_TEXTURE_WORLD_WIDTH,
+        2,
+      )
+      expect(THREE.MathUtils.euclideanModulo(lastU, 1)).toBeCloseTo(
+        THREE.MathUtils.euclideanModulo(firstU, 1),
+        5,
+      )
+      for (let point = 0; point <= samples; point += 1) {
+        const bottom = sideOffset + point * 2
+        expect(uvs.getX(bottom)).toBeCloseTo(uvs.getX(bottom + 1), 6)
+        expect(uvs.getY(bottom)).toBe(0)
+        expect(uvs.getY(bottom + 1)).toBe(1)
+      }
+
+      for (let panel = 0; panel < samples; panel += 1) {
+        const indexOffset = (sideIndex * samples + panel) * 6
+        const a = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          indices.getX(indexOffset),
+        )
+        const b = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          indices.getX(indexOffset + 1),
+        )
+        const c = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          indices.getX(indexOffset + 2),
+        )
+        const faceNormal = new THREE.Vector3()
+          .crossVectors(b.clone().sub(a), c.clone().sub(a))
+          .normalize()
+        const trackSide = new THREE.Vector3().crossVectors(
+          new THREE.Vector3(0, 1, 0),
+          trackCurve.getTangentAt((panel + 0.5) / samples).normalize(),
+        ).normalize()
+        expect(faceNormal.dot(trackSide.multiplyScalar(-sideSign))).toBeGreaterThan(0.96)
+      }
+    }
+
+    expect(() => createCatchFenceGeometry(null, samples)).toThrow(TypeError)
+    expect(() => createCatchFenceGeometry({
+      getPointAt: () => new THREE.Vector3(),
+    }, samples)).toThrow(TypeError)
+    expect(() => createCatchFenceGeometry({
+      getPointAt: () => new THREE.Vector3(),
+      getTangentAt: () => new THREE.Vector3(0, 0, 1),
+    }, samples)).toThrow(RangeError)
+    expect(() => createCatchFenceGeometry(trackCurve, 2)).toThrow(RangeError)
+    expect(() => createCatchFenceGeometry(trackCurve, samples, 4)).toThrow(RangeError)
 
     geometry.dispose()
   })
@@ -4062,30 +4266,30 @@ describe('circuit visual geometry', () => {
       harbour.curve,
       harbour.venue,
     )
-    expect(scenery.getAttribute('position').count).toBe(9_072)
-    expect(scenery.getIndex().count).toBe(13_608)
-    expect(scenery.getIndex().count / 3).toBe(4_536)
+    expect(scenery.getAttribute('position').count).toBe(8_904)
+    expect(scenery.getIndex().count).toBe(13_356)
+    expect(scenery.getIndex().count / 3).toBe(4_452)
     expect(
       scenery.getAttribute('position').count
         + positions.count
         + yachtRig.getAttribute('position').count
         + surfaceWear.getAttribute('position').count
         + palmTrunk.getAttribute('position').count,
-    ).toBe(19_700)
+    ).toBe(19_532)
     expect(
       scenery.getIndex().count
         + indices.count
         + yachtRig.getIndex().count
         + surfaceWear.getIndex().count
         + palmTrunk.getIndex().count,
-    ).toBe(33_804)
+    ).toBe(33_552)
     expect((
       scenery.getIndex().count
         + indices.count
         + yachtRig.getIndex().count
         + surfaceWear.getIndex().count
         + palmTrunk.getIndex().count
-    ) / 3).toBe(11_268)
+    ) / 3).toBe(11_184)
 
     scenery.dispose()
     yachtRig.dispose()

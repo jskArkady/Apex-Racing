@@ -320,7 +320,7 @@ describe('Adversarial Testing Suite: Track Component', () => {
     expect(rigidBodies.length).toBe(3);
 
     const meshes = container.querySelectorAll('mesh');
-    expect(meshes.length).toBe(26);
+    expect(meshes.length).toBe(27);
     expect(container.querySelector('[name="track-barrier-graphics"]')).toBeTruthy();
     expect(container.querySelector('[name="track-barrier-structural-surfaces"]')).toBeTruthy();
     expect(container.querySelector('[name="track-braking-distance-boards"]')).toBeTruthy();
@@ -342,6 +342,7 @@ describe('Adversarial Testing Suite: Track Component', () => {
     expect(container.querySelector('[name="track-apex-tent-canopies"]')).toBeTruthy();
     expect(container.querySelector('[name="track-palm-tree-billboards"]')).toBeTruthy();
     expect(container.querySelector('[name="track-palm-trunk-surfaces"]')).toBeTruthy();
+    expect(container.querySelector('[name="track-catch-fence-surfaces"]')).toBeTruthy();
   });
 
   it('demonstrates useMemo geometry caching across multiple renders', () => {

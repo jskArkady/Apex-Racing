@@ -39,6 +39,7 @@ import templeTreeSpriteAtlasUrl from '../assets/textures/temple-tree-sprite-atla
 import pitComplexStructureAtlasUrl from '../assets/textures/pit-complex-structure-surface-atlas-1024.webp'
 import sharedBarrierStructuralSurfaceAtlasUrl from '../assets/textures/shared-barrier-structural-surface-atlas-1024.webp'
 import sharedBrakingDistanceBoardAtlasUrl from '../assets/textures/shared-braking-distance-board-atlas-1024.webp'
+import sharedCatchFenceMeshTileUrl from '../assets/textures/shared-catch-fence-mesh-tile-1024.webp'
 import sharedGantryStructureAtlasUrl from '../assets/textures/shared-gantry-structure-surface-atlas-1024.webp'
 import sharedKerbSurfaceAtlasUrl from '../assets/textures/shared-kerb-surface-atlas-1024.webp'
 import sharedPalmTreeSpriteAtlasUrl from '../assets/textures/shared-palm-tree-sprite-atlas-1024.webp'
@@ -438,6 +439,17 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
     barrierStructuralSurfaceTexture.magFilter = THREE.LinearFilter
     barrierStructuralSurfaceTexture.generateMipmaps = true
     barrierStructuralSurfaceTexture.anisotropy = 4
+    const catchFenceTexture = new THREE.TextureLoader().load(
+      sharedCatchFenceMeshTileUrl,
+    )
+    catchFenceTexture.name = 'generated-shared-catch-fence-mesh-tile'
+    catchFenceTexture.colorSpace = THREE.SRGBColorSpace
+    catchFenceTexture.wrapS = THREE.RepeatWrapping
+    catchFenceTexture.wrapT = THREE.ClampToEdgeWrapping
+    catchFenceTexture.minFilter = THREE.LinearMipmapLinearFilter
+    catchFenceTexture.magFilter = THREE.LinearFilter
+    catchFenceTexture.generateMipmaps = true
+    catchFenceTexture.anisotropy = 4
     const brakingBoardGraphicsTexture = new THREE.TextureLoader().load(
       sharedBrakingDistanceBoardAtlasUrl,
     )
@@ -891,6 +903,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       apexGravelRunoffTexture,
       barrierAtlasTexture,
       barrierStructuralSurfaceTexture,
+      catchFenceTexture,
       brakingBoardGraphicsTexture,
       tracksideOperationsGraphicsTexture,
       trackLightingGraphicsTexture,
@@ -952,6 +965,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
         : null,
       barrierStructuralSurfaceMaterial: new THREE.MeshStandardMaterial({
         map: barrierStructuralSurfaceTexture,
+        vertexColors: true,
         roughness: activeTrack.venue === 'apex' ? 0.9 : 0.48,
         metalness: activeTrack.venue === 'apex' ? 0.04 : 0.64,
         side: THREE.FrontSide,
@@ -1273,11 +1287,13 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           side: THREE.DoubleSide,
         })
         : null,
-      fenceMaterial: new THREE.LineBasicMaterial({
-        color: '#b8c0bd',
-        transparent: true,
-        opacity: 0.18,
-        depthWrite: false,
+      fenceMaterial: new THREE.MeshStandardMaterial({
+        color: '#c8cfcc',
+        map: catchFenceTexture,
+        roughness: 0.58,
+        metalness: 0.62,
+        alphaTest: 0.34,
+        side: THREE.DoubleSide,
       }),
       glowMaterial: new THREE.MeshBasicMaterial({
         vertexColors: true,
@@ -1342,6 +1358,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.apexGravelRunoffTexture,
       assets.barrierAtlasTexture,
       assets.barrierStructuralSurfaceTexture,
+      assets.catchFenceTexture,
       assets.brakingBoardGraphicsTexture,
       assets.tracksideOperationsGraphicsTexture,
       assets.trackLightingGraphicsTexture,
@@ -1770,7 +1787,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
         </mesh>
       )}
 
-      <lineSegments
+      <mesh
+        name="track-catch-fence-surfaces"
         geometry={assets.catchFenceGeometry}
         material={assets.fenceMaterial}
         renderOrder={2}

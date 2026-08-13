@@ -283,39 +283,100 @@ const FORMULA_BODYWORK_SIDEPODS = Object.freeze([
   }),
 ])
 
-const frontWingBodyworkPanels = FRONT_WING_PLANES.map((plane, index) => {
-  const angle = plane.rotation[0]
-  const topNormal = [0, Math.cos(angle), Math.sin(angle)]
-  return freezeLiveryPanel({
-    key: `front-wing-${index}-top`,
-    position: overlayPosition(plane.position, topNormal, plane.size[1] / 2 + 0.002),
-    rotation: [angle - Math.PI / 2, 0, 0],
-    size: [plane.size[0] - 0.04, plane.size[2] - 0.02],
-    variant: 3,
-    type: 'plane',
-  })
+const BODYWORK_DETAIL_ORDER = Object.freeze({ low: 0, race: 1, hero: 2 })
+
+const resolveBodyworkVariant = material => ({
+  accent: 0,
+  primary: 1,
+  warm: 2,
+  carbon: 3,
+})[material] ?? 3
+
+const freezeBodyworkBox = ({
+  key,
+  position,
+  rotation = [0, 0, 0],
+  size,
+  material = 'carbon',
+  minimumDetail = 'low',
+}) => freezeLiveryPanel({
+  key,
+  position,
+  rotation,
+  size,
+  variant: resolveBodyworkVariant(material),
+  minimumDetail,
+  type: 'box',
 })
 
-const frontEndplateBodyworkPanels = [-1, 1].flatMap(sideSign => [
-  freezeLiveryPanel({
-    key: `front-endplate-${sideSign < 0 ? 'left' : 'right'}-outer`,
-    position: [sideSign * (1.05 + 0.07 / 2 + 0.002), 0.32, -2.22],
-    rotation: [0, sideSign * Math.PI / 2, 0],
-    size: [0.51, 0.27],
-    variant: 3,
-    mirrorU: sideSign < 0,
-    type: 'plane',
+const wingBodyworkPanels = [
+  ...FRONT_WING_PLANES.map((plane, index) => freezeBodyworkBox({
+    key: `front-wing-${index}-skin`,
+    ...plane,
+    minimumDetail: index === 0 ? 'low' : 'race',
+  })),
+  ...REAR_WING_PLANES.map((plane, index) => freezeBodyworkBox({
+    key: `rear-wing-${index}-skin`,
+    ...plane,
+    minimumDetail: index === 0 ? 'low' : 'race',
+  })),
+]
+
+const endplateBodyworkPanels = [
+  ...[-1.05, 1.05].map(x => freezeBodyworkBox({
+    key: `front-endplate-${x < 0 ? 'left' : 'right'}-skin`,
+    position: [x, 0.32, -2.22],
+    size: [0.07, 0.31, 0.55],
+    material: 'primary',
+  })),
+  ...[-0.76, 0.76].map(x => freezeBodyworkBox({
+    key: `rear-endplate-${x < 0 ? 'left' : 'right'}-skin`,
+    position: [x, 0.8, 1.81],
+    size: [0.075, 0.68, 0.5],
+  })),
+]
+
+const raceBodyworkPanels = [
+  ...[-0.52, 0.52].map(x => freezeBodyworkBox({
+    key: `beam-wing-${x < 0 ? 'left' : 'right'}-skin`,
+    position: [x, 0.58, 1.47],
+    rotation: [-0.18, 0, 0],
+    size: [0.42, 0.045, 0.18],
+    material: 'accent',
+    minimumDetail: 'race',
+  })),
+  ...LIVERY_DETAILS.map(detail => freezeBodyworkBox({
+    ...detail,
+    key: `${detail.key}-skin`,
+    minimumDetail: 'race',
+  })),
+  freezeBodyworkBox({
+    key: 'monocoque-spine-accent-skin',
+    position: [0, 0.9, -0.28],
+    rotation: [0.06, 0, 0],
+    size: [0.28, 0.035, 1.28],
+    material: 'accent',
+    minimumDetail: 'race',
   }),
-  freezeLiveryPanel({
-    key: `front-endplate-${sideSign < 0 ? 'left' : 'right'}-inner`,
-    position: [sideSign * (1.05 - 0.07 / 2 - 0.002), 0.32, -2.22],
-    rotation: [0, -sideSign * Math.PI / 2, 0],
-    size: [0.51, 0.27],
-    variant: 3,
-    mirrorU: sideSign > 0,
-    type: 'plane',
-  }),
-])
+  ...[-0.61, 0.61].map(x => freezeBodyworkBox({
+    key: `sidepod-${x < 0 ? 'left' : 'right'}-accent-skin`,
+    position: [x, 0.64, 0.06],
+    size: [0.48, 0.055, 1.02],
+    material: 'accent',
+    minimumDetail: 'race',
+  })),
+]
+
+const heroBodyworkPanels = [-0.61, 0.61].flatMap(x => (
+  SIDE_DECALS.map((detail, index) => freezeBodyworkBox({
+    key: `sidepod-${x < 0 ? 'left' : 'right'}-decal-${index}-skin`,
+    position: [x + Math.sign(x) * 0.018, 0.72, detail.offset],
+    rotation: [0, 0, x > 0 ? -0.18 : 0.18],
+    size: [0.042, 0.08, detail.width],
+    material: detail.material,
+    minimumDetail: 'hero',
+  }))
+))
 
 const floorBodyworkPanels = [
   freezeLiveryPanel({
@@ -369,10 +430,22 @@ export const PLAYER_BODYWORK_GRAPHICS_LAYOUT = Object.freeze([
       type: 'shell-cap',
     })))
   )),
-  ...frontWingBodyworkPanels,
-  ...frontEndplateBodyworkPanels,
   ...floorBodyworkPanels,
+  ...wingBodyworkPanels,
+  ...endplateBodyworkPanels,
+  ...raceBodyworkPanels,
+  ...heroBodyworkPanels,
 ])
+
+export function getPlayerBodyworkGraphicsLayout(detail = 'hero') {
+  if (!(detail in BODYWORK_DETAIL_ORDER)) {
+    throw new RangeError(`Unsupported Formula bodywork detail tier: ${detail}`)
+  }
+  return PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
+    BODYWORK_DETAIL_ORDER[panel.minimumDetail ?? 'low']
+      <= BODYWORK_DETAIL_ORDER[detail]
+  ))
+}
 
 const rearAeroLiveryPanels = REAR_WING_PLANES.slice(1).flatMap((plane, index) => {
   const angle = plane.rotation[0]
@@ -1092,13 +1165,36 @@ function createBodyworkPlaneGeometry(panel) {
   return geometry
 }
 
-export function createPlayerBodyworkGraphicsGeometry(ownerId = 'player') {
-  const parts = PLAYER_BODYWORK_GRAPHICS_LAYOUT.map(panel => (
+function createBodyworkBoxGeometry(panel) {
+  const surfaceOffset = 0.001
+  const geometry = new THREE.BoxGeometry(
+    ...panel.size.map(dimension => dimension + surfaceOffset * 2),
+  )
+  remapGeometryUvVertices(
+    geometry,
+    Array.from({ length: geometry.getAttribute('uv').count }, (_, index) => index),
+    panel.variant,
+  )
+  geometry.applyMatrix4(new THREE.Matrix4().compose(
+    new THREE.Vector3(...panel.position),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(...panel.rotation)),
+    new THREE.Vector3(1, 1, 1),
+  ))
+  return geometry
+}
+
+export function createPlayerBodyworkGraphicsGeometry(
+  ownerId = 'player',
+  detail = 'hero',
+) {
+  const parts = getPlayerBodyworkGraphicsLayout(detail).map(panel => (
     panel.type === 'shell-facet'
       ? createBodyworkShellFacetGeometry(panel)
       : panel.type === 'shell-cap'
         ? createBodyworkShellCapGeometry(panel)
-        : createBodyworkPlaneGeometry(panel)
+        : panel.type === 'box'
+          ? createBodyworkBoxGeometry(panel)
+          : createBodyworkPlaneGeometry(panel)
   ))
   const merged = mergeGeometries(parts)
   for (const geometry of parts) geometry.dispose()
@@ -1308,6 +1404,9 @@ export default function FormulaCar({
   const showHeroDetail = isPlayer || detail === 'hero'
   const isLowDetail = !isPlayer && detail === 'low'
   const showRaceDetail = !isLowDetail
+  const detailTier = isLowDetail
+    ? 'low'
+    : showHeroDetail ? 'hero' : 'race'
   const palette = useMemo(() => {
     const primary = new THREE.Color(color)
     return {
@@ -1364,7 +1463,10 @@ export default function FormulaCar({
       setBodyworkAssets(null)
       return undefined
     }
-    const geometry = createPlayerBodyworkGraphicsGeometry(resolvedLiveryAtlas.id)
+    const geometry = createPlayerBodyworkGraphicsGeometry(
+      resolvedLiveryAtlas.id,
+      detailTier,
+    )
     const texture = new THREE.TextureLoader().load(resolvedLiveryAtlas.bodyworkUrl)
     texture.name = `generated-${resolvedLiveryAtlas.id}-formula-bodywork-surface-atlas`
     texture.colorSpace = THREE.SRGBColorSpace
@@ -1394,7 +1496,7 @@ export default function FormulaCar({
       assets.material.dispose()
       assets.texture.dispose()
     }
-  }, [resolvedLiveryAtlas])
+  }, [detailTier, resolvedLiveryAtlas])
 
   useEffect(() => {
     const sharedAssets = acquireSharedFormulaTyreSurfaceAssets()
@@ -1423,9 +1525,6 @@ export default function FormulaCar({
   }, [isLowDetail])
 
   useEffect(() => {
-    const detailTier = isLowDetail
-      ? 'low'
-      : showHeroDetail ? 'hero' : 'race'
     const sharedAssets = acquireSharedFormulaCockpitMechanicalAssets()
     const geometry = createFormulaCockpitMechanicalGeometry({
       primary: palette.primary,
@@ -1454,7 +1553,7 @@ export default function FormulaCar({
       }
       releaseSharedFormulaCockpitMechanicalAssets()
     }
-  }, [accent, isLowDetail, palette.primary, showHeroDetail])
+  }, [accent, detailTier, isLowDetail, palette.primary])
 
   useFrame((state, delta) => {
     const gameState = useGameStore.getState().gameState

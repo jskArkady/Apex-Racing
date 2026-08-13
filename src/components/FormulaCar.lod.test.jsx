@@ -13,6 +13,7 @@ import FormulaCar, {
   createFormulaWheelCoverSurfaceGeometry,
   createPlayerBodyworkGraphicsGeometry,
   createPlayerLiveryGraphicsGeometry,
+  getPlayerBodyworkGraphicsLayout,
 } from './FormulaCar'
 
 const countMeshes = container => container.querySelectorAll('mesh').length
@@ -302,15 +303,11 @@ describe('FormulaCar visual LOD', () => {
     cover.dispose()
   })
 
-  it('maps sixty bodywork panels across complete shells, aero, and floor', () => {
-    const geometry = createPlayerBodyworkGraphicsGeometry()
-    const positions = geometry.getAttribute('position')
-    const normals = geometry.getAttribute('normal')
-    const uvs = geometry.getAttribute('uv')
-
+  it('maps complete bodywork skins into the matching visual LOD tier', () => {
     expect(Object.isFrozen(PLAYER_BODYWORK_GRAPHICS_LAYOUT)).toBe(true)
-    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT).toHaveLength(60)
-    expect(new Set(PLAYER_BODYWORK_GRAPHICS_LAYOUT.map(panel => panel.key)).size).toBe(60)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT).toHaveLength(80)
+    expect(new Set(PLAYER_BODYWORK_GRAPHICS_LAYOUT.map(panel => panel.key)).size).toBe(80)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.every(Object.isFrozen)).toBe(true)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.type === 'shell-facet'
     ))).toHaveLength(40)
@@ -331,91 +328,145 @@ describe('FormulaCar visual LOD', () => {
     ))).toHaveLength(10)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.key.startsWith('sidepod-')
-    ))).toHaveLength(20)
+    ))).toHaveLength(28)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.key.startsWith('front-wing-')
     ))).toHaveLength(4)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.key.startsWith('front-endplate-')
+    ))).toHaveLength(2)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
+      panel.key.startsWith('rear-wing-')
     ))).toHaveLength(4)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
+      panel.key.startsWith('rear-endplate-')
+    ))).toHaveLength(2)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
+      panel.key.startsWith('beam-wing-')
+    ))).toHaveLength(2)
     expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
       panel.key.startsWith('underfloor-')
     ))).toHaveLength(2)
-    expect(positions.count).toBe(290)
-    expect(normals.count).toBe(290)
-    expect(uvs.count).toBe(290)
-    expect(geometry.getIndex().count).toBe(540)
-    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
-    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
-    expect(Array.from(uvs.array).every(Number.isFinite)).toBe(true)
+    expect(PLAYER_BODYWORK_GRAPHICS_LAYOUT.filter(panel => (
+      panel.type === 'box'
+    ))).toHaveLength(28)
+    expect(() => getPlayerBodyworkGraphicsLayout('cinematic')).toThrow(
+      'Unsupported Formula bodywork detail tier: cinematic',
+    )
 
     const atlasInset = 1 / 1024
-    let vertexOffset = 0
-    PLAYER_BODYWORK_GRAPHICS_LAYOUT.forEach((panel) => {
-      const column = panel.variant % 2
-      const row = Math.floor(panel.variant / 2)
-      const minU = column * 0.5 + atlasInset
-      const maxU = (column + 1) * 0.5 - atlasInset
-      const minV = row === 0 ? 0.5 + atlasInset : atlasInset
-      const maxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
-      const midU = (minU + maxU) / 2
-      const vertexCount = panel.type === 'shell-cap' ? 9 : 4
-      for (let vertex = vertexOffset; vertex < vertexOffset + vertexCount; vertex += 1) {
-        expect(uvs.getX(vertex)).toBeGreaterThanOrEqual(minU)
-        expect(uvs.getX(vertex)).toBeLessThanOrEqual(maxU)
-        expect(uvs.getY(vertex)).toBeGreaterThanOrEqual(minV)
-        expect(uvs.getY(vertex)).toBeLessThanOrEqual(maxV)
-        if (panel.type === 'shell-facet') {
-          if (panel.sideSign < 0) expect(uvs.getX(vertex)).toBeLessThanOrEqual(midU)
-          else expect(uvs.getX(vertex)).toBeGreaterThanOrEqual(midU)
-          if (panel.facetBand === 'top') {
-            expect(normals.getY(vertex)).toBeGreaterThan(0.5)
-          } else if (panel.facetBand === 'side') {
-            expect(normals.getY(vertex)).toBeGreaterThan(0.2)
-            expect(normals.getX(vertex) * panel.sideSign).toBeGreaterThan(0.8)
-          } else if (panel.facetBand === 'lowerSide') {
-            expect(normals.getY(vertex)).toBeLessThan(-0.2)
-            expect(normals.getX(vertex) * panel.sideSign).toBeGreaterThan(0.8)
-          } else {
-            expect(normals.getY(vertex)).toBeLessThan(-0.5)
-          }
-        } else if (panel.type === 'shell-cap') {
-          expect(normals.getZ(vertex) * panel.endSign).toBeGreaterThan(0.99999)
-        } else {
-          const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
-          const expectedNormal = new THREE.Vector3(0, 0, 1).applyEuler(
-            new THREE.Euler(...panel.rotation),
-          )
-          expect(normal.dot(expectedNormal)).toBeGreaterThan(0.99999)
-        }
-      }
-      vertexOffset += vertexCount
-    })
-
-    const indices = geometry.getIndex()
-    for (let index = 0; index < indices.count; index += 3) {
-      const aIndex = indices.getX(index)
-      const bIndex = indices.getX(index + 1)
-      const cIndex = indices.getX(index + 2)
-      const a = new THREE.Vector3().fromBufferAttribute(positions, aIndex)
-      const b = new THREE.Vector3().fromBufferAttribute(positions, bIndex)
-      const c = new THREE.Vector3().fromBufferAttribute(positions, cIndex)
-      const geometricNormal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
-      const averageNormal = new THREE.Vector3()
-        .fromBufferAttribute(normals, aIndex)
-        .add(new THREE.Vector3().fromBufferAttribute(normals, bIndex))
-        .add(new THREE.Vector3().fromBufferAttribute(normals, cIndex))
-        .normalize()
-      expect(geometricNormal.dot(averageNormal)).toBeGreaterThan(0.99)
+    const expectations = {
+      low: {
+        panels: 58,
+        positions: 402,
+        indices: 708,
+        min: [-1.091, 0.137, -2.496],
+        max: [1.091, 1.162786, 2.061],
+      },
+      race: {
+        panels: 74,
+        positions: 786,
+        indices: 1284,
+        min: [-1.091, 0.137, -2.496],
+        max: [1.091, 1.29911, 2.061],
+      },
+      hero: {
+        panels: 80,
+        positions: 930,
+        indices: 1500,
+        min: [-1.091, 0.137, -2.496],
+        max: [1.091, 1.29911, 2.061],
+      },
     }
 
-    expect(geometry.boundingBox.min.x).toBeCloseTo(-1.087, 5)
-    expect(geometry.boundingBox.min.y).toBeCloseTo(0.137, 5)
-    expect(geometry.boundingBox.min.z).toBeCloseTo(-2.475, 5)
-    expect(geometry.boundingBox.max.x).toBeCloseTo(1.087, 5)
-    expect(geometry.boundingBox.max.y).toBeCloseTo(1.052, 5)
-    expect(geometry.boundingBox.max.z).toBeCloseTo(1.902, 5)
-    geometry.dispose()
+    for (const [detail, expected] of Object.entries(expectations)) {
+      const layout = getPlayerBodyworkGraphicsLayout(detail)
+      const geometry = createPlayerBodyworkGraphicsGeometry('player', detail)
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+
+      expect(layout).toHaveLength(expected.panels)
+      expect(positions.count).toBe(expected.positions)
+      expect(normals.count).toBe(expected.positions)
+      expect(uvs.count).toBe(expected.positions)
+      expect(geometry.getIndex().count).toBe(expected.indices)
+      expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+      expect(Array.from(uvs.array).every(Number.isFinite)).toBe(true)
+
+      let vertexOffset = 0
+      layout.forEach((panel) => {
+        const column = panel.variant % 2
+        const row = Math.floor(panel.variant / 2)
+        const minU = column * 0.5 + atlasInset
+        const maxU = (column + 1) * 0.5 - atlasInset
+        const minV = row === 0 ? 0.5 + atlasInset : atlasInset
+        const maxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+        const midU = (minU + maxU) / 2
+        const vertexCount = panel.type === 'shell-cap'
+          ? 9
+          : panel.type === 'box' ? 24 : 4
+        for (let vertex = vertexOffset; vertex < vertexOffset + vertexCount; vertex += 1) {
+          expect(uvs.getX(vertex)).toBeGreaterThanOrEqual(minU)
+          expect(uvs.getX(vertex)).toBeLessThanOrEqual(maxU)
+          expect(uvs.getY(vertex)).toBeGreaterThanOrEqual(minV)
+          expect(uvs.getY(vertex)).toBeLessThanOrEqual(maxV)
+          if (panel.type === 'shell-facet') {
+            if (panel.sideSign < 0) expect(uvs.getX(vertex)).toBeLessThanOrEqual(midU)
+            else expect(uvs.getX(vertex)).toBeGreaterThanOrEqual(midU)
+            if (panel.facetBand === 'top') {
+              expect(normals.getY(vertex)).toBeGreaterThan(0.5)
+            } else if (panel.facetBand === 'side') {
+              expect(normals.getY(vertex)).toBeGreaterThan(0.2)
+              expect(normals.getX(vertex) * panel.sideSign).toBeGreaterThan(0.8)
+            } else if (panel.facetBand === 'lowerSide') {
+              expect(normals.getY(vertex)).toBeLessThan(-0.2)
+              expect(normals.getX(vertex) * panel.sideSign).toBeGreaterThan(0.8)
+            } else {
+              expect(normals.getY(vertex)).toBeLessThan(-0.5)
+            }
+          } else if (panel.type === 'shell-cap') {
+            expect(normals.getZ(vertex) * panel.endSign).toBeGreaterThan(0.99999)
+          } else if (panel.type === 'plane') {
+            const normal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+            const expectedNormal = new THREE.Vector3(0, 0, 1).applyEuler(
+              new THREE.Euler(...panel.rotation),
+            )
+            expect(normal.dot(expectedNormal)).toBeGreaterThan(0.99999)
+          } else {
+            expect(new THREE.Vector3().fromBufferAttribute(normals, vertex).length())
+              .toBeCloseTo(1, 5)
+          }
+        }
+        vertexOffset += vertexCount
+      })
+
+      const indices = geometry.getIndex()
+      for (let index = 0; index < indices.count; index += 3) {
+        const aIndex = indices.getX(index)
+        const bIndex = indices.getX(index + 1)
+        const cIndex = indices.getX(index + 2)
+        const a = new THREE.Vector3().fromBufferAttribute(positions, aIndex)
+        const b = new THREE.Vector3().fromBufferAttribute(positions, bIndex)
+        const c = new THREE.Vector3().fromBufferAttribute(positions, cIndex)
+        const geometricNormal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
+        const averageNormal = new THREE.Vector3()
+          .fromBufferAttribute(normals, aIndex)
+          .add(new THREE.Vector3().fromBufferAttribute(normals, bIndex))
+          .add(new THREE.Vector3().fromBufferAttribute(normals, cIndex))
+          .normalize()
+        expect(geometricNormal.dot(averageNormal)).toBeGreaterThan(0.99)
+      }
+
+      expected.min.forEach((value, axis) => {
+        expect(geometry.boundingBox.min.getComponent(axis)).toBeCloseTo(value, 5)
+      })
+      expected.max.forEach((value, axis) => {
+        expect(geometry.boundingBox.max.getComponent(axis)).toBeCloseTo(value, 5)
+      })
+      geometry.dispose()
+    }
   })
 
   it('maps eighteen finite livery panels across the hero and rear aero surfaces', () => {

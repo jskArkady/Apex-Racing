@@ -8,6 +8,7 @@ export const ROAD_SEGMENTS = Math.ceil(trackLength / 3.5)
 export const BARRIER_SEGMENTS = Math.ceil(trackLength / 4.25)
 export const BARRIER_GRAPHICS_BOTTOM_OFFSET = 0.02
 export const BARRIER_GRAPHICS_HEIGHT = 1.32
+export const CATCH_FENCE_TEXTURE_WORLD_WIDTH = 3.2
 export const CURB_SEGMENTS = Math.ceil(trackLength / 6)
 export const SURFACE_SEGMENTS = Math.ceil(trackLength / 5)
 export const LOW_DETAIL_SURFACE_SEGMENTS = Math.ceil(trackLength / 10)
@@ -513,6 +514,19 @@ const COLORS = {
   tifosi: '#d92f39',
 }
 
+export const TEMPLE_START_GANTRY_TRIM_LAYOUT = Object.freeze(
+  [COLORS.italianGreen, COLORS.white, COLORS.red].map((color, index) => (
+    Object.freeze({
+      progress: START_GANTRY_PROGRESS,
+      lateral: -2.6 + index * 2.6,
+      centerY: 7.48,
+      size: Object.freeze([2.35, 0.18, 0.78]),
+      color,
+      surfaceOffset: 0.006,
+    })
+  )),
+)
+
 export const TEMPLE_PIT_BAY_TRIM_LAYOUT = Object.freeze(
   PIT_BAYS.map(bay => Object.freeze({
     progress: PIT_STRAIGHT_PROGRESS,
@@ -921,6 +935,40 @@ export const GANTRY_DISPLAY_LAYOUTS = Object.freeze({
       approachOffset: -0.402,
     }),
   ]),
+})
+export const GANTRY_ACCENT_CARRIER_LAYOUTS = Object.freeze({
+  apex: Object.freeze(GANTRY_DISPLAY_LAYOUTS.apex.map((display, index) => (
+    Object.freeze({
+      progress: display.progress,
+      lateral: 0,
+      centerY: index === 0 ? 7.18 : 5.52,
+      size: Object.freeze(index === 0
+        ? [7.2, 0.22, 0.78]
+        : [7.2, 0.16, 0.72]),
+      color: COLORS.gold,
+      surfaceOffset: 0.006,
+    })
+  ))),
+  harbour: Object.freeze(GANTRY_DISPLAY_LAYOUTS.harbour.map(display => (
+    Object.freeze({
+      progress: display.progress,
+      lateral: 0,
+      centerY: 7.18,
+      size: Object.freeze([7.2, 0.22, 0.78]),
+      color: COLORS.red,
+      surfaceOffset: 0.006,
+    })
+  ))),
+  temple: Object.freeze(GANTRY_DISPLAY_LAYOUTS.temple.map(display => (
+    Object.freeze({
+      progress: display.progress,
+      lateral: 0,
+      centerY: 7.18,
+      size: Object.freeze([7.2, 0.22, 0.78]),
+      color: COLORS.italianGreen,
+      surfaceOffset: 0.006,
+    })
+  ))),
 })
 export const MARSHAL_POST_PROGRESS = Object.freeze([0.12, 0.31, 0.47, 0.66, 0.84])
 export const APEX_MARSHAL_POST_ROOF = Object.freeze({
@@ -1371,7 +1419,13 @@ export function createBarrierStructuralSurfaceGeometry(
     ? BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteOuter
     : BARRIER_STRUCTURAL_SURFACE_VARIANTS.steelOuter
 
-  const createMappedQuad = ({ vertices, variant, physicalU, physicalV }) => {
+  const createMappedQuad = ({
+    vertices,
+    variant,
+    physicalU,
+    physicalV,
+    color = '#ffffff',
+  }) => {
     const geometry = new THREE.BufferGeometry()
     geometry.setAttribute(
       'position',
@@ -1403,7 +1457,77 @@ export function createBarrierStructuralSurfaceGeometry(
       maxU, maxV,
     ], 2))
     geometry.computeVertexNormals()
+    addVertexColor(geometry, color)
     parts.push(geometry)
+  }
+
+  const addMappedBox = ({ progress, lateral, centerY, size, color }) => {
+    const [boxWidth, boxHeight, boxLength] = size
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, progress, point, tangent, side)
+    const center = point.clone()
+      .addScaledVector(side, lateral)
+      .addScaledVector(WORLD_UP, centerY)
+    const halfWidth = boxWidth / 2
+    const halfHeight = boxHeight / 2
+    const halfLength = boxLength / 2
+    const concreteOuter = BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteOuter
+
+    for (const sideSign of [-1, 1]) {
+      const normal = side.clone().multiplyScalar(sideSign)
+      const faceCenter = center.clone().addScaledVector(normal, halfWidth)
+      const across = tangent.clone().multiplyScalar(sideSign)
+      createMappedQuad({
+        vertices: [
+          faceCenter.clone().addScaledVector(across, -halfLength).addScaledVector(WORLD_UP, -halfHeight),
+          faceCenter.clone().addScaledVector(across, halfLength).addScaledVector(WORLD_UP, -halfHeight),
+          faceCenter.clone().addScaledVector(across, -halfLength).addScaledVector(WORLD_UP, halfHeight),
+          faceCenter.clone().addScaledVector(across, halfLength).addScaledVector(WORLD_UP, halfHeight),
+        ],
+        variant: concreteOuter,
+        physicalU: boxLength,
+        physicalV: boxHeight,
+        color,
+      })
+    }
+    for (const endSign of [-1, 1]) {
+      const normal = tangent.clone().multiplyScalar(endSign)
+      const faceCenter = center.clone().addScaledVector(normal, halfLength)
+      const across = side.clone().multiplyScalar(-endSign)
+      createMappedQuad({
+        vertices: [
+          faceCenter.clone().addScaledVector(across, -halfWidth).addScaledVector(WORLD_UP, -halfHeight),
+          faceCenter.clone().addScaledVector(across, halfWidth).addScaledVector(WORLD_UP, -halfHeight),
+          faceCenter.clone().addScaledVector(across, -halfWidth).addScaledVector(WORLD_UP, halfHeight),
+          faceCenter.clone().addScaledVector(across, halfWidth).addScaledVector(WORLD_UP, halfHeight),
+        ],
+        variant: concreteOuter,
+        physicalU: boxWidth,
+        physicalV: boxHeight,
+        color,
+      })
+    }
+    for (const verticalSign of [-1, 1]) {
+      const normal = WORLD_UP.clone().multiplyScalar(verticalSign)
+      const faceCenter = center.clone().addScaledVector(normal, halfHeight)
+      const vertical = tangent.clone().multiplyScalar(verticalSign)
+      createMappedQuad({
+        vertices: [
+          faceCenter.clone().addScaledVector(side, -halfWidth).addScaledVector(vertical, -halfLength),
+          faceCenter.clone().addScaledVector(side, halfWidth).addScaledVector(vertical, -halfLength),
+          faceCenter.clone().addScaledVector(side, -halfWidth).addScaledVector(vertical, halfLength),
+          faceCenter.clone().addScaledVector(side, halfWidth).addScaledVector(vertical, halfLength),
+        ],
+        variant: verticalSign > 0
+          ? BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteCap
+          : concreteOuter,
+        physicalU: boxWidth,
+        physicalV: boxLength,
+        color,
+      })
+    }
   }
 
   for (let panelIndex = 0; panelIndex < samples; panelIndex += 1) {
@@ -1465,6 +1589,56 @@ export function createBarrierStructuralSurfaceGeometry(
         variant: outerVariant,
         physicalU: panelLength,
         physicalV: outerTopY - outerBottomY,
+      })
+    }
+  }
+
+  if (venue === 'harbour') {
+    for (const [index, progress] of (
+      HARBOUR_RETAINING_WALL_LAYOUT.progresses.entries()
+    )) {
+      addMappedBox({
+        progress,
+        lateral: roadWidth / 2
+          + HARBOUR_RETAINING_WALL_LAYOUT.capLateralOffsetFromRoad,
+        centerY: HARBOUR_RETAINING_WALL_LAYOUT.capCenterY,
+        size: HARBOUR_RETAINING_WALL_LAYOUT.capSize,
+        color: index % 2 ? COLORS.red : COLORS.white,
+      })
+    }
+
+    // The raised retaining-wall caps sit beside, rather than over, the wider
+    // wall crowns. Keep those player-visible horizontal concrete faces in the
+    // same generated structural atlas without adding another owned resource.
+    for (const progress of HARBOUR_RETAINING_WALL_LAYOUT.progresses) {
+      const point = new THREE.Vector3()
+      const tangent = new THREE.Vector3()
+      const side = new THREE.Vector3()
+      getTrackFrame(curve, progress, point, tangent, side)
+      const halfWidth = HARBOUR_RETAINING_WALL_LAYOUT.width / 2
+      const halfLength = HARBOUR_RETAINING_WALL_LAYOUT.length / 2
+      const faceCenter = point.clone()
+        .addScaledVector(
+          side,
+          roadWidth / 2
+            + HARBOUR_RETAINING_WALL_LAYOUT.lateralOffsetFromRoad,
+        )
+        .addScaledVector(
+          WORLD_UP,
+          HARBOUR_RETAINING_WALL_LAYOUT.centerY
+            + HARBOUR_RETAINING_WALL_LAYOUT.height / 2
+            + faceOffset,
+        )
+      createMappedQuad({
+        vertices: [
+          faceCenter.clone().addScaledVector(side, -halfWidth).addScaledVector(tangent, -halfLength),
+          faceCenter.clone().addScaledVector(side, halfWidth).addScaledVector(tangent, -halfLength),
+          faceCenter.clone().addScaledVector(side, -halfWidth).addScaledVector(tangent, halfLength),
+          faceCenter.clone().addScaledVector(side, halfWidth).addScaledVector(tangent, halfLength),
+        ],
+        variant: BARRIER_STRUCTURAL_SURFACE_VARIANTS.concreteCap,
+        physicalU: HARBOUR_RETAINING_WALL_LAYOUT.width,
+        physicalV: HARBOUR_RETAINING_WALL_LAYOUT.length,
       })
     }
   }
@@ -1968,15 +2142,13 @@ export function getTempleGravelRunoffLayout(curve, roadWidth = ROAD_WIDTH) {
 }
 
 function addCircuitLandmarks(parts, curve, venue, roadWidth = ROAD_WIDTH) {
-  const venueAccent = venue === 'temple'
-    ? COLORS.italianGreen
-    : venue === 'harbour' ? COLORS.red : COLORS.gold
   // Start/finish gantry: a high-contrast anchor visible from the final corner.
   for (const lateral of [-roadWidth / 2 - 1.35, roadWidth / 2 + 1.35]) {
     pushTrackBox(parts, curve, START_GANTRY_PROGRESS, lateral, 3.7, [0.48, 7.4, 0.48], COLORS.steel)
   }
   pushTrackBox(parts, curve, START_GANTRY_PROGRESS, 0, 7.15, [roadWidth + 3.2, 0.8, 0.72], COLORS.dark)
-  pushTrackBox(parts, curve, START_GANTRY_PROGRESS, 0, 7.18, [7.2, 0.22, 0.78], venueAccent)
+  // The central accent carrier lives in the shared pit-structure surface
+  // geometry so its top, soffit, rear, wings, and ends receive generated skin.
   // Five light columns in two rows read as a real F1 start gantry rather than
   // generic floodlights. They stay inside the existing merged scenery draw.
   for (const lateral of START_LIGHT_LATERALS) {
@@ -1993,11 +2165,8 @@ function addCircuitLandmarks(parts, curve, venue, roadWidth = ROAD_WIDTH) {
     }
   }
 
-  if (venue === 'temple') {
-    for (const [index, color] of [COLORS.italianGreen, COLORS.white, COLORS.red].entries()) {
-      pushTrackBox(parts, curve, START_GANTRY_PROGRESS, -2.6 + index * 2.6, 7.48, [2.35, 0.18, 0.78], color)
-    }
-  }
+  // Temple's tricolore upper trim is mapped by the shared pit-structure
+  // surface geometry so every exposed face receives generated detail.
 
   if (venue !== 'apex') return
 
@@ -2044,7 +2213,6 @@ function addNightVenueDetails(parts, curve, roadWidth = ROAD_WIDTH) {
       pushTrackBox(parts, curve, progress, lateral, 2.8, [0.34, 5.6, 0.34], COLORS.steel)
     }
     pushTrackBox(parts, curve, progress, 0, 5.5, [roadWidth + 2.8, 0.72, 0.68], COLORS.dark)
-    pushTrackBox(parts, curve, progress, 0, 5.52, [7.2, 0.16, 0.72], COLORS.gold)
   }
 
   for (const [index, progress] of MARSHAL_POST_PROGRESS.entries()) {
@@ -3201,7 +3369,6 @@ export function getTrackLightingGraphicsLayout(
         }
       }
     }
-
   }
 
   return Object.freeze(layout)
@@ -4095,6 +4262,7 @@ export function createPitComplexStructureGeometry(
     along = 0,
     preservePhysicalAspect = false,
     verticalModule = [1, 1],
+    surfaceOffset = faceOffset,
   }) => {
     const [roofWidth, roofHeight, roofLength] = size
     const roofPoint = new THREE.Vector3()
@@ -4120,7 +4288,7 @@ export function createPitComplexStructureGeometry(
       addFace({
         center: localRoofCenter.clone().addScaledVector(
           normal,
-          roofHeight / 2 + faceOffset,
+          roofHeight / 2 + surfaceOffset,
         ),
         across: roofSide,
         vertical: roofTangent.clone().multiplyScalar(-surfaceSign),
@@ -4137,7 +4305,7 @@ export function createPitComplexStructureGeometry(
       addFace({
         center: localRoofCenter.clone().addScaledVector(
           roofSide,
-          lateralSign * (roofWidth / 2 + faceOffset),
+          lateralSign * (roofWidth / 2 + surfaceOffset),
         ),
         across: roofTangent.clone().multiplyScalar(-lateralSign),
         vertical: WORLD_UP,
@@ -4154,7 +4322,7 @@ export function createPitComplexStructureGeometry(
       addFace({
         center: localRoofCenter.clone().addScaledVector(
           roofTangent,
-          alongSign * (roofLength / 2 + faceOffset),
+          alongSign * (roofLength / 2 + surfaceOffset),
         ),
         across: roofSide.clone().multiplyScalar(alongSign),
         vertical: WORLD_UP,
@@ -4218,6 +4386,18 @@ export function createPitComplexStructureGeometry(
         preservePhysicalAspect: true,
       })
     }
+    for (const trim of TEMPLE_START_GANTRY_TRIM_LAYOUT) {
+      addBoxSurfaces({
+        ...trim,
+        preservePhysicalAspect: true,
+      })
+    }
+  }
+  for (const carrier of GANTRY_ACCENT_CARRIER_LAYOUTS[venue]) {
+    addBoxSurfaces({
+      ...carrier,
+      preservePhysicalAspect: true,
+    })
   }
 
   const merged = mergeGeometries(parts)
@@ -7496,7 +7676,7 @@ function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
 
   // Retaining walls, road furniture and patched asphalt make the opening
   // sector read as a converted city street rather than a permanent circuit.
-  for (const [index, progress] of HARBOUR_RETAINING_WALL_LAYOUT.progresses.entries()) {
+  for (const progress of HARBOUR_RETAINING_WALL_LAYOUT.progresses) {
     const layout = HARBOUR_RETAINING_WALL_LAYOUT
     pushTrackBox(
       parts,
@@ -7506,15 +7686,6 @@ function addHarbourSignature(parts, curve, roadWidth = ROAD_WIDTH) {
       layout.centerY,
       [layout.width, layout.height, layout.length],
       COLORS.stone,
-    )
-    pushTrackBox(
-      parts,
-      curve,
-      progress,
-      roadWidth / 2 + layout.capLateralOffsetFromRoad,
-      layout.capCenterY,
-      layout.capSize,
-      index % 2 ? COLORS.red : COLORS.white,
     )
   }
   // Swimming Pool and compact harbour stands frame the final sector.
@@ -7798,8 +7969,16 @@ export function createCircuitGlowGeometry(curve, venue = 'apex', roadWidth = ROA
     }
     pushWorldBox(parts, [285, 0.04, 62], [20, 0.065, 121], COLORS.waterGlow)
   } else {
-    for (const [index, color] of [COLORS.italianGreen, COLORS.white, COLORS.red].entries()) {
-      pushTrackBox(parts, curve, START_GANTRY_PROGRESS, -2.6 + index * 2.6, 7.5, [2.2, 0.1, 0.7], color)
+    for (const trim of TEMPLE_START_GANTRY_TRIM_LAYOUT) {
+      pushTrackBox(
+        parts,
+        curve,
+        trim.progress,
+        trim.lateral,
+        7.5,
+        [2.2, 0.1, 0.7],
+        trim.color,
+      )
     }
     pushTrackBox(parts, curve, 0.03, -27.45, 13.8, [0.08, 0.5, 4.6], COLORS.red)
   }
@@ -7829,17 +8008,29 @@ export function createCatchFenceGeometry(
   samples = Math.ceil(trackLength / 10),
   roadWidth = ROAD_WIDTH,
 ) {
+  if (
+    !curve
+    || typeof curve.getPointAt !== 'function'
+    || typeof curve.getTangentAt !== 'function'
+  ) {
+    throw new TypeError('Catch-fence surfaces require a finite track curve')
+  }
+  if (!Number.isInteger(samples) || samples < 3) {
+    throw new RangeError('Catch-fence surfaces require at least three samples')
+  }
+  if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
+    throw new RangeError('Catch-fence surfaces require a usable road width')
+  }
+
   const positions = []
+  const uvs = []
+  const indices = []
   const fenceOffset = roadWidth / 2 + 0.48
   const baseHeight = 1.28
   const topHeight = 4.7
-  const wireHeights = [1.58, 2.2, 2.82, 3.46, 4.12, 4.58]
+  const topLean = 0.34
 
-  const pushSegment = (start, end) => {
-    positions.push(start.x, start.y, start.z, end.x, end.y, end.z)
-  }
-
-  for (const sideSign of [-1, 1]) {
+  for (const [sideIndex, sideSign] of [-1, 1].entries()) {
     const pointsAtHeight = (progress, height, lean = 0) => {
       const point = new THREE.Vector3()
       const tangent = new THREE.Vector3()
@@ -7850,26 +8041,58 @@ export function createCatchFenceGeometry(
       return point
     }
 
-    for (let index = 0; index < samples; index += 1) {
+    const sideVertexOffset = positions.length / 3
+    const cumulativeDistances = []
+    let distanceAlong = 0
+    let previousBase = null
+    for (let index = 0; index <= samples; index += 1) {
       const progress = index / samples
-      const nextProgress = (index + 1) / samples
       const base = pointsAtHeight(progress, baseHeight)
-      const top = pointsAtHeight(progress, topHeight, 0.34)
-      pushSegment(base, top)
+      const top = pointsAtHeight(progress, topHeight, topLean)
+      if (previousBase) distanceAlong += base.distanceTo(previousBase)
+      previousBase = base
+      positions.push(...base.toArray(), ...top.toArray())
+      cumulativeDistances.push(distanceAlong)
+    }
+    if (!Number.isFinite(distanceAlong) || distanceAlong <= 0) {
+      throw new RangeError('Catch-fence surfaces require a finite non-zero curve length')
+    }
 
-      for (const height of wireHeights) {
-        const lean = Math.max(0, height - 3.7) * 0.34
-        pushSegment(
-          pointsAtHeight(progress, height, lean),
-          pointsAtHeight(nextProgress, height, lean),
+    const repeatCount = Math.max(
+      1,
+      Math.round(distanceAlong / CATCH_FENCE_TEXTURE_WORLD_WIDTH),
+    )
+    for (const cumulativeDistance of cumulativeDistances) {
+      const textureU = cumulativeDistance / distanceAlong * repeatCount
+        + sideIndex * 0.37
+      uvs.push(textureU, 0, textureU, 1)
+    }
+
+    for (let panel = 0; panel < samples; panel += 1) {
+      const bottomStart = sideVertexOffset + panel * 2
+      const topStart = bottomStart + 1
+      const bottomEnd = bottomStart + 2
+      const topEnd = bottomStart + 3
+      if (sideSign > 0) {
+        indices.push(
+          bottomStart, bottomEnd, topStart,
+          bottomEnd, topEnd, topStart,
+        )
+      } else {
+        indices.push(
+          bottomStart, topStart, bottomEnd,
+          bottomEnd, topStart, topEnd,
         )
       }
-
     }
   }
 
   const geometry = new THREE.BufferGeometry()
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+  geometry.setIndex(indices)
+  geometry.computeVertexNormals()
+  geometry.name = 'shared-catch-fence-surface-geometry'
   geometry.computeBoundingBox()
   geometry.computeBoundingSphere()
   return geometry
