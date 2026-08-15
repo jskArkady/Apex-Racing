@@ -2027,6 +2027,69 @@
       }
     },
     {
+      "id": "surface.shared.circuit_glow_trim.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-15",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external signal, lighting, bridge, tower, tunnel, water, circuit, vehicle, sponsor, brand, real-location, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque emissive surface atlas for the shared start-signal, bridge-trim, tower-ring, tunnel-service, and Harbour water-shimmer glow primitives across the three fictional circuits.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with hard center boundaries, no gutters or artwork crossing a split, and strict flat orthographic material samples.",
+        "The modules are a smoked-glass red-and-amber signal lens, a horizontally tileable gold architectural light rail, a cyan-and-gold segmented ring or tunnel-service band, and a broad low-contrast cyan-teal water shimmer field.",
+        "Opaque RGB, neutral axis-aligned artwork with restrained authored glow colour, no perspective, complete scene, vehicles, people, text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsors, flags, arrows, hazard icons, screens, UI, watermark, shadows, reflections, or baked environment.",
+        "The runtime derivative must be power-of-two with each exact 627-by-627 source quadrant independently resized to a 512-by-512 module; one-texel UV insets isolate every glow primitive inside the existing merged emissive geometry without adding a draw call."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared circuit-glow trim atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 2082979,
+          "sha256": "320177198454998bc449034ff3c3de8407bf09386a66ca32625a530a8a35bae7"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-circuit-glow-trim-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 89136,
+          "sha256": "8a7f3bf4f052c023403918756923bd3ee84eacbb33960bcfb27088d5c5f31292",
+          "encoding": "Opaque browser-canvas WebP quality 0.88",
+          "processing": "Split the 1254x1254 RGB source at its exact 627-pixel quadrant boundaries; independently downscaled each module to 512x512 in a browser canvas; assembled an exact opaque RGB 1024x1024 atlas and encoded it as WebP to prevent cross-quadrant resampling bleed."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-15",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "opaque": true,
+          "sourceSplit": [627, 627],
+          "runtime": {
+            "textureLoadsAddedPerVenue": 1,
+            "geometryObjectsAdded": 0,
+            "materialsAdded": 0,
+            "drawCallsAdded": 0,
+            "uvInset": 0.0009765625,
+            "captures": [
+              {"track":"apex_gp","view":"gantry","calls":119,"triangles":72984,"geometries":101,"textures":35,"canvasCount":1,"targetVisible":true,"carVisible":false,"pageErrors":0,"requestFailures":0,"httpErrors":0},
+              {"track":"harbour_street","view":"tunnel-chase","calls":123,"triangles":67866,"geometries":102,"textures":33,"canvasCount":1,"carVisible":true,"pageErrors":0,"requestFailures":0,"httpErrors":0},
+              {"track":"harbour_street","view":"yacht-chase","calls":119,"triangles":67358,"geometries":98,"textures":31,"canvasCount":1,"carVisible":true,"pageErrors":0,"requestFailures":0,"httpErrors":0},
+              {"track":"temple_speedway","view":"timing-tower-cap-chase","calls":117,"triangles":62304,"geometries":98,"textures":30,"canvasCount":1,"carVisible":true,"pageErrors":0,"requestFailures":0,"httpErrors":0}
+            ]
+          }
+        },
+        "notes": "The generated RGB source and decoded WebP derivative were inspected for exact quadrant boundaries, opacity, the four requested emissive roles, readable medium-scale detail, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry tests verify finite UVs for every start-signal, Apex bridge and tower-ring, Harbour tunnel and water-glow, and Temple trim primitive inside isolated atlas quadrants; lifecycle tests verify one shared texture load and explicit disposal while retaining the existing one glow geometry, one material, and one draw call. The shared MeshBasicMaterial preserves the established transparent vertex-tinted glow and now samples the generated trim artwork. The focused 135-test set, full 61-file 602-test regression, repository oxlint, 679-module production build, derivative hash check, manifest parse, and git diff whitespace check passed. WSL2 Chrome captures of Apex gantry, Harbour tunnel and yacht-water approaches, and Temple timing-tower chase views retained one WebGL canvas, positive render calls, clean glow/water composition, and zero page exceptions, failed requests, or HTTP error responses; the Apex landmark intentionally reports targetVisible rather than carVisible. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
       "id": "facade.apex.race_control.atlas",
       "revision": 1,
       "sourceType": "generated",
@@ -2074,6 +2137,145 @@
           "quadrantMaxChannelStddev": [77.23, 64.075, 29.293, 77.462]
         },
         "notes": "The source and decoded derivative were inspected for exact quadrant boundaries, five- and four-bay top modules, service and stair-core bottom modules, opaque output, module isolation, text, logos, perspective, gutters, and compression artifacts. Geometry tests verified sixteen floor panels across all four race-control building faces, one-texel UV insets, exact module quadrants, finite bounds, floor heights, and outward normals. WSL2 headless Chrome WebGL captures of the Apex switchbacks approach and sector entry at 1440x900 confirmed readable glazing, service and stair-core bands, no obsolete glass or gold-box overlap, one active canvas, visible capture targets, positive render calls, zero page exceptions, zero request failures, and zero HTTP error responses. Chrome emitted one first-page generic resource 404 console line without a matching failed request or error response; it did not recur and no application resource failure was observed. No blocking issue was found."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.apex.race_control_roof.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-15",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external race-control building, roof, circuit, racing series, vehicle, sponsor, brand, real-location, architectural-material, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque architectural-surface atlas for the player-visible roof cap and service edges of the fictional Apex race-control building, complementing its existing vertical floor-facade atlas.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with hard center boundaries, no gutters or artwork crossing a split, and strict flat orthographic material samples.",
+        "Top-left is a top-down graphite ribbed roof membrane with drainage seams; top-right is a straight-on warm limestone and graphite roof fascia; bottom-left is an upward-looking graphite soffit with covered cable trays; bottom-right is a straight-on neutral technical service plate with a latch and narrow vents.",
+        "Even neutral diffuse albedo only: no directional light, shadows, ambient occlusion, glare, reflections, baked environment, perspective, complete building, scene, sky, ground, road, track, vehicles, people, text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsor marks, flags, emblems, arrows, hazard icons, screens, LED ribbons, signal lenses, floodlights, camera lenses, telemetry, watermark, or UI.",
+        "The runtime derivative must be opaque RGB and power-of-two with each exact source quadrant independently resized to a 512-by-512 module; every roof-cap face uses a one-texel-isolated centered physical-aspect crop and outward FrontSide winding."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Apex race-control roof-surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 1845500,
+          "sha256": "b8ccecf4c1a28fbc6590dba345815bbbb144c8c19e79b2785064db5f66dfe249"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-race-control-roof-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 49908,
+          "sha256": "e90c247619673767ed52c733fc576d7bc47a8c0ba6b787510c86fb480d3bdec6",
+          "encoding": "Opaque browser-canvas WebP quality 0.88",
+          "processing": "Split the 1254-by-1254 RGB source at exact 627-pixel quadrant boundaries; independently downscaled each quadrant to 512-by-512 with browser-canvas resampling; assembled an exact opaque RGB 1024-by-1024 atlas without cross-quadrant resampling."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-15",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "opaque": true,
+          "sourceSplit": [627, 627],
+          "geometry": {
+            "positions": 24,
+            "indices": 36,
+            "triangles": 12,
+            "faceOffset": 0.012,
+            "roofTopY": 10.212
+          },
+          "runtime": {
+            "canvasCount": 1,
+            "calls": 121,
+            "triangles": 70952,
+            "geometries": 100,
+            "textures": 34,
+            "carVisible": true,
+            "pageErrors": 0,
+            "requestFailures": 0,
+            "httpErrors": 0
+          }
+        },
+        "notes": "The source and decoded derivative were inspected for the four requested roof roles, opaque RGB output, hard center splits, module isolation, readable architectural scale, text, logos, perspective, gutters, clipping, and compression artifacts. Geometry tests verify one closed 24-vertex, 36-index, 12-triangle roof-cap box with all six outward faces, one-texel-isolated centered physical-aspect UV crops, finite attributes, and a 12-millimetre surface offset above the existing Apex race-control roof. Apex-only lifecycle tests verify one mapped geometry, one material, one texture load, named-mesh rendering, and explicit disposal. The dedicated 1440-by-900 WSL2 Chrome chase capture at the race-control switchbacks kept the player car and roof cap in frame with one canvas, 121 calls, 70,952 submitted triangles, 100 geometries, 34 textures, zero page exceptions, zero request failures, and zero HTTP error responses; no z-fighting, adjacent-module bleed, clipping, or facade regression was visible. The focused 136-test set, full 61-file 598-test regression suite, repository oxlint, 677-module production build, all 60 manifest derivative byte-and-hash checks, JSON parse, and git diff whitespace check passed on 2026-08-15."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
+    },
+    {
+      "id": "surface.apex.marshal_window.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-15",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external marshal post, observation window, circuit, racing series, vehicle, sponsor, brand, real-location, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque surface atlas for the five thin player-visible observation-window and service-trim boxes on fictional Apex circuit marshal posts.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with hard center boundaries, no gutters or artwork crossing a split, and strict flat orthographic material samples.",
+        "Top-left is dark smoked observation glass with a restrained blue-green tint; top-right is graphite window-frame and mullion trim; bottom-left is a ribbed underside soffit with a covered cable channel; bottom-right is a galvanized and graphite service fascia with an unlabeled latch and sparse amber-red indicators.",
+        "Premium restrained stylized realism, readable medium-scale detail after mipmapping, even neutral diffuse albedo, no directional light, shadows, ambient occlusion, glare, reflections, baked environment, perspective, complete building, scene, track, vehicle, people, text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsor marks, flags, emblems, arrows, hazard icons, screens, watermark, or UI.",
+        "The runtime derivative must be opaque RGB and power-of-two with each exact source quadrant independently resized to a 512-by-512 module; five closed boxes use one-texel-isolated centered physical-aspect UV crops and outward FrontSide winding while preserving the original glass volume for shadow silhouette."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module Apex marshal-window surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 1877827,
+          "sha256": "d4425691cbd7a89494f05a3611af292945e0ef0ff47c38f5e1de90c8c73da834"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "apex-marshal-window-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 46500,
+          "sha256": "c065a1721c764e9d923ffea7e4579dc289458c87f7c7f179ab48bb4e4f60a1da",
+          "encoding": "Opaque browser-canvas WebP quality 0.88",
+          "processing": "Split the 1254-by-1254 RGB source at exact 627-pixel quadrant boundaries; independently downscaled each quadrant to 512-by-512 with browser-canvas resampling; assembled an exact opaque RGB 1024-by-1024 atlas without cross-quadrant resampling."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-15",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "opaque": true,
+          "sourceSplit": [627, 627],
+          "geometry": {
+            "boxes": 5,
+            "faces": 30,
+            "positions": 120,
+            "indices": 180,
+            "triangles": 60,
+            "faceOffset": 0.012,
+            "windowY": [1.098, 1.302]
+          },
+          "runtime": {
+            "view": "marshal-post-chase",
+            "canvasCount": 1,
+            "calls": 120,
+            "triangles": 72836,
+            "geometries": 100,
+            "textures": 30,
+            "carVisible": true,
+            "pageErrors": 0,
+            "requestFailures": 0,
+            "httpErrors": 0
+          }
+        },
+        "notes": "The generated source and decoded derivative were inspected for smoked-glass, frame, soffit, and service-fascia roles, exact hard quadrant splits, opaque RGB output, readable contrast, text, logos, perspective, gutters, clipping, and compression artifacts. Geometry tests verify five closed boxes (30 outward faces, 120 vertices, 180 indices, 60 triangles), one-texel-isolated centered physical-aspect UV crops, finite attributes, and the 12-millimetre outward face offset while the original glass solids remain for shadow silhouette. Apex-only lifecycle and adversarial tests verify one mapped geometry, one material, one texture load, named-mesh rendering, and explicit disposal. The 1440-by-900 WSL2 Chrome player chase frame at the first marshal post retained one canvas, a visible player car, 120 calls, 72,836 submitted triangles, 100 geometries, 30 textures, zero page exceptions, zero request failures, and zero HTTP error responses; a target-locked detail route also rendered the target without z-fighting or clipping. The focused 138-test set, full 61-file 600-test regression suite, repository oxlint, 678-module production build, all 61 manifest derivative byte-and-hash checks, JSON parse, and git diff whitespace check passed on 2026-08-15."
       },
       "humanIpReview": {
         "status": "pending_user_approval",

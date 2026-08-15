@@ -291,6 +291,31 @@ export function parseVisualCaptureRequest(search, enabled = true) {
     })
   }
 
+  if (view === 'race-control-chase') {
+    if (trackId !== 'apex_gp') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.32,
+      cameraHeight: 5.2,
+    })
+  }
+
+  if (view === 'marshal-window-chase') {
+    if (trackId !== 'apex_gp') return null
+    return Object.freeze({
+      trackId,
+      view,
+      cameraMode: 'chase',
+      captureProgress: 0.095,
+      cameraHeight: 3.6,
+      targetProgress: 0.12,
+      targetLateral: -11.1,
+      targetHeight: 1.6,
+    })
+  }
+
   const cue = getTrackVisualCue(trackId, view)
   if (!cue) return null
 

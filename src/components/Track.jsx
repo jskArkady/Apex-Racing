@@ -9,6 +9,8 @@ import apexInfieldAlbedoUrl from '../assets/textures/apex-desert-infield-albedo-
 import apexPitLaneStaffSpriteAtlasUrl from '../assets/textures/apex-pit-lane-staff-sprite-atlas-1024.webp'
 import apexPitGarageFacadeUrl from '../assets/textures/apex-night-pit-garage-facade-1024.webp'
 import apexRaceControlFacadeAtlasUrl from '../assets/textures/apex-night-race-control-facade-atlas-1024.webp'
+import apexRaceControlRoofSurfaceAtlasUrl from '../assets/textures/apex-race-control-roof-surface-atlas-1024.webp'
+import apexMarshalWindowSurfaceAtlasUrl from '../assets/textures/apex-marshal-window-surface-atlas-1024.webp'
 import apexTentCanopySurfaceAtlasUrl from '../assets/textures/apex-tent-canopy-surface-atlas-1024.webp'
 import apexTowerRingSurfaceAtlasUrl from '../assets/textures/apex-tower-ring-surface-atlas-1024.webp'
 import apexVenueFacadeAtlasUrl from '../assets/textures/apex-night-tower-hospitality-atlas-1024.webp'
@@ -47,13 +49,16 @@ import sharedPalmTrunkSurfaceAtlasUrl from '../assets/textures/shared-palm-trunk
 import sharedTrackSurfaceWearAtlasUrl from '../assets/textures/shared-track-surface-wear-strip-atlas-1024.webp'
 import sharedTrackLightingSignalAtlasUrl from '../assets/textures/shared-track-lighting-signal-atlas-1024.webp'
 import sharedTracksideOperationsAtlasUrl from '../assets/textures/shared-trackside-operations-atlas-1024.webp'
+import sharedCircuitGlowTrimAtlasUrl from '../assets/textures/shared-circuit-glow-trim-atlas-1024.webp'
 import asphaltAlbedoUrl from '../assets/textures/track-asphalt-albedo-512.webp'
 import { getTrackPreset } from '../utils/trackData'
 import {
   BARRIER_SEGMENTS,
   createApexGravelRunoffGeometry,
   createApexPitStaffBillboardGeometry,
+  createApexMarshalWindowSurfaceGeometry,
   createApexRaceControlFacadeGeometry,
+  createApexRaceControlRoofSurfaceGeometry,
   createApexTentCanopyGeometry,
   createApexTowerRingSurfaceGeometry,
   createApexVenueFacadeGeometry,
@@ -265,6 +270,12 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       : null
     const apexRaceControlFacadeGeometry = activeTrack.venue === 'apex'
       ? createApexRaceControlFacadeGeometry(trackCurve, roadWidth)
+      : null
+    const apexRaceControlRoofSurfaceGeometry = activeTrack.venue === 'apex'
+      ? createApexRaceControlRoofSurfaceGeometry(trackCurve, roadWidth)
+      : null
+    const apexMarshalWindowSurfaceGeometry = activeTrack.venue === 'apex'
+      ? createApexMarshalWindowSurfaceGeometry(trackCurve, roadWidth)
       : null
     const apexPitStaffBillboardGeometry = activeTrack.venue === 'apex'
       ? createApexPitStaffBillboardGeometry(trackCurve)
@@ -483,6 +494,17 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
     trackLightingGraphicsTexture.magFilter = THREE.LinearFilter
     trackLightingGraphicsTexture.generateMipmaps = true
     trackLightingGraphicsTexture.anisotropy = 4
+    const circuitGlowTrimTexture = new THREE.TextureLoader().load(
+      sharedCircuitGlowTrimAtlasUrl,
+    )
+    circuitGlowTrimTexture.name = 'generated-shared-circuit-glow-trim-atlas'
+    circuitGlowTrimTexture.colorSpace = THREE.SRGBColorSpace
+    circuitGlowTrimTexture.wrapS = THREE.ClampToEdgeWrapping
+    circuitGlowTrimTexture.wrapT = THREE.ClampToEdgeWrapping
+    circuitGlowTrimTexture.minFilter = THREE.LinearMipmapLinearFilter
+    circuitGlowTrimTexture.magFilter = THREE.LinearFilter
+    circuitGlowTrimTexture.generateMipmaps = true
+    circuitGlowTrimTexture.anisotropy = 4
     const kerbSurfaceTexture = new THREE.TextureLoader().load(sharedKerbSurfaceAtlasUrl)
     kerbSurfaceTexture.name = 'generated-shared-kerb-surface-atlas'
     kerbSurfaceTexture.colorSpace = THREE.SRGBColorSpace
@@ -591,6 +613,32 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       apexRaceControlFacadeTexture.magFilter = THREE.LinearFilter
       apexRaceControlFacadeTexture.generateMipmaps = true
       apexRaceControlFacadeTexture.anisotropy = 4
+    }
+    const apexRaceControlRoofSurfaceTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexRaceControlRoofSurfaceAtlasUrl)
+      : null
+    if (apexRaceControlRoofSurfaceTexture) {
+      apexRaceControlRoofSurfaceTexture.name = 'generated-apex-race-control-roof-surface-atlas'
+      apexRaceControlRoofSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      apexRaceControlRoofSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      apexRaceControlRoofSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      apexRaceControlRoofSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexRaceControlRoofSurfaceTexture.magFilter = THREE.LinearFilter
+      apexRaceControlRoofSurfaceTexture.generateMipmaps = true
+      apexRaceControlRoofSurfaceTexture.anisotropy = 4
+    }
+    const apexMarshalWindowSurfaceTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexMarshalWindowSurfaceAtlasUrl)
+      : null
+    if (apexMarshalWindowSurfaceTexture) {
+      apexMarshalWindowSurfaceTexture.name = 'generated-apex-marshal-window-surface-atlas'
+      apexMarshalWindowSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      apexMarshalWindowSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      apexMarshalWindowSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      apexMarshalWindowSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexMarshalWindowSurfaceTexture.magFilter = THREE.LinearFilter
+      apexMarshalWindowSurfaceTexture.generateMipmaps = true
+      apexMarshalWindowSurfaceTexture.anisotropy = 4
     }
     const apexPitStaffBillboardTexture = activeTrack.venue === 'apex'
       ? new THREE.TextureLoader().load(apexPitLaneStaffSpriteAtlasUrl)
@@ -872,6 +920,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       gantryStructureSurfaceGeometry,
       apexVenueFacadeGeometry,
       apexRaceControlFacadeGeometry,
+      apexRaceControlRoofSurfaceGeometry,
+      apexMarshalWindowSurfaceGeometry,
       apexPitStaffBillboardGeometry,
       apexTentCanopyGeometry,
       apexTowerRingSurfaceGeometry,
@@ -907,6 +957,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       brakingBoardGraphicsTexture,
       tracksideOperationsGraphicsTexture,
       trackLightingGraphicsTexture,
+      circuitGlowTrimTexture,
       kerbSurfaceTexture,
       crowdPanelTexture,
       grandstandStructureTexture,
@@ -916,6 +967,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       gantryStructureSurfaceTexture,
       apexVenueFacadeTexture,
       apexRaceControlFacadeTexture,
+      apexRaceControlRoofSurfaceTexture,
+      apexMarshalWindowSurfaceTexture,
       apexPitStaffBillboardTexture,
       apexTentCanopyTexture,
       apexTowerRingSurfaceTexture,
@@ -1087,6 +1140,26 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           emissive: '#ffffff',
           emissiveMap: apexRaceControlFacadeTexture,
           emissiveIntensity: 0.22,
+        })
+        : null,
+      apexRaceControlRoofSurfaceMaterial: apexRaceControlRoofSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexRaceControlRoofSurfaceTexture,
+          roughness: 0.78,
+          metalness: 0.18,
+          side: THREE.FrontSide,
+        })
+        : null,
+      apexMarshalWindowSurfaceMaterial: apexMarshalWindowSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexMarshalWindowSurfaceTexture,
+          vertexColors: true,
+          roughness: 0.38,
+          metalness: 0.32,
+          emissive: '#ffffff',
+          emissiveMap: apexMarshalWindowSurfaceTexture,
+          emissiveIntensity: 0.1,
+          side: THREE.FrontSide,
         })
         : null,
       apexPitStaffBillboardMaterial: apexPitStaffBillboardTexture
@@ -1296,6 +1369,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
         side: THREE.DoubleSide,
       }),
       glowMaterial: new THREE.MeshBasicMaterial({
+        map: circuitGlowTrimTexture,
         vertexColors: true,
         transparent: true,
         opacity: 0.76,
@@ -1327,6 +1401,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.gantryStructureSurfaceGeometry,
       assets.apexVenueFacadeGeometry,
       assets.apexRaceControlFacadeGeometry,
+      assets.apexRaceControlRoofSurfaceGeometry,
+      assets.apexMarshalWindowSurfaceGeometry,
       assets.apexPitStaffBillboardGeometry,
       assets.apexTentCanopyGeometry,
       assets.apexTowerRingSurfaceGeometry,
@@ -1362,6 +1438,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.brakingBoardGraphicsTexture,
       assets.tracksideOperationsGraphicsTexture,
       assets.trackLightingGraphicsTexture,
+      assets.circuitGlowTrimTexture,
       assets.kerbSurfaceTexture,
       assets.crowdPanelTexture,
       assets.grandstandStructureTexture,
@@ -1371,6 +1448,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.gantryStructureSurfaceTexture,
       assets.apexVenueFacadeTexture,
       assets.apexRaceControlFacadeTexture,
+      assets.apexRaceControlRoofSurfaceTexture,
+      assets.apexMarshalWindowSurfaceTexture,
       assets.apexPitStaffBillboardTexture,
       assets.apexTentCanopyTexture,
       assets.apexTowerRingSurfaceTexture,
@@ -1409,6 +1488,8 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       assets.gantryStructureSurfaceMaterial,
       assets.apexVenueFacadeMaterial,
       assets.apexRaceControlFacadeMaterial,
+      assets.apexRaceControlRoofSurfaceMaterial,
+      assets.apexMarshalWindowSurfaceMaterial,
       assets.apexPitStaffBillboardMaterial,
       assets.apexTentCanopyMaterial,
       assets.apexTowerRingSurfaceMaterial,
@@ -1644,6 +1725,22 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           receiveShadow
         />
       )}
+      {assets.apexRaceControlRoofSurfaceMaterial && (
+        <mesh
+          name="track-apex-race-control-roof-surfaces"
+          geometry={assets.apexRaceControlRoofSurfaceGeometry}
+          material={assets.apexRaceControlRoofSurfaceMaterial}
+          receiveShadow
+        />
+      )}
+      {assets.apexMarshalWindowSurfaceMaterial && (
+        <mesh
+          name="track-apex-marshal-window-surfaces"
+          geometry={assets.apexMarshalWindowSurfaceGeometry}
+          material={assets.apexMarshalWindowSurfaceMaterial}
+          receiveShadow
+        />
+      )}
       {assets.apexPitStaffBillboardMaterial && (
         <mesh
           name="track-apex-pit-lane-staff-billboards"
@@ -1774,7 +1871,11 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           receiveShadow
         />
       )}
-      <mesh geometry={assets.glowGeometry} material={assets.glowMaterial} />
+      <mesh
+        name="track-glow-surfaces"
+        geometry={assets.glowGeometry}
+        material={assets.glowMaterial}
+      />
 
       {assets.waterMaterial && (
         <mesh

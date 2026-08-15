@@ -45,6 +45,12 @@ export const TRACK_LIGHTING_GRAPHICS_VARIANTS = Object.freeze({
   floodlightRear: 3,
   startSignalService: 3,
 })
+export const TRACK_GLOW_SURFACE_VARIANTS = Object.freeze({
+  signalLens: 0,
+  amberRail: 1,
+  ringBand: 2,
+  waterShimmer: 3,
+})
 export const TRACKSIDE_OPERATIONS_VARIANTS = Object.freeze({
   marshalPost: 0,
   broadcastLens: 1,
@@ -290,6 +296,30 @@ export const APEX_RACE_CONTROL_LAYOUT = Object.freeze({
   centerY: 5.1,
   size: Object.freeze([5.8, 10.2, 4.4]),
   floors: 4,
+})
+export const APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS = Object.freeze({
+  roofTop: 0,
+  roofFascia: 1,
+  underside: 2,
+  serviceEnd: 3,
+})
+export const APEX_RACE_CONTROL_ROOF_LAYOUT = Object.freeze({
+  capHeight: 0.18,
+  edgeOverhang: 0.024,
+  faceOffset: 0.012,
+})
+export const APEX_MARSHAL_WINDOW_SURFACE_VARIANTS = Object.freeze({
+  windowGlass: 0,
+  frameTrim: 1,
+  underside: 2,
+  serviceFascia: 3,
+})
+export const APEX_MARSHAL_WINDOW_SURFACE_LAYOUT = Object.freeze({
+  centerY: 1.2,
+  lateralFromRoad: 3.15,
+  lateralOffset: -0.05,
+  faceOffset: 0.012,
+  size: Object.freeze([2.16, 0.18, 1.1]),
 })
 export const APEX_TIMING_MAST_LAYOUT = Object.freeze({
   progress: 0.69,
@@ -1692,6 +1722,91 @@ function pushTrackBox(parts, curve, progress, lateral, y, size, color, along = 0
   pushBox(parts, size, point, _quaternion, color)
 }
 
+function remapGlowAtlasUvs(geometry, variant) {
+  const atlasInset = 1 / 1024
+  const column = variant % 2
+  const row = Math.floor(variant / 2)
+  const minU = column * 0.5 + atlasInset
+  const maxU = (column + 1) * 0.5 - atlasInset
+  const minV = row === 0 ? 0.5 + atlasInset : atlasInset
+  const maxV = row === 0 ? 1 - atlasInset : 0.5 - atlasInset
+  const uvs = geometry.getAttribute('uv')
+  for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+    uvs.setXY(
+      vertex,
+      THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
+      THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+    )
+  }
+  uvs.needsUpdate = true
+  return geometry
+}
+
+function pushTrackGlowBox(
+  parts,
+  curve,
+  progress,
+  lateral,
+  y,
+  size,
+  color,
+  variant,
+  along = 0,
+) {
+  const geometry = remapGlowAtlasUvs(
+    new THREE.BoxGeometry(...size),
+    variant,
+  )
+  pushTrackPrimitive(
+    parts,
+    curve,
+    progress,
+    lateral,
+    y,
+    geometry,
+    color,
+    along,
+  )
+}
+
+function pushTrackGlowCylinder(
+  parts,
+  curve,
+  progress,
+  lateral,
+  y,
+  radius,
+  height,
+  color,
+  variant,
+  along = 0,
+  segments = 10,
+) {
+  const geometry = remapGlowAtlasUvs(
+    new THREE.CylinderGeometry(radius, radius, height, segments),
+    variant,
+  )
+  pushTrackPrimitive(
+    parts,
+    curve,
+    progress,
+    lateral,
+    y,
+    geometry,
+    color,
+    along,
+  )
+}
+
+function pushWorldGlowBox(parts, size, position, color, variant, yaw = 0) {
+  const geometry = remapGlowAtlasUvs(new THREE.BoxGeometry(...size), variant)
+  const quaternion = new THREE.Quaternion().setFromAxisAngle(WORLD_UP, yaw)
+  _matrix.compose(new THREE.Vector3(...position), quaternion, _scale)
+  geometry.applyMatrix4(_matrix)
+  addVertexColor(geometry, color)
+  parts.push(geometry)
+}
+
 function pushTrackPrimitive(parts, curve, progress, lateral, y, geometry, color, along = 0, localRotation) {
   const point = new THREE.Vector3()
   const tangent = new THREE.Vector3()
@@ -2215,9 +2330,10 @@ function addNightVenueDetails(parts, curve, roadWidth = ROAD_WIDTH) {
     pushTrackBox(parts, curve, progress, 0, 5.5, [roadWidth + 2.8, 0.72, 0.68], COLORS.dark)
   }
 
+  const windowLayout = APEX_MARSHAL_WINDOW_SURFACE_LAYOUT
   for (const [index, progress] of MARSHAL_POST_PROGRESS.entries()) {
     const side = index % 2 === 0 ? -1 : 1
-    const lateral = side * (roadWidth / 2 + 3.15)
+    const lateral = side * (roadWidth / 2 + windowLayout.lateralFromRoad)
     pushTrackBox(
       parts,
       curve,
@@ -2227,7 +2343,17 @@ function addNightVenueDetails(parts, curve, roadWidth = ROAD_WIDTH) {
       TRACKSIDE_OPERATIONS_BODY_LAYOUTS.marshalPost.size,
       COLORS.dark,
     )
-    pushTrackBox(parts, curve, progress, lateral - side * 0.05, 1.2, [2.16, 0.18, 1.1], COLORS.glass)
+    // Keep the original glass volume for its established shadow silhouette;
+    // the generated marshal-window mesh adds the readable player-facing trim.
+    pushTrackBox(
+      parts,
+      curve,
+      progress,
+      lateral + side * windowLayout.lateralOffset,
+      windowLayout.centerY,
+      windowLayout.size,
+      COLORS.glass,
+    )
   }
 
 }
@@ -6157,6 +6283,225 @@ export function createApexRaceControlFacadeGeometry(
   return merged
 }
 
+export function createApexRaceControlRoofSurfaceGeometry(
+  curve,
+  roadWidth = ROAD_WIDTH,
+) {
+  if (
+    !curve
+    || typeof curve.getPointAt !== 'function'
+    || typeof curve.getTangentAt !== 'function'
+  ) {
+    throw new TypeError('Apex race-control roof graphics require a finite track curve')
+  }
+
+  const structure = APEX_RACE_CONTROL_LAYOUT
+  const roof = APEX_RACE_CONTROL_ROOF_LAYOUT
+  const [structureWidth, structureHeight, structureLength] = structure.size
+  const capWidth = structureWidth + roof.edgeOverhang
+  const capLength = structureLength + roof.edgeOverhang
+  const parts = []
+  const atlasInset = 1 / 1024
+
+  const remapFace = (
+    geometry,
+    materialIndex,
+    variant,
+    physicalU,
+    physicalV,
+  ) => {
+    const group = geometry.groups.find(entry => (
+      entry.materialIndex === materialIndex
+    ))
+    const index = geometry.getIndex()
+    const vertices = new Set(
+      Array.from(index.array.slice(group.start, group.start + group.count)),
+    )
+    const column = variant % 2
+    const row = Math.floor(variant / 2)
+    const moduleCenterU = column * 0.5 + 0.25
+    const moduleCenterV = row === 0 ? 0.75 : 0.25
+    const maxDimension = Math.max(physicalU, physicalV)
+    const moduleSpanU = (0.5 - atlasInset * 2) * physicalU / maxDimension
+    const moduleSpanV = (0.5 - atlasInset * 2) * physicalV / maxDimension
+    const minU = moduleCenterU - moduleSpanU / 2
+    const maxU = moduleCenterU + moduleSpanU / 2
+    const minV = moduleCenterV - moduleSpanV / 2
+    const maxV = moduleCenterV + moduleSpanV / 2
+    const uvs = geometry.getAttribute('uv')
+    for (const vertex of vertices) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+      )
+    }
+  }
+
+  const capHeight = roof.capHeight
+  const geometry = new THREE.BoxGeometry(capWidth, capHeight, capLength)
+  const variants = [
+    APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.roofFascia,
+    APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.roofFascia,
+    APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.roofTop,
+    APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.underside,
+    APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.serviceEnd,
+    APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.serviceEnd,
+  ]
+  const dimensions = [
+    [capLength, capHeight],
+    [capLength, capHeight],
+    [capWidth, capLength],
+    [capWidth, capLength],
+    [capWidth, capHeight],
+    [capWidth, capHeight],
+  ]
+  for (let face = 0; face < variants.length; face += 1) {
+    remapFace(geometry, face, variants[face], ...dimensions[face])
+  }
+
+  const point = new THREE.Vector3()
+  const tangent = new THREE.Vector3()
+  const side = new THREE.Vector3()
+  getTrackFrame(curve, structure.progress, point, tangent, side)
+  point
+    .addScaledVector(
+      side,
+      roadWidth / 2 + structure.lateralOffsetFromRoad,
+    )
+    .addScaledVector(
+      WORLD_UP,
+      structure.centerY
+        + structureHeight / 2
+        - capHeight / 2
+        + roof.faceOffset,
+    )
+  const matrix = new THREE.Matrix4().makeBasis(side, WORLD_UP, tangent)
+  matrix.setPosition(point)
+  geometry.applyMatrix4(matrix)
+  geometry.getAttribute('uv').needsUpdate = true
+  parts.push(geometry)
+
+  const merged = mergeGeometries(parts)
+  for (const part of parts) part.dispose()
+  if (!merged) {
+    throw new Error('Apex race-control roof surface geometry could not be merged')
+  }
+  merged.name = 'apex-race-control-roof-surface-geometry'
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
+export function createApexMarshalWindowSurfaceGeometry(
+  curve,
+  roadWidth = ROAD_WIDTH,
+) {
+  if (
+    !curve
+    || typeof curve.getPointAt !== 'function'
+    || typeof curve.getTangentAt !== 'function'
+  ) {
+    throw new TypeError('Apex marshal-window graphics require a finite track curve')
+  }
+  if (!Number.isFinite(roadWidth) || roadWidth <= 4) {
+    throw new RangeError('Apex marshal-window graphics require a usable road width')
+  }
+
+  const layout = APEX_MARSHAL_WINDOW_SURFACE_LAYOUT
+  const atlasInset = 1 / 1024
+  const [width, height, length] = layout.size
+  const expandedSize = [
+    width + layout.faceOffset * 2,
+    height + layout.faceOffset * 2,
+    length + layout.faceOffset * 2,
+  ]
+  const variants = [
+    APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.frameTrim,
+    APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.frameTrim,
+    APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.windowGlass,
+    APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.underside,
+    APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.serviceFascia,
+    APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.serviceFascia,
+  ]
+  const dimensions = [
+    [expandedSize[2], expandedSize[1]],
+    [expandedSize[2], expandedSize[1]],
+    [expandedSize[0], expandedSize[2]],
+    [expandedSize[0], expandedSize[2]],
+    [expandedSize[0], expandedSize[1]],
+    [expandedSize[0], expandedSize[1]],
+  ]
+  const parts = []
+
+  const remapFace = (geometry, materialIndex, variant, physicalU, physicalV) => {
+    const group = geometry.groups.find(entry => (
+      entry.materialIndex === materialIndex
+    ))
+    const index = geometry.getIndex()
+    const vertices = new Set(
+      Array.from(index.array.slice(group.start, group.start + group.count)),
+    )
+    const column = variant % 2
+    const row = Math.floor(variant / 2)
+    const centerU = column * 0.5 + 0.25
+    const centerV = row === 0 ? 0.75 : 0.25
+    const maxDimension = Math.max(physicalU, physicalV)
+    const spanU = (0.5 - atlasInset * 2) * physicalU / maxDimension
+    const spanV = (0.5 - atlasInset * 2) * physicalV / maxDimension
+    const minU = centerU - spanU / 2
+    const maxU = centerU + spanU / 2
+    const minV = centerV - spanV / 2
+    const maxV = centerV + spanV / 2
+    const uvs = geometry.getAttribute('uv')
+    for (const vertex of vertices) {
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, uvs.getX(vertex)),
+        THREE.MathUtils.lerp(minV, maxV, uvs.getY(vertex)),
+      )
+    }
+  }
+
+  for (const [index, progress] of MARSHAL_POST_PROGRESS.entries()) {
+    const sideSign = index % 2 === 0 ? -1 : 1
+    const lateral = (
+      sideSign * (roadWidth / 2 + layout.lateralFromRoad)
+      + sideSign * layout.lateralOffset
+    )
+    const point = new THREE.Vector3()
+    const tangent = new THREE.Vector3()
+    const side = new THREE.Vector3()
+    getTrackFrame(curve, progress, point, tangent, side)
+    point
+      .addScaledVector(side, lateral)
+      .addScaledVector(
+        WORLD_UP,
+        layout.centerY,
+      )
+    const geometry = new THREE.BoxGeometry(...expandedSize)
+    for (let face = 0; face < variants.length; face += 1) {
+      remapFace(geometry, face, variants[face], ...dimensions[face])
+    }
+    const matrix = new THREE.Matrix4().makeBasis(side, WORLD_UP, tangent)
+    matrix.setPosition(point)
+    geometry.applyMatrix4(matrix)
+    addVertexColor(geometry, COLORS.glass)
+    geometry.getAttribute('uv').needsUpdate = true
+    parts.push(geometry)
+  }
+
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) {
+    throw new Error('Apex marshal-window surface geometry could not be merged')
+  }
+  merged.name = 'apex-marshal-window-surface-geometry'
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
+}
+
 export function createApexVenueFacadeGeometry(curve) {
   if (!curve || typeof curve.getPointAt !== 'function') {
     throw new TypeError('Apex venue graphics require a finite track curve')
@@ -7936,19 +8281,59 @@ export function createCircuitGlowGeometry(curve, venue = 'apex', roadWidth = ROA
   const parts = []
   for (const lateral of START_LIGHT_LATERALS) {
     for (const rowLevel of START_LIGHT_ROW_LEVELS) {
-      pushTrackBox(parts, curve, START_GANTRY_PROGRESS, lateral, rowLevel, [0.5, 0.13, 0.56], COLORS.red)
+      pushTrackGlowBox(
+        parts,
+        curve,
+        START_GANTRY_PROGRESS,
+        lateral,
+        rowLevel,
+        [0.5, 0.13, 0.56],
+        COLORS.red,
+        TRACK_GLOW_SURFACE_VARIANTS.signalLens,
+      )
     }
   }
 
   if (venue === 'apex') {
     for (const bay of PIT_BAYS) {
-      pushTrackBox(parts, curve, PIT_STRAIGHT_PROGRESS, -17.05, 2.78, [0.12, 0.12, 3.4], COLORS.warm, bay * 4.8)
+      pushTrackGlowBox(
+        parts,
+        curve,
+        PIT_STRAIGHT_PROGRESS,
+        -17.05,
+        2.78,
+        [0.12, 0.12, 3.4],
+        COLORS.warm,
+        TRACK_GLOW_SURFACE_VARIANTS.amberRail,
+        bay * 4.8,
+      )
     }
     for (const progress of [START_GANTRY_PROGRESS, ...MEDIA_BRIDGE_PROGRESS]) {
-      pushTrackBox(parts, curve, progress, 0, progress === START_GANTRY_PROGRESS ? 7.18 : 5.53, [6.9, 0.13, 0.74], COLORS.gold)
+      pushTrackGlowBox(
+        parts,
+        curve,
+        progress,
+        0,
+        progress === START_GANTRY_PROGRESS ? 7.18 : 5.53,
+        [6.9, 0.13, 0.74],
+        COLORS.gold,
+        TRACK_GLOW_SURFACE_VARIANTS.amberRail,
+      )
     }
     for (let floor = 0; floor < 8; floor += 1) {
-      pushTrackCylinder(parts, curve, 0.53, -36, 3.53 + floor * 3.15, 7.48, 0.12, floor % 2 === 0 ? COLORS.cyan : COLORS.gold, 0, 20)
+      pushTrackGlowCylinder(
+        parts,
+        curve,
+        0.53,
+        -36,
+        3.53 + floor * 3.15,
+        7.48,
+        0.12,
+        floor % 2 === 0 ? COLORS.cyan : COLORS.gold,
+        TRACK_GLOW_SURFACE_VARIANTS.ringBand,
+        0,
+        20,
+      )
     }
   } else if (venue === 'harbour') {
     const tunnelLayout = getHarbourTunnelLayout(curve)
@@ -7956,7 +8341,7 @@ export function createCircuitGlowGeometry(curve, venue = 'apex', roadWidth = ROA
     // bend without adding another transparent material or draw call.
     for (const progress of tunnelLayout.progresses) {
       for (const side of [-1, 1]) {
-        pushTrackBox(
+        pushTrackGlowBox(
           parts,
           curve,
           progress,
@@ -7964,13 +8349,20 @@ export function createCircuitGlowGeometry(curve, venue = 'apex', roadWidth = ROA
           3.82,
           [0.1, 0.1, tunnelLayout.panelLength],
           COLORS.warm,
+          TRACK_GLOW_SURFACE_VARIANTS.amberRail,
         )
       }
     }
-    pushWorldBox(parts, [285, 0.04, 62], [20, 0.065, 121], COLORS.waterGlow)
+    pushWorldGlowBox(
+      parts,
+      [285, 0.04, 62],
+      [20, 0.065, 121],
+      COLORS.waterGlow,
+      TRACK_GLOW_SURFACE_VARIANTS.waterShimmer,
+    )
   } else {
     for (const trim of TEMPLE_START_GANTRY_TRIM_LAYOUT) {
-      pushTrackBox(
+      pushTrackGlowBox(
         parts,
         curve,
         trim.progress,
@@ -7978,9 +8370,19 @@ export function createCircuitGlowGeometry(curve, venue = 'apex', roadWidth = ROA
         7.5,
         [2.2, 0.1, 0.7],
         trim.color,
+        TRACK_GLOW_SURFACE_VARIANTS.amberRail,
       )
     }
-    pushTrackBox(parts, curve, 0.03, -27.45, 13.8, [0.08, 0.5, 4.6], COLORS.red)
+    pushTrackGlowBox(
+      parts,
+      curve,
+      0.03,
+      -27.45,
+      13.8,
+      [0.08, 0.5, 4.6],
+      COLORS.red,
+      TRACK_GLOW_SURFACE_VARIANTS.ringBand,
+    )
   }
 
   const merged = mergeGeometries(parts)

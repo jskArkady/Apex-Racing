@@ -307,6 +307,33 @@ describe('development visual capture requests', () => {
       cameraHeight: 3.6,
     })
     expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=apex_gp&view=race-control-chase',
+    )).toEqual({
+      trackId: 'apex_gp',
+      view: 'race-control-chase',
+      cameraMode: 'chase',
+      captureProgress: 0.32,
+      cameraHeight: 5.2,
+    })
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=apex_gp&view=marshal-window-chase',
+    )).toEqual({
+      trackId: 'apex_gp',
+      view: 'marshal-window-chase',
+      cameraMode: 'chase',
+      captureProgress: 0.095,
+      cameraHeight: 3.6,
+      targetProgress: 0.12,
+      targetLateral: -11.1,
+      targetHeight: 1.6,
+    })
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=harbour_street&view=marshal-window-chase',
+    )).toBeNull()
+    expect(parseVisualCaptureRequest(
+      '?visualCapture=1&track=harbour_street&view=race-control-chase',
+    )).toBeNull()
+    expect(parseVisualCaptureRequest(
       '?visualCapture=1&track=harbour_street&view=tower-chase',
     )).toBeNull()
     expect(parseVisualCaptureRequest(

@@ -49,7 +49,7 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(32)
     expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(32)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(32)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(33)
   })
 
   it.each([
@@ -177,7 +177,7 @@ describe('owned Three.js resource lifecycle', () => {
     const view = render(<Track track={getTrackPreset(trackId)} />)
 
     expect(textureLoad).toHaveBeenCalledTimes(
-      16
+      17
         + Number(Boolean(tunnelWallFile))
         + Number(Boolean(apexVenueFacadeFile))
         + Number(Boolean(apexVenueFacadeFile))
@@ -199,7 +199,9 @@ describe('owned Three.js resource lifecycle', () => {
         + Number(Boolean(palmTrunkSurfaceFile))
         + Number(Boolean(treeBillboardFile))
         + Number(Boolean(gravelRunoffFile))
-        + Number(trackId === 'harbour_street'),
+        + Number(trackId === 'harbour_street')
+        + Number(trackId === 'apex_gp')
+        + Number(trackId === 'apex_gp'),
     )
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining('track-asphalt-albedo-512.webp'),
@@ -212,6 +214,9 @@ describe('owned Three.js resource lifecycle', () => {
     )
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining('shared-track-lighting-signal-atlas-1024.webp'),
+    )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('shared-circuit-glow-trim-atlas-1024.webp'),
     )
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining('shared-gantry-structure-surface-atlas-1024.webp'),
@@ -279,12 +284,30 @@ describe('owned Three.js resource lifecycle', () => {
       expect(
         view.container.querySelector('[name="track-apex-race-control-facades"]'),
       ).toBeTruthy()
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining('apex-race-control-roof-surface-atlas-1024.webp'),
+      )
+      expect(
+        view.container.querySelector('[name="track-apex-race-control-roof-surfaces"]'),
+      ).toBeTruthy()
+      expect(textureLoad).toHaveBeenCalledWith(
+        expect.stringContaining('apex-marshal-window-surface-atlas-1024.webp'),
+      )
+      expect(
+        view.container.querySelector('[name="track-apex-marshal-window-surfaces"]'),
+      ).toBeTruthy()
     } else {
       expect(
         view.container.querySelector('[name="track-apex-venue-facades"]'),
       ).toBeNull()
       expect(
         view.container.querySelector('[name="track-apex-race-control-facades"]'),
+      ).toBeNull()
+      expect(
+        view.container.querySelector('[name="track-apex-race-control-roof-surfaces"]'),
+      ).toBeNull()
+      expect(
+        view.container.querySelector('[name="track-apex-marshal-window-surfaces"]'),
       ).toBeNull()
     }
     if (apexTowerRingSurfaceFile) {
@@ -861,6 +884,109 @@ describe('owned Three.js resource lifecycle', () => {
     expect(material.side).toBe(THREE.FrontSide)
   })
 
+  it('configures the generated Apex race-control roof surface atlas', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('apex_gp')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('apex-race-control-roof-surface-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-apex-race-control-roof-surface-atlas')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(
+      view.container.querySelector('[name="track-apex-race-control-roof-surfaces"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.roughness === 0.78
+      && candidate.metalness === 0.18
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.side).toBe(THREE.FrontSide)
+  })
+
+  it('configures the generated Apex marshal-window surface atlas', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('apex_gp')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('apex-marshal-window-surface-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-apex-marshal-window-surface-atlas')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(
+      view.container.querySelector('[name="track-apex-marshal-window-surfaces"]'),
+    ).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshStandardMaterial
+      && candidate.map === texture
+      && candidate.vertexColors === true
+      && candidate.roughness === 0.38
+      && candidate.metalness === 0.32
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(material.emissiveMap).toBe(texture)
+    expect(material.emissiveIntensity).toBe(0.1)
+    expect(material.side).toBe(THREE.FrontSide)
+  })
+
+  it('configures the shared generated circuit-glow atlas on the emissive draw', () => {
+    const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
+    const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
+    const loadIndex = textureLoad.mock.calls.findIndex(([url]) => (
+      url.includes('shared-circuit-glow-trim-atlas-1024.webp')
+    ))
+    const texture = textureLoad.mock.results[loadIndex]?.value
+
+    expect(loadIndex).toBeGreaterThanOrEqual(0)
+    expect(texture).toBeInstanceOf(THREE.Texture)
+    expect(texture.name).toBe('generated-shared-circuit-glow-trim-atlas')
+    expect(texture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(texture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(texture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(texture.magFilter).toBe(THREE.LinearFilter)
+    expect(texture.generateMipmaps).toBe(true)
+    expect(texture.anisotropy).toBe(4)
+    expect(view.container.querySelector('[name="track-glow-surfaces"]')).toBeTruthy()
+    view.unmount()
+
+    const material = materialDispose.mock.contexts.find(candidate => (
+      candidate instanceof THREE.MeshBasicMaterial
+      && candidate.map === texture
+      && candidate.vertexColors === true
+      && candidate.transparent === true
+      && candidate.opacity === 0.76
+    ))
+    expect(material).toBeInstanceOf(THREE.MeshBasicMaterial)
+  })
+
   it('tints the shared grandstand atlas for venue accent canopies', () => {
     const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
     const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
@@ -928,7 +1054,7 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(23)
     expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(22)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(21)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(22)
     const material = materialDispose.mock.contexts.find(candidate => (
       candidate instanceof THREE.MeshStandardMaterial
       && candidate.map === texture
@@ -976,9 +1102,9 @@ describe('owned Three.js resource lifecycle', () => {
     ).toBeTruthy()
     view.unmount()
 
-    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(27)
-    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(26)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(26)
+    expect(geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount).toBe(29)
+    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(28)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(29)
     const gravelMaterial = materialDispose.mock.contexts.find(candidate => (
       candidate instanceof THREE.MeshStandardMaterial
       && candidate.map === gravelTexture

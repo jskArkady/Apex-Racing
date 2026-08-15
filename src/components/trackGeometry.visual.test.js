@@ -24,14 +24,20 @@ import {
   APEX_MARSHAL_POST_ROOF,
   APEX_PIT_WALL_DISPLAY_LAYOUT,
   APEX_RACE_CONTROL_LAYOUT,
+  APEX_RACE_CONTROL_ROOF_LAYOUT,
+  APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS,
+  APEX_MARSHAL_WINDOW_SURFACE_LAYOUT,
+  APEX_MARSHAL_WINDOW_SURFACE_VARIANTS,
   APEX_TIMING_MAST_LAYOUT,
   APEX_TENT_CANOPY_LAYOUT,
   BROADCAST_CAMERA_PROGRESS,
   BROADCAST_CAMERA_SUPPORT_LAYOUT,
   CATCH_FENCE_TEXTURE_WORLD_WIDTH,
   createApexPitStaffBillboardGeometry,
+  createApexMarshalWindowSurfaceGeometry,
   createApexGravelRunoffGeometry,
   createApexRaceControlFacadeGeometry,
+  createApexRaceControlRoofSurfaceGeometry,
   createApexTentCanopyGeometry,
   createApexTowerRingSurfaceGeometry,
   createApexVenueFacadeGeometry,
@@ -161,6 +167,7 @@ import {
   TEMPLE_TREE_LAYOUT,
   TRACKSIDE_BARRIER_POST_LAYOUT,
   TRACK_LIGHTING_GRAPHICS_VARIANTS,
+  TRACK_GLOW_SURFACE_VARIANTS,
   TRACK_SURFACE_WEAR_VARIANTS,
   TRACKSIDE_OPERATIONS_VARIANTS,
   TRACKSIDE_OPERATIONS_BODY_LAYOUTS,
@@ -903,6 +910,226 @@ describe('circuit visual geometry', () => {
       approachEndFloor: 4,
       departureEndFloor: 4,
     })
+    geometry.dispose()
+  })
+
+  it('skins the Apex race-control roof cap on all exposed faces', () => {
+    const apex = TRACK_PRESETS.find(track => track.venue === 'apex')
+    const geometry = createApexRaceControlRoofSurfaceGeometry(
+      apex.curve,
+      apex.roadWidth,
+    )
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const uvs = geometry.getAttribute('uv')
+    const index = geometry.getIndex()
+    const expectedVariants = [
+      APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.roofFascia,
+      APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.roofFascia,
+      APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.roofTop,
+      APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.underside,
+      APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.serviceEnd,
+      APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS.serviceEnd,
+    ]
+
+    expect(Object.isFrozen(APEX_RACE_CONTROL_ROOF_LAYOUT)).toBe(true)
+    expect(Object.isFrozen(APEX_RACE_CONTROL_ROOF_SURFACE_VARIANTS)).toBe(true)
+    expect(positions.count).toBe(24)
+    expect(normals.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(index.count).toBe(36)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value > 0 && value < 1
+    ))).toBe(true)
+
+    const tangent = apex.curve
+      .getTangentAt(APEX_RACE_CONTROL_LAYOUT.progress)
+      .normalize()
+    const side = new THREE.Vector3().crossVectors(
+      new THREE.Vector3(0, 1, 0),
+      tangent,
+    ).normalize()
+    const expectedNormals = [
+      side,
+      side.clone().multiplyScalar(-1),
+      new THREE.Vector3(0, 1, 0),
+      new THREE.Vector3(0, -1, 0),
+      tangent,
+      tangent.clone().multiplyScalar(-1),
+    ]
+    for (let face = 0; face < expectedVariants.length; face += 1) {
+      const vertex = face * 4
+      const actualNormal = new THREE.Vector3().fromBufferAttribute(normals, vertex)
+      expect(actualNormal.dot(expectedNormals[face])).toBeGreaterThan(0.99)
+      const column = expectedVariants[face] % 2
+      const row = Math.floor(expectedVariants[face] / 2)
+      const faceU = Array.from(
+        { length: 4 },
+        (_, offset) => uvs.getX(vertex + offset),
+      )
+      const faceV = Array.from(
+        { length: 4 },
+        (_, offset) => uvs.getY(vertex + offset),
+      )
+      expect(Math.min(...faceU)).toBeGreaterThan(column * 0.5)
+      expect(Math.max(...faceU)).toBeLessThan((column + 1) * 0.5)
+      if (row === 0) expect(Math.min(...faceV)).toBeGreaterThan(0.5)
+      else expect(Math.max(...faceV)).toBeLessThan(0.5)
+
+      const triangleStart = face * 6
+      for (let triangle = triangleStart; triangle < triangleStart + 6; triangle += 3) {
+        const a = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          index.getX(triangle),
+        )
+        const b = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          index.getX(triangle + 1),
+        )
+        const c = new THREE.Vector3().fromBufferAttribute(
+          positions,
+          index.getX(triangle + 2),
+        )
+        expect(
+          b.clone().sub(a).cross(c.clone().sub(a)).normalize().dot(actualNormal),
+        ).toBeGreaterThan(0.99)
+      }
+    }
+
+    const bounds = geometry.boundingBox
+    expect(bounds.min.y).toBeCloseTo(
+      APEX_RACE_CONTROL_LAYOUT.centerY
+        + APEX_RACE_CONTROL_LAYOUT.size[1] / 2
+        - APEX_RACE_CONTROL_ROOF_LAYOUT.capHeight
+        + APEX_RACE_CONTROL_ROOF_LAYOUT.faceOffset,
+      5,
+    )
+    expect(bounds.max.y).toBeCloseTo(
+      APEX_RACE_CONTROL_LAYOUT.centerY
+        + APEX_RACE_CONTROL_LAYOUT.size[1] / 2
+        + APEX_RACE_CONTROL_ROOF_LAYOUT.faceOffset,
+      5,
+    )
+    geometry.dispose()
+  })
+
+  it('skins every Apex marshal observation-window box with isolated atlas faces', () => {
+    const apex = TRACK_PRESETS.find(track => track.venue === 'apex')
+    const geometry = createApexMarshalWindowSurfaceGeometry(
+      apex.curve,
+      apex.roadWidth,
+    )
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+    const colors = geometry.getAttribute('color')
+    const uvs = geometry.getAttribute('uv')
+    const index = geometry.getIndex()
+    const expectedVariants = [
+      APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.frameTrim,
+      APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.frameTrim,
+      APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.windowGlass,
+      APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.underside,
+      APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.serviceFascia,
+      APEX_MARSHAL_WINDOW_SURFACE_VARIANTS.serviceFascia,
+    ]
+    const variantCounts = [0, 0, 0, 0]
+    const [width, height, length] = APEX_MARSHAL_WINDOW_SURFACE_LAYOUT.size
+    const expanded = [
+      width + APEX_MARSHAL_WINDOW_SURFACE_LAYOUT.faceOffset * 2,
+      height + APEX_MARSHAL_WINDOW_SURFACE_LAYOUT.faceOffset * 2,
+      length + APEX_MARSHAL_WINDOW_SURFACE_LAYOUT.faceOffset * 2,
+    ]
+
+    expect(Object.isFrozen(APEX_MARSHAL_WINDOW_SURFACE_LAYOUT)).toBe(true)
+    expect(Object.isFrozen(APEX_MARSHAL_WINDOW_SURFACE_LAYOUT.size)).toBe(true)
+    expect(Object.isFrozen(APEX_MARSHAL_WINDOW_SURFACE_VARIANTS)).toBe(true)
+    expect(positions.count).toBe(MARSHAL_POST_PROGRESS.length * 24)
+    expect(normals.count).toBe(positions.count)
+    expect(colors.count).toBe(positions.count)
+    expect(uvs.count).toBe(positions.count)
+    expect(index.count).toBe(MARSHAL_POST_PROGRESS.length * 36)
+    expect(Array.from(positions.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(normals.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(colors.array).every(Number.isFinite)).toBe(true)
+    expect(Array.from(uvs.array).every(value => (
+      Number.isFinite(value) && value > 0 && value < 1
+    ))).toBe(true)
+
+    for (let box = 0; box < MARSHAL_POST_PROGRESS.length; box += 1) {
+      const tangent = apex.curve
+        .getTangentAt(MARSHAL_POST_PROGRESS[box])
+        .setY(0)
+        .normalize()
+      const side = new THREE.Vector3().crossVectors(
+        new THREE.Vector3(0, 1, 0),
+        tangent,
+      ).normalize()
+      const expectedNormals = [
+        side,
+        side.clone().multiplyScalar(-1),
+        new THREE.Vector3(0, 1, 0),
+        new THREE.Vector3(0, -1, 0),
+        tangent,
+        tangent.clone().multiplyScalar(-1),
+      ]
+      for (let face = 0; face < expectedVariants.length; face += 1) {
+        const vertex = box * 24 + face * 4
+        const actualNormal = new THREE.Vector3()
+          .fromBufferAttribute(normals, vertex)
+        expect(actualNormal.dot(expectedNormals[face])).toBeGreaterThan(0.99)
+        const variant = expectedVariants[face]
+        const minU = Math.min(...Array.from(
+          { length: 4 },
+          (_, offset) => uvs.getX(vertex + offset),
+        ))
+        const maxU = Math.max(...Array.from(
+          { length: 4 },
+          (_, offset) => uvs.getX(vertex + offset),
+        ))
+        const minV = Math.min(...Array.from(
+          { length: 4 },
+          (_, offset) => uvs.getY(vertex + offset),
+        ))
+        const maxV = Math.max(...Array.from(
+          { length: 4 },
+          (_, offset) => uvs.getY(vertex + offset),
+        ))
+        expect(minU).toBeGreaterThan((variant % 2) * 0.5)
+        expect(maxU).toBeLessThan((variant % 2 + 1) * 0.5)
+        if (Math.floor(variant / 2) === 0) expect(minV).toBeGreaterThan(0.5)
+        else expect(maxV).toBeLessThan(0.5)
+        variantCounts[variant] += 1
+
+        for (let triangle = face * 6; triangle < face * 6 + 6; triangle += 3) {
+          const a = new THREE.Vector3().fromBufferAttribute(
+            positions,
+            index.getX(box * 36 + triangle),
+          )
+          const b = new THREE.Vector3().fromBufferAttribute(
+            positions,
+            index.getX(box * 36 + triangle + 1),
+          )
+          const c = new THREE.Vector3().fromBufferAttribute(
+            positions,
+            index.getX(box * 36 + triangle + 2),
+          )
+          expect(
+            b.clone().sub(a).cross(c.clone().sub(a)).normalize().dot(actualNormal),
+          ).toBeGreaterThan(0.99)
+        }
+      }
+    }
+    expect(variantCounts).toEqual([5, 10, 5, 10])
+    expect(geometry.boundingBox.min.y).toBeCloseTo(
+      APEX_MARSHAL_WINDOW_SURFACE_LAYOUT.centerY - expanded[1] / 2,
+      5,
+    )
+    expect(geometry.boundingBox.max.y).toBeCloseTo(
+      APEX_MARSHAL_WINDOW_SURFACE_LAYOUT.centerY + expanded[1] / 2,
+      5,
+    )
     geometry.dispose()
   })
 
@@ -5641,5 +5868,38 @@ describe('circuit visual geometry', () => {
     expect(geometry.boundingBox.max.y).toBeGreaterThan(20)
 
     geometry.dispose()
+  })
+
+  it('maps glow primitives to isolated generated emissive atlas quadrants', () => {
+    expect(TRACK_GLOW_SURFACE_VARIANTS).toEqual({
+      signalLens: 0,
+      amberRail: 1,
+      ringBand: 2,
+      waterShimmer: 3,
+    })
+
+    for (const preset of TRACK_PRESETS) {
+      const geometry = createCircuitGlowGeometry(
+        preset.curve,
+        preset.venue,
+        preset.roadWidth,
+      )
+      const uvs = geometry.getAttribute('uv')
+      expect(uvs).toBeTruthy()
+      const modules = new Set()
+      for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+        const u = uvs.getX(vertex)
+        const v = uvs.getY(vertex)
+        expect(Number.isFinite(u)).toBe(true)
+        expect(Number.isFinite(v)).toBe(true)
+        expect(u).toBeGreaterThanOrEqual(1 / 1024)
+        expect(u).toBeLessThanOrEqual(1 - 1 / 1024)
+        expect(v).toBeGreaterThanOrEqual(1 / 1024)
+        expect(v).toBeLessThanOrEqual(1 - 1 / 1024)
+        modules.add(`${Math.floor(u * 2)}:${Math.floor(v * 2)}`)
+      }
+      expect(modules.size).toBeGreaterThanOrEqual(3)
+      geometry.dispose()
+    }
   })
 })
