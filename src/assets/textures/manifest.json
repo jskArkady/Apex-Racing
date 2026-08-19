@@ -3452,6 +3452,62 @@
         "reviewedAt": null,
         "notes": "No external human or legal review has been claimed."
       }
+    },
+    {
+      "id": "surface.shared_formula.lighting.atlas",
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-08-19",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "No external formula car, race light, vehicle, racing series, circuit, sponsor, brand, real-location, lamp, product, or stock-texture image was used as an image input.",
+      "promptIntent": "An exact 2-by-2 opaque emissive surface atlas for the vertical rear safety lamps, central rain light, cyan side-status lamps, and active-aero status strip shared by all fictional player and AI formula cars.",
+      "promptConstraints": [
+        "Exactly four equal edge-to-edge square modules with hard center boundaries, no gutters or artwork crossing a split, and strict orthographic front-facing lens surfaces on dark graphite housings.",
+        "The top row contains a three-segment vertical red safety lamp and a five-cell horizontal red rain light; the bottom row contains a two-bar vertical cyan status lamp and a segmented horizontal lime active-aero strip.",
+        "No complete car, wheel, wing, track, road, garage, scene, sky, people, text, pseudo-text, letters, numbers, punctuation, logos, brands, sponsors, racing-series marks, flags, arrows, hazard icons, UI, watermark, perspective, visible object thickness, detached light fixture, damage, dirt, cast shadows, ambient occlusion, external bloom halo, glare, reflections, or transparent pixels.",
+        "The runtime derivative must be exact opaque RGB 1024-by-1024 WebP with every exact 627-by-627 source quadrant independently resized to one 512-by-512 module, one-texel UV isolation, centered physical-aspect face crops, and outward FrontSide winding.",
+        "Hero, race, and low LODs must replace the former six, five, and one separate solid-colour light boxes with one merged generated-light mesh per car while preserving the original positions, dimensions, rotations, and visible triangle counts."
+      ],
+      "sources": [
+        {
+          "role": "generated four-module shared formula lighting surface atlas master",
+          "dimensions": [1254, 1254],
+          "bytes": 1987217,
+          "sha256": "8d2a7c874a983143e1835709001dc5cd480cdadc9de5b5d1b7a99235521e5b31"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "shared-formula-lighting-surface-atlas-1024.webp",
+          "dimensions": [1024, 1024],
+          "bytes": 84866,
+          "sha256": "4cf5710d83b3cea29de6c4163f56edd2aeb04d9458f282623213f762cc898b0a",
+          "encoding": "Opaque Linux Chromium Canvas WebP quality 0.90",
+          "processing": "Split the 1254-by-1254 RGB source at exact 627-pixel quadrant boundaries; independently resized every module to 512-by-512 with high-quality Linux Chromium Canvas resampling; assembled an exact opaque RGB 1024-by-1024 atlas and encoded it as WebP without cross-quadrant resampling."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "reviewedAt": "2026-08-19",
+        "metrics": {
+          "quadrantDimensions": [512, 512],
+          "sourceSplit": [627, 627],
+          "opaque": true,
+          "focusedTests": 95,
+          "fullTestFiles": 61,
+          "fullTests": 603,
+          "buildModules": 680,
+          "runtimeCaptures": 4
+        },
+        "notes": "The generated RGB source and decoded WebP derivative were inspected for exact quadrant boundaries, opacity, the four requested vehicle-light roles, module isolation, readable lens detail, text, logos, perspective, gutters, clipping, and compression artifacts. Focused geometry, LOD, camera, and resource-lifecycle coverage passed 95 tests; the complete 61-file 603-test regression suite, affected-file oxlint, 680-module production build, manifest JSON and derivative byte/hash validation, diff check, and final requirement-and-diff review also passed on 2026-08-19. Linux Chromium 1440-by-900 real chase captures for Apex kerb, Harbour tunnel, and Temple kerb views retained one WebGL canvas and a visible car while reporting respectively 113/70,736/93/30, 118/67,866/97/34, and 112/62,304/93/31 renderer calls/submitted triangles/geometries/textures, with no page exception, failed request, or HTTP error response. A fourth Temple race capture exercised the four-car player-and-AI path and reported 301/85,452/234/37 with racerCount four and the same clean error checks. The merged generated-light mesh preserves every former light box position, dimension, rotation, and triangle count while reducing hero and race mesh count by five and four respectively; all four cars share one atlas texture and material, and StrictMode ownership and disposal are explicitly covered."
+      },
+      "humanIpReview": {
+        "status": "pending_user_approval",
+        "reviewedAt": null,
+        "notes": "No external human or legal review has been claimed."
+      }
     }
   ]
 }

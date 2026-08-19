@@ -4,10 +4,12 @@ import * as THREE from 'three'
 import FormulaCar, {
   FORMULA_LIVERY_ATLASES,
   FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS,
+  FORMULA_LIGHTING_SURFACE_VARIANTS,
   FORMULA_TYRE_SURFACE_VARIANTS,
   PLAYER_BODYWORK_GRAPHICS_LAYOUT,
   PLAYER_LIVERY_GRAPHICS_LAYOUT,
   createFormulaCockpitMechanicalGeometry,
+  createFormulaLightingSurfaceGeometry,
   createFormulaWheelHardwareGeometry,
   createFormulaTyreSurfaceGeometry,
   createFormulaWheelCoverSurfaceGeometry,
@@ -30,6 +32,94 @@ function expectCoreRaceSilhouette(container) {
 }
 
 describe('FormulaCar visual LOD', () => {
+  it('maps every safety and status light into the shared emissive atlas', () => {
+    expect(FORMULA_LIGHTING_SURFACE_VARIANTS).toEqual({
+      verticalRearSafety: 0,
+      centralRainLight: 1,
+      cyanSideStatus: 2,
+      activeAeroStatus: 3,
+    })
+    const expectations = {
+      hero: {
+        positions: 144,
+        indices: 216,
+        variants: [0, 1, 2, 3],
+        min: [-0.855, 0.535, 0.43],
+        max: [0.855, 1.21836, 2.125],
+      },
+      race: {
+        positions: 120,
+        indices: 180,
+        variants: [0, 1, 2],
+        min: [-0.855, 0.535, 0.43],
+        max: [0.855, 0.91, 2.125],
+      },
+      low: {
+        positions: 24,
+        indices: 36,
+        variants: [1],
+        min: [-0.1, 0.535, 2.075],
+        max: [0.1, 0.625, 2.125],
+      },
+    }
+    const atlasInset = 1 / 1024
+
+    for (const [detail, expected] of Object.entries(expectations)) {
+      const geometry = createFormulaLightingSurfaceGeometry(detail)
+      const positions = geometry.getAttribute('position')
+      const normals = geometry.getAttribute('normal')
+      const uvs = geometry.getAttribute('uv')
+      const indices = geometry.getIndex()
+      expect(geometry.name).toBe(`formula-lighting-${detail}-geometry`)
+      expect(positions.count).toBe(expected.positions)
+      expect(normals.count).toBe(expected.positions)
+      expect(uvs.count).toBe(expected.positions)
+      expect(indices.count).toBe(expected.indices)
+      for (const attribute of [positions, normals, uvs]) {
+        expect(Array.from(attribute.array).every(Number.isFinite)).toBe(true)
+      }
+
+      const variants = new Set()
+      for (let vertex = 0; vertex < uvs.count; vertex += 1) {
+        const u = uvs.getX(vertex)
+        const v = uvs.getY(vertex)
+        expect(u).toBeGreaterThanOrEqual(atlasInset)
+        expect(u).toBeLessThanOrEqual(1 - atlasInset)
+        expect(v).toBeGreaterThanOrEqual(atlasInset)
+        expect(v).toBeLessThanOrEqual(1 - atlasInset)
+        variants.add((v < 0.5 ? 2 : 0) + (u >= 0.5 ? 1 : 0))
+      }
+      expect([...variants].sort()).toEqual(expected.variants)
+
+      for (let index = 0; index < indices.count; index += 3) {
+        const aIndex = indices.getX(index)
+        const bIndex = indices.getX(index + 1)
+        const cIndex = indices.getX(index + 2)
+        const a = new THREE.Vector3().fromBufferAttribute(positions, aIndex)
+        const b = new THREE.Vector3().fromBufferAttribute(positions, bIndex)
+        const c = new THREE.Vector3().fromBufferAttribute(positions, cIndex)
+        const geometricNormal = b.clone().sub(a).cross(c.clone().sub(a)).normalize()
+        const averageNormal = new THREE.Vector3()
+          .fromBufferAttribute(normals, aIndex)
+          .add(new THREE.Vector3().fromBufferAttribute(normals, bIndex))
+          .add(new THREE.Vector3().fromBufferAttribute(normals, cIndex))
+          .normalize()
+        expect(geometricNormal.dot(averageNormal)).toBeGreaterThan(0.99999)
+      }
+      expected.min.forEach((value, axis) => {
+        expect(geometry.boundingBox.min.getComponent(axis)).toBeCloseTo(value, 5)
+        expect(geometry.boundingBox.max.getComponent(axis)).toBeCloseTo(
+          expected.max[axis],
+          5,
+        )
+      })
+      geometry.dispose()
+    }
+    expect(() => createFormulaLightingSurfaceGeometry('thumbnail')).toThrow(
+      RangeError,
+    )
+  })
+
   it('maps the cockpit and mechanical LOD tiers into isolated atlas modules', () => {
     expect(FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS).toEqual({
       cockpitCarbon: 0,
@@ -565,7 +655,8 @@ describe('FormulaCar visual LOD', () => {
     expect(countNamed(view.container, 'formula-diffuser-fin')).toBe(0)
     expect(countNamed(view.container, 'formula-suspension-strut')).toBe(0)
     expect(countNamed(view.container, 'front-active-hinge-left')).toBe(0)
-    expect(countNamed(view.container, 'rear-overtake-mode-strip')).toBe(1)
+    expect(countNamed(view.container, 'rear-overtake-mode-strip')).toBe(0)
+    expect(countNamed(view.container, 'formula-lighting-surfaces')).toBe(1)
     expect(countNamed(view.container, 'player-formula-livery-graphics')).toBe(0)
     expect(countNamed(view.container, 'formula-tyre-surface')).toBe(4)
     expect(countNamed(view.container, 'formula-wheel-cover-surface')).toBe(4)
@@ -578,6 +669,7 @@ describe('FormulaCar visual LOD', () => {
     expect(countNamed(view.container, 'formula-tyre-tag')).toBe(16)
     expect(countNamed(view.container, 'formula-sidepod-louver')).toBe(0)
     expect(countNamed(view.container, 'formula-wheel-hardware-surfaces')).toBe(4)
+    expect(countNamed(view.container, 'formula-lighting-surfaces')).toBe(1)
   })
 
   it('cuts the race mesh count by at least 28 percent', () => {
@@ -602,6 +694,7 @@ describe('FormulaCar visual LOD', () => {
     expect(countNamed(container, 'formula-suspension-strut')).toBe(0)
     expect(countNamed(container, 'front-active-hinge-left')).toBe(0)
     expect(countNamed(container, 'rear-overtake-mode-strip')).toBe(0)
+    expect(countNamed(container, 'formula-lighting-surfaces')).toBe(1)
     expect(countNamed(container, 'player-formula-livery-graphics')).toBe(0)
     expect(countNamed(container, 'player-formula-bodywork-graphics')).toBe(0)
     expect(countNamed(container, 'formula-tyre-surface')).toBe(4)
@@ -642,6 +735,7 @@ describe('FormulaCar visual LOD', () => {
     expect(countNamed(view.container, 'formula-tyre-surface')).toBe(4)
     expect(countNamed(view.container, 'formula-wheel-cover-surface')).toBe(0)
     expect(countNamed(view.container, 'formula-wheel-hardware-surfaces')).toBe(4)
+    expect(countNamed(view.container, 'formula-lighting-surfaces')).toBe(1)
     expect(lowMeshCount).toBeLessThanOrEqual(Math.floor(raceMeshCount * 0.65))
   })
 })

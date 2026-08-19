@@ -1351,6 +1351,9 @@ describe('owned Three.js resource lifecycle', () => {
     const cockpitBeforeUnmount = countNamedDisposals(
       'formula-cockpit-mechanical-hero-geometry',
     )
+    const lightingBeforeUnmount = countNamedDisposals(
+      'formula-lighting-hero-geometry',
+    )
 
     view.unmount()
 
@@ -1362,9 +1365,13 @@ describe('owned Three.js resource lifecycle', () => {
       countNamedDisposals('formula-cockpit-mechanical-hero-geometry')
       - cockpitBeforeUnmount,
     ).toBe(1)
+    expect(
+      countNamedDisposals('formula-lighting-hero-geometry')
+      - lightingBeforeUnmount,
+    ).toBe(1)
   })
 
-  it('shares the tyre and cockpit-mechanical atlases across a four-car field', () => {
+  it('shares the tyre, cockpit-mechanical, and lighting atlases across a four-car field', () => {
     const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
     const materialDispose = vi.spyOn(THREE.Material.prototype, 'dispose')
     const textureDispose = vi.spyOn(THREE.Texture.prototype, 'dispose')
@@ -1392,9 +1399,18 @@ describe('owned Three.js resource lifecycle', () => {
         url.includes('shared-formula-cockpit-mechanical-surface-atlas-1024.webp')
       ))
     ]?.value
+    const lightingLoads = textureLoad.mock.calls.filter(([url]) => (
+      url.includes('shared-formula-lighting-surface-atlas-1024.webp')
+    ))
+    const lightingTexture = textureLoad.mock.results[
+      textureLoad.mock.calls.findIndex(([url]) => (
+        url.includes('shared-formula-lighting-surface-atlas-1024.webp')
+      ))
+    ]?.value
 
     expect(tyreLoads).toHaveLength(1)
     expect(cockpitLoads).toHaveLength(1)
+    expect(lightingLoads).toHaveLength(1)
     expect(tyreTexture).toBeInstanceOf(THREE.Texture)
     expect(tyreTexture.name).toBe('generated-shared-formula-tyre-wheel-surface-atlas')
     expect(tyreTexture.colorSpace).toBe(THREE.SRGBColorSpace)
@@ -1415,19 +1431,34 @@ describe('owned Three.js resource lifecycle', () => {
     expect(cockpitTexture.magFilter).toBe(THREE.LinearFilter)
     expect(cockpitTexture.generateMipmaps).toBe(true)
     expect(cockpitTexture.anisotropy).toBe(4)
+    expect(lightingTexture).toBeInstanceOf(THREE.Texture)
+    expect(lightingTexture.name).toBe(
+      'generated-shared-formula-lighting-surface-atlas',
+    )
+    expect(lightingTexture.colorSpace).toBe(THREE.SRGBColorSpace)
+    expect(lightingTexture.wrapS).toBe(THREE.ClampToEdgeWrapping)
+    expect(lightingTexture.wrapT).toBe(THREE.ClampToEdgeWrapping)
+    expect(lightingTexture.minFilter).toBe(THREE.LinearMipmapLinearFilter)
+    expect(lightingTexture.magFilter).toBe(THREE.LinearFilter)
+    expect(lightingTexture.generateMipmaps).toBe(true)
+    expect(lightingTexture.anisotropy).toBe(4)
     expect(view.container.querySelectorAll('[name="formula-tyre-surface"]')).toHaveLength(16)
     expect(view.container.querySelectorAll('[name="formula-wheel-cover-surface"]')).toHaveLength(16)
     expect(
       view.container.querySelectorAll('[name="formula-cockpit-mechanical-surfaces"]'),
     ).toHaveLength(4)
+    expect(
+      view.container.querySelectorAll('[name="formula-lighting-surfaces"]'),
+    ).toHaveLength(4)
     const materialDisposalsBeforeUnmount = materialDispose.mock.calls.length
     const textureDisposalsBeforeUnmount = textureDispose.mock.calls.length
     view.unmount()
 
-    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(3)
-    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(2)
+    expect(materialDispose.mock.calls.length - materialDisposalsBeforeUnmount).toBe(4)
+    expect(textureDispose.mock.calls.length - textureDisposalsBeforeUnmount).toBe(3)
     expect(textureDispose.mock.contexts).toContain(tyreTexture)
     expect(textureDispose.mock.contexts).toContain(cockpitTexture)
+    expect(textureDispose.mock.contexts).toContain(lightingTexture)
     const tyreMaterial = materialDispose.mock.contexts.find(material => (
       material?.name === 'shared-formula-tyre-surface-material'
     ))
@@ -1436,6 +1467,9 @@ describe('owned Three.js resource lifecycle', () => {
     ))
     const cockpitMaterial = materialDispose.mock.contexts.find(material => (
       material?.name === 'shared-formula-cockpit-mechanical-surface-material'
+    ))
+    const lightingMaterial = materialDispose.mock.contexts.find(material => (
+      material?.name === 'shared-formula-lighting-surface-material'
     ))
     expect(tyreMaterial).toBeInstanceOf(THREE.MeshStandardMaterial)
     expect(tyreMaterial.map).toBe(tyreTexture)
@@ -1453,6 +1487,15 @@ describe('owned Three.js resource lifecycle', () => {
     expect(cockpitMaterial.roughness).toBe(0.38)
     expect(cockpitMaterial.metalness).toBe(0.58)
     expect(cockpitMaterial.side).toBe(THREE.FrontSide)
+    expect(lightingMaterial).toBeInstanceOf(THREE.MeshStandardMaterial)
+    expect(lightingMaterial.map).toBe(lightingTexture)
+    expect(lightingMaterial.emissiveMap).toBe(lightingTexture)
+    expect(lightingMaterial.emissive.getHex()).toBe(0xffffff)
+    expect(lightingMaterial.emissiveIntensity).toBe(1.85)
+    expect(lightingMaterial.roughness).toBe(0.24)
+    expect(lightingMaterial.metalness).toBe(0.08)
+    expect(lightingMaterial.side).toBe(THREE.FrontSide)
+    expect(lightingMaterial.toneMapped).toBe(false)
   })
 
   it('loads and disposes the player-only livery and bodywork graphics resources', () => {
@@ -1462,7 +1505,7 @@ describe('owned Three.js resource lifecycle', () => {
     const textureDispose = vi.spyOn(THREE.Texture.prototype, 'dispose')
     const view = render(<FormulaCar isPlayer />)
 
-    expect(textureLoad).toHaveBeenCalledTimes(4)
+    expect(textureLoad).toHaveBeenCalledTimes(5)
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining('player-formula-livery-surface-atlas-1024.webp'),
     )
@@ -1476,6 +1519,9 @@ describe('owned Three.js resource lifecycle', () => {
       expect.stringContaining(
         'shared-formula-cockpit-mechanical-surface-atlas-1024.webp',
       ),
+    )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('shared-formula-lighting-surface-atlas-1024.webp'),
     )
     const bodyworkLoadIndex = textureLoad.mock.calls.findIndex(([url]) => (
       url.includes('player-formula-bodywork-surface-atlas-1024.webp')
@@ -1504,13 +1550,13 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(
       geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount,
-    ).toBe(20)
+    ).toBe(21)
     expect(
       materialDispose.mock.calls.length - materialDisposalsBeforeUnmount,
-    ).toBe(5)
+    ).toBe(6)
     expect(
       textureDispose.mock.calls.length - textureDisposalsBeforeUnmount,
-    ).toBe(4)
+    ).toBe(5)
     const bodyworkMaterial = materialDispose.mock.contexts.find(candidate => (
       candidate?.name === 'player-formula-bodywork-graphics-material'
     ))
@@ -1535,7 +1581,7 @@ describe('owned Three.js resource lifecycle', () => {
     const textureDispose = vi.spyOn(THREE.Texture.prototype, 'dispose')
     const view = render(<FormulaCar detail="race" liveryAtlas={liveryAtlas} />)
 
-    expect(textureLoad).toHaveBeenCalledTimes(4)
+    expect(textureLoad).toHaveBeenCalledTimes(5)
     expect(textureLoad).toHaveBeenCalledWith(
       expect.stringContaining(`ai-${color}-formula-livery-surface-atlas-1024.webp`),
     )
@@ -1549,6 +1595,9 @@ describe('owned Three.js resource lifecycle', () => {
       expect.stringContaining(
         'shared-formula-cockpit-mechanical-surface-atlas-1024.webp',
       ),
+    )
+    expect(textureLoad).toHaveBeenCalledWith(
+      expect.stringContaining('shared-formula-lighting-surface-atlas-1024.webp'),
     )
     expect(
       view.container.querySelector('[name="ai-formula-livery-graphics"]'),
@@ -1577,13 +1626,13 @@ describe('owned Three.js resource lifecycle', () => {
 
     expect(
       geometryDispose.mock.calls.length - geometryDisposalsBeforeUnmount,
-    ).toBe(20)
+    ).toBe(21)
     expect(
       materialDispose.mock.calls.length - materialDisposalsBeforeUnmount,
-    ).toBe(5)
+    ).toBe(6)
     expect(
       textureDispose.mock.calls.length - textureDisposalsBeforeUnmount,
-    ).toBe(4)
+    ).toBe(5)
     const bodyworkMaterial = materialDispose.mock.contexts.find(candidate => (
       candidate?.name === `ai-${color}-formula-bodywork-graphics-material`
     ))
@@ -1617,25 +1666,31 @@ describe('owned Three.js resource lifecycle', () => {
       .filter(geometry => (
         geometry?.name === 'formula-cockpit-mechanical-hero-geometry'
       )).length
+    const countLightingGeometryDisposals = () => geometryDispose.mock.contexts
+      .filter(geometry => (
+        geometry?.name === 'formula-lighting-hero-geometry'
+      )).length
     const view = render(
       <React.StrictMode>
         <FormulaCar isPlayer />
       </React.StrictMode>,
     )
 
-    expect(textureLoad).toHaveBeenCalledTimes(8)
+    expect(textureLoad).toHaveBeenCalledTimes(10)
     expect(countLiveryGeometryDisposals()).toBe(1)
     expect(countBodyworkGeometryDisposals()).toBe(1)
     expect(countCockpitGeometryDisposals()).toBe(1)
-    expect(materialDispose).toHaveBeenCalledTimes(5)
-    expect(textureDispose).toHaveBeenCalledTimes(4)
+    expect(countLightingGeometryDisposals()).toBe(1)
+    expect(materialDispose).toHaveBeenCalledTimes(6)
+    expect(textureDispose).toHaveBeenCalledTimes(5)
 
     view.unmount()
 
     expect(countLiveryGeometryDisposals()).toBe(2)
     expect(countBodyworkGeometryDisposals()).toBe(2)
     expect(countCockpitGeometryDisposals()).toBe(2)
-    expect(materialDispose).toHaveBeenCalledTimes(10)
-    expect(textureDispose).toHaveBeenCalledTimes(8)
+    expect(countLightingGeometryDisposals()).toBe(2)
+    expect(materialDispose).toHaveBeenCalledTimes(12)
+    expect(textureDispose).toHaveBeenCalledTimes(10)
   })
 })

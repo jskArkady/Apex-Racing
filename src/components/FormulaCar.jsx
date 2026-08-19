@@ -13,6 +13,7 @@ import aiGreenFormulaBodyworkAtlasUrl from '../assets/textures/ai-green-formula-
 import aiOrangeFormulaBodyworkAtlasUrl from '../assets/textures/ai-orange-formula-bodywork-surface-atlas-1024.webp'
 import sharedFormulaTyreWheelAtlasUrl from '../assets/textures/shared-formula-tyre-wheel-surface-atlas-1024.webp'
 import sharedFormulaCockpitMechanicalAtlasUrl from '../assets/textures/shared-formula-cockpit-mechanical-surface-atlas-1024.webp'
+import sharedFormulaLightingSurfaceAtlasUrl from '../assets/textures/shared-formula-lighting-surface-atlas-1024.webp'
 
 export const FORMULA_LIVERY_ATLASES = Object.freeze({
   player: Object.freeze({
@@ -60,6 +61,12 @@ export const FORMULA_COCKPIT_MECHANICAL_SURFACE_VARIANTS = Object.freeze({
   mechanicalMetal: 1,
   aeroCarbon: 2,
   tintableComposite: 3,
+})
+export const FORMULA_LIGHTING_SURFACE_VARIANTS = Object.freeze({
+  verticalRearSafety: 0,
+  centralRainLight: 1,
+  cyanSideStatus: 2,
+  activeAeroStatus: 3,
 })
 const SUSPENSION_STRUTS = Object.freeze([
   [[-0.36, 0.34, -1.18], [-0.82, 0.35, -1.42]],
@@ -126,6 +133,8 @@ let sharedFormulaTyreSurfaceAssets = null
 let sharedFormulaTyreSurfaceReferenceCount = 0
 let sharedFormulaCockpitMechanicalAssets = null
 let sharedFormulaCockpitMechanicalReferenceCount = 0
+let sharedFormulaLightingSurfaceAssets = null
+let sharedFormulaLightingSurfaceReferenceCount = 0
 
 function acquireSharedFormulaTyreSurfaceAssets() {
   if (!sharedFormulaTyreSurfaceAssets) {
@@ -212,6 +221,51 @@ function releaseSharedFormulaCockpitMechanicalAssets() {
   sharedFormulaCockpitMechanicalAssets.material.dispose()
   sharedFormulaCockpitMechanicalAssets.texture.dispose()
   sharedFormulaCockpitMechanicalAssets = null
+}
+
+function acquireSharedFormulaLightingSurfaceAssets() {
+  if (!sharedFormulaLightingSurfaceAssets) {
+    const texture = new THREE.TextureLoader().load(
+      sharedFormulaLightingSurfaceAtlasUrl,
+    )
+    texture.name = 'generated-shared-formula-lighting-surface-atlas'
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.wrapS = THREE.ClampToEdgeWrapping
+    texture.wrapT = THREE.ClampToEdgeWrapping
+    texture.minFilter = THREE.LinearMipmapLinearFilter
+    texture.magFilter = THREE.LinearFilter
+    texture.generateMipmaps = true
+    texture.anisotropy = 4
+
+    const material = new THREE.MeshStandardMaterial({
+      map: texture,
+      emissive: '#ffffff',
+      emissiveMap: texture,
+      emissiveIntensity: 1.85,
+      roughness: 0.24,
+      metalness: 0.08,
+      side: THREE.FrontSide,
+      toneMapped: false,
+    })
+    material.name = 'shared-formula-lighting-surface-material'
+    sharedFormulaLightingSurfaceAssets = { texture, material }
+  }
+  sharedFormulaLightingSurfaceReferenceCount += 1
+  return sharedFormulaLightingSurfaceAssets
+}
+
+function releaseSharedFormulaLightingSurfaceAssets() {
+  sharedFormulaLightingSurfaceReferenceCount = Math.max(
+    sharedFormulaLightingSurfaceReferenceCount - 1,
+    0,
+  )
+  if (
+    sharedFormulaLightingSurfaceReferenceCount !== 0
+    || !sharedFormulaLightingSurfaceAssets
+  ) return
+  sharedFormulaLightingSurfaceAssets.material.dispose()
+  sharedFormulaLightingSurfaceAssets.texture.dispose()
+  sharedFormulaLightingSurfaceAssets = null
 }
 
 const freezeLiveryPanel = panel => Object.freeze({
@@ -614,6 +668,112 @@ function remapGeometryUvVertices(geometry, vertexIndices, variant) {
     )
   }
   uvs.needsUpdate = true
+}
+
+function remapLightingBoxUvs(geometry, variant, size) {
+  const { minU, maxU, minV, maxV } = getAtlasModuleBounds(variant)
+  const [width, height, depth] = size
+  const faceDimensions = [
+    [depth, height],
+    [depth, height],
+    [width, depth],
+    [width, depth],
+    [width, height],
+    [width, height],
+  ]
+  const indices = geometry.getIndex()
+  const uvs = geometry.getAttribute('uv')
+
+  for (const group of geometry.groups) {
+    const [physicalU, physicalV] = faceDimensions[group.materialIndex]
+    const maxDimension = Math.max(physicalU, physicalV)
+    const cropU = physicalU / maxDimension
+    const cropV = physicalV / maxDimension
+    const sourceMinU = 0.5 - cropU / 2
+    const sourceMaxU = 0.5 + cropU / 2
+    const sourceMinV = 0.5 - cropV / 2
+    const sourceMaxV = 0.5 + cropV / 2
+    const vertices = new Set()
+    for (let offset = group.start; offset < group.start + group.count; offset += 1) {
+      vertices.add(indices.getX(offset))
+    }
+    for (const vertex of vertices) {
+      const sourceU = THREE.MathUtils.lerp(
+        sourceMinU,
+        sourceMaxU,
+        uvs.getX(vertex),
+      )
+      const sourceV = THREE.MathUtils.lerp(
+        sourceMinV,
+        sourceMaxV,
+        uvs.getY(vertex),
+      )
+      uvs.setXY(
+        vertex,
+        THREE.MathUtils.lerp(minU, maxU, sourceU),
+        THREE.MathUtils.lerp(minV, maxV, sourceV),
+      )
+    }
+  }
+  uvs.needsUpdate = true
+}
+
+export function createFormulaLightingSurfaceGeometry(detail = 'hero') {
+  if (!['hero', 'race', 'low'].includes(detail)) {
+    throw new RangeError(`Unsupported Formula lighting detail tier: ${detail}`)
+  }
+  const showRaceDetail = detail !== 'low'
+  const showHeroDetail = detail === 'hero'
+  const layout = []
+
+  for (const [index, position] of REAR_LIGHT_STRIPS.entries()) {
+    if (!showRaceDetail && index !== 1) continue
+    layout.push({
+      position,
+      rotation: [0, 0, 0],
+      size: index === 1 ? [0.2, 0.09, 0.05] : [0.055, 0.26, 0.05],
+      variant: index === 1
+        ? FORMULA_LIGHTING_SURFACE_VARIANTS.centralRainLight
+        : FORMULA_LIGHTING_SURFACE_VARIANTS.verticalRearSafety,
+    })
+  }
+  if (showRaceDetail) {
+    for (const position of SIDE_SAFETY_LIGHTS) {
+      layout.push({
+        position,
+        rotation: [0, 0, 0],
+        size: [0.05, 0.16, 0.06],
+        variant: FORMULA_LIGHTING_SURFACE_VARIANTS.cyanSideStatus,
+      })
+    }
+  }
+  if (showHeroDetail) {
+    const activeAeroLight = ACTIVE_AERO_MARKERS.find(marker => marker.emissive)
+    layout.push({
+      position: activeAeroLight.position,
+      rotation: activeAeroLight.rotation,
+      size: activeAeroLight.size,
+      variant: FORMULA_LIGHTING_SURFACE_VARIANTS.activeAeroStatus,
+    })
+  }
+
+  const parts = layout.map((panel) => {
+    const geometry = new THREE.BoxGeometry(...panel.size)
+    remapLightingBoxUvs(geometry, panel.variant, panel.size)
+    geometry.applyMatrix4(new THREE.Matrix4().compose(
+      new THREE.Vector3(...panel.position),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(...panel.rotation)),
+      new THREE.Vector3(1, 1, 1),
+    ))
+    return geometry
+  })
+  const merged = mergeGeometries(parts)
+  for (const geometry of parts) geometry.dispose()
+  if (!merged) throw new Error('Formula lighting surface geometry could not be merged')
+  merged.name = `formula-lighting-${detail}-geometry`
+  merged.computeBoundingBox()
+  merged.computeBoundingSphere()
+  return merged
 }
 
 function tintGeometryVertices(geometry, color) {
@@ -1420,6 +1580,7 @@ export default function FormulaCar({
   const [bodyworkAssets, setBodyworkAssets] = useState(null)
   const [tyreSurfaceAssets, setTyreSurfaceAssets] = useState(null)
   const [cockpitMechanicalAssets, setCockpitMechanicalAssets] = useState(null)
+  const [lightingSurfaceAssets, setLightingSurfaceAssets] = useState(null)
 
   useEffect(() => {
     if (!resolvedLiveryAtlas) {
@@ -1554,6 +1715,21 @@ export default function FormulaCar({
       releaseSharedFormulaCockpitMechanicalAssets()
     }
   }, [accent, detailTier, isLowDetail, palette.primary])
+
+  useEffect(() => {
+    const sharedAssets = acquireSharedFormulaLightingSurfaceAssets()
+    const geometry = createFormulaLightingSurfaceGeometry(detailTier)
+    const assets = {
+      detailTier,
+      geometry,
+      material: sharedAssets.material,
+    }
+    setLightingSurfaceAssets(assets)
+    return () => {
+      geometry.dispose()
+      releaseSharedFormulaLightingSurfaceAssets()
+    }
+  }, [detailTier])
 
   useFrame((state, delta) => {
     const gameState = useGameStore.getState().gameState
@@ -1707,9 +1883,6 @@ export default function FormulaCar({
           castShadow={index === 0}
         />
       ))}
-      {showHeroDetail && ACTIVE_AERO_MARKERS.filter(detail => detail.emissive).map(detail => (
-        <DetailBox key={detail.key} detail={detail} palette={palette} accent={accent} />
-      ))}
       {[-0.76, 0.76].map(x => (
         <mesh key={`rear-endplate-${x}`} position={[x, 0.8, 1.81]}>
           <boxGeometry args={[0.075, 0.68, 0.5]} />
@@ -1722,18 +1895,13 @@ export default function FormulaCar({
           <meshStandardMaterial color={accent} roughness={0.38} metalness={0.48} />
         </mesh>
       ))}
-      {REAR_LIGHT_STRIPS.filter((_, index) => showRaceDetail || index === 1).map(([x, y, z], index) => (
-        <mesh key={`rear-light-${index}`} position={[x, y, z]}>
-          <boxGeometry args={index === 1 ? [0.2, 0.09, 0.05] : [0.055, 0.26, 0.05]} />
-          <meshStandardMaterial color="#ff2727" emissive="#d40808" emissiveIntensity={2.7} />
-        </mesh>
-      ))}
-      {showRaceDetail && SIDE_SAFETY_LIGHTS.map(([x, y, z]) => (
-        <mesh key={`side-safety-light-${x}`} position={[x, y, z]}>
-          <boxGeometry args={[0.05, 0.16, 0.06]} />
-          <meshStandardMaterial color="#41d6ff" emissive="#1789ff" emissiveIntensity={1.6} roughness={0.3} />
-        </mesh>
-      ))}
+      {lightingSurfaceAssets?.detailTier === detailTier && (
+        <mesh
+          name="formula-lighting-surfaces"
+          geometry={lightingSurfaceAssets.geometry}
+          material={lightingSurfaceAssets.material}
+        />
+      )}
       {WHEEL_LAYOUT.map(wheel => (
         <Wheel
           key={`wheel-${wheel.index}`}
