@@ -31,7 +31,12 @@ export default defineConfig({
     chunkSizeWarningLimit: 2400,
     rollupOptions: {
       output: {
-        manualChunks: vendorChunk,
+        strictExecutionOrder: true,
+        // Preserve the vendor groups without pulling their shared dependencies
+        // into Rapier's chunk, which would make the menu load physics eagerly.
+        codeSplitting: {
+          groups: [{ name: vendorChunk, includeDependenciesRecursively: false }],
+        },
       },
     },
   },

@@ -34,8 +34,8 @@ const sanitizePersonalBests = (value) => {
 };
 
 const loadPersonalBests = () => {
-  if (typeof window === 'undefined' || !window.localStorage) return {};
   try {
+    if (typeof window === 'undefined' || !window.localStorage) return {};
     return sanitizePersonalBests(JSON.parse(
       window.localStorage.getItem(PERSONAL_BEST_STORAGE_KEY) ?? '{}'
     ));
@@ -45,8 +45,8 @@ const loadPersonalBests = () => {
 };
 
 const savePersonalBests = (personalBests) => {
-  if (typeof window === 'undefined' || !window.localStorage) return;
   try {
+    if (typeof window === 'undefined' || !window.localStorage) return;
     window.localStorage.setItem(
       PERSONAL_BEST_STORAGE_KEY,
       JSON.stringify(sanitizePersonalBests(personalBests))

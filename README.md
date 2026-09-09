@@ -12,7 +12,7 @@ Apex Racing is a browser-based 3D circuit racing game built with React, Three.js
 - Chase camera, minimap, checkpoints, live position, lap timing, gear, RPM, and wrong-way feedback
 - Procedural Web Audio engine sound that responds to speed and RPM
 - Keyboard and multitouch controls
-- Low, medium, and high graphics presets for render scale and shadows
+- Fixed high-quality graphics with shadows; settings provide audio volume control
 
 ## Circuits
 
@@ -56,7 +56,7 @@ npm run preview
 | `S` or `↓` | Brake, then reverse |
 | `A` / `D` or `←` / `→` | Steer |
 | `Space` | Brake |
-| `R` | Recover the car to the starting grid |
+| `R` | Recover to the last accepted checkpoint, or the starting grid before the first checkpoint |
 | `Esc` | Pause or resume |
 
 On touch devices, use the on-screen steering, throttle, brake/reverse, recovery, and pause controls. Multitouch allows steering and pedal input at the same time.

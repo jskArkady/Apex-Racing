@@ -1304,6 +1304,24 @@ kbd {
   }
 }
 
+@media (max-width: 360px) {
+  .hud-top {
+    gap: 6px;
+  }
+
+  .hud-race-position {
+    gap: 8px;
+  }
+
+  .hud-race-position strong {
+    white-space: nowrap;
+  }
+
+  .checkpoint-readout {
+    min-width: 0;
+  }
+}
+
 @media (any-pointer: coarse) {
   .mobile-driving-controls {
     position: absolute;

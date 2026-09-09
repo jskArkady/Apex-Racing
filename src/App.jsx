@@ -1,12 +1,10 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { Suspense, useEffect, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Physics } from '@react-three/rapier'
 import { KeyboardControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { useGameStore } from './store/gameStore'
-import Car from './components/Car'
-import Track from './components/Track'
-import Opponents from './components/Opponents'
+import LazyRaceScene from './components/LazyRaceScene'
+import RaceSceneBoundary from './components/RaceSceneBoundary'
 import RaceLighting from './components/RaceLighting'
 import SkyBackdrop from './components/SkyBackdrop'
 import MainMenu from './ui/MainMenu'
@@ -14,25 +12,8 @@ import HUD from './ui/HUD'
 import PauseMenu from './ui/PauseMenu'
 import EndScreen from './ui/EndScreen'
 import { audioEngine } from './utils/AudioEngine'
-import { VEHICLE_DYNAMICS } from './utils/vehicleDynamics'
 import { getTrackPreset } from './utils/trackData'
 import { parseVisualCaptureRequest } from './utils/visualCapture'
-
-// We need a GameLoop component that handles elapsed time ticks when playing and countdown decrements
-function GameLoop() {
-  const gameState = useGameStore(state => state.gameState)
-  const decrementCountdown = useGameStore(state => state.decrementCountdown)
-  
-  useEffect(() => {
-    if (gameState !== 'countdown') return
-    const interval = setInterval(() => {
-      decrementCountdown()
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [gameState, decrementCountdown])
-  
-  return null
-}
 
 const keyboardMap = [
   { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
@@ -93,6 +74,8 @@ function NightStars() {
 }
 
 function App() {
+  const [raceReady, setRaceReady] = useState(false)
+  const [raceError, setRaceError] = useState(null)
   const visualCaptureRequest = useMemo(() => parseVisualCaptureRequest(
     typeof window === 'undefined' ? '' : window.location.search,
     import.meta.env.DEV,
@@ -101,12 +84,16 @@ function App() {
   const gameMode = useGameStore(state => state.gameMode)
   const selectedTrackId = useGameStore(state => state.selectedTrackId)
   const pauseGame = useGameStore(state => state.pauseGame)
+  const returnToMenu = useGameStore(state => state.returnToMenu)
   const audioVolume = useGameStore(state => state.settings.audio)
   const selectedTrack = useMemo(() => getTrackPreset(selectedTrackId), [selectedTrackId])
   const environment = useMemo(() => ({
     ...DEFAULT_TRACK_ENVIRONMENT,
     ...selectedTrack.environment,
   }), [selectedTrack])
+  useEffect(() => {
+    if (gameState === 'menu') setRaceError(null)
+  }, [gameState])
   useEffect(() => {
     if (!visualCaptureRequest) return undefined
 
@@ -210,29 +197,43 @@ function App() {
         
         {/* Physics and Game Objects */}
         {(gameState === 'playing' || gameState === 'countdown' || gameState === 'paused' || gameState === 'finished') && (
-          <Physics
-            paused={gameState === 'paused' || gameState === 'finished'}
-            gravity={[0, -9.81, 0]}
-            timeStep={VEHICLE_DYNAMICS.physicsStep}
-          >
-            <Track track={selectedTrack} graphicsQuality="high" />
-            <Car
-              track={selectedTrack}
-              captureRequest={visualCaptureRequest}
-            />
-            {gameMode === 'single' && <Opponents track={selectedTrack} />}
-          </Physics>
+          <RaceSceneBoundary onError={setRaceError}>
+            <Suspense fallback={null}>
+              <LazyRaceScene
+                track={selectedTrack}
+                captureRequest={visualCaptureRequest}
+                onReady={setRaceReady}
+              />
+            </Suspense>
+          </RaceSceneBoundary>
         )}
         
-        <GameLoop />
       </Canvas>
       
       {/* 2D UI Overlay */}
       <div className="ui-layer">
         {gameState === 'menu' && <MainMenu />}
-        {(gameState === 'playing' || gameState === 'countdown') && <HUD />}
-        {gameState === 'paused' && <PauseMenu />}
-        {gameState === 'finished' && <EndScreen />}
+        {!raceError && (gameState === 'playing' || gameState === 'countdown') && (raceReady ? <HUD /> : (
+          <div className="menu-overlay">
+            <section className="menu-content">
+              <p role="status" aria-live="polite">Preparing race…</p>
+              <button className="btn interactive" onClick={returnToMenu}>Back to Menu</button>
+            </section>
+          </div>
+        ))}
+        {raceError && gameState !== 'menu' && (
+          <div className="menu-overlay">
+            <section className="menu-content">
+              <p role="alert">The race could not load. Reload the game to try again.</p>
+              <div className="menu-actions">
+                <button className="btn btn-primary interactive" onClick={() => window.location.reload()}>Reload Game</button>
+                <button className="btn interactive" onClick={returnToMenu}>Back to Menu</button>
+              </div>
+            </section>
+          </div>
+        )}
+        {!raceError && gameState === 'paused' && <PauseMenu />}
+        {!raceError && gameState === 'finished' && <EndScreen />}
       </div>
     </KeyboardControls>
   )

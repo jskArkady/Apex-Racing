@@ -3,6 +3,11 @@ import '@testing-library/jest-dom';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useMemo } from 'react';
 global.React = React;
 
+// Controller integration tests exercise an already loaded scene synchronously.
+// The real lazy boundary is covered separately by raceLoading.test.jsx and by
+// the production-browser smoke test, including a delayed scene download.
+vi.mock('../components/LazyRaceScene', async () => import('../components/RaceScene'));
+
 // ----------------------------------------------------
 // A. Global Web Audio API Mock
 // ----------------------------------------------------

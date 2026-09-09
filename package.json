@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:browser": "node scripts/browser-check.mjs smoke",
     "test:unit": "vitest run src/utils src/store",
     "test:ui": "vitest run src/ui src/components",
     "test:integration": "vitest run src/test",
