@@ -11,6 +11,7 @@ render as end-to-end coverage.
 | `npm run test:regression` | Release-blocking race-integrity regressions: seam ranking, render hitches, recovery and finish |
 | `npm run test:qa` | Long-circuit, stress and adversarial scenarios |
 | `npm run verify` | Lint, full suite and production build |
+| `npm run verify:browser` | Production build + real Chromium smoke checks |
 | `npm run test:browser` | Production Chromium/WebGL driving flow, touch input and deferred-loading recovery (requires a build and Playwright runtime) |
 
 ## Test boundaries
@@ -36,13 +37,27 @@ render as end-to-end coverage.
 `scripts/browser-check.mjs` serves the production build on a temporary loopback
 port, launches headless Chromium with SwiftShader, and closes both after the run.
 It reuses an installed Playwright runtime; no browser package ships with the game.
-Set `PLAYWRIGHT_MODULE` to its absolute `index.mjs` path if it is not resolvable
-as `playwright`. Optionally set `CHROMIUM_EXECUTABLE` and
+If Playwright is installed as a dependency, the script resolves it automatically.
+Set `PLAYWRIGHT_MODULE` to its absolute `index.mjs` path if needed. Optionally
+set `CHROMIUM_EXECUTABLE` and
 `CHROMIUM_LIBRARY_PATH` for an existing Linux browser and its shared libraries.
 
 ```bash
 npm run build
 PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs npm run test:browser
+```
+
+You can run the integrated browser verification with:
+
+```bash
+npm run verify:browser
+```
+
+If Playwright is missing, run:
+
+```bash
+npm i -D playwright
+npx playwright install chromium
 ```
 
 The smoke checks cover all three tracks at 1280×720, plus Apex at 390×844,

@@ -454,6 +454,9 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
        }
        return
     }
+    if (!audioEngine.isPlaying) {
+      audioEngine.start()
+    }
     
     // Render loops can occasionally report a zero/invalid delta while a tab is
     // being restored. Never let that sample contaminate timing or physics.

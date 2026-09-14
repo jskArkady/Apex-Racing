@@ -271,7 +271,31 @@ describe('Tier 1: Feature Coverage', () => {
       expect(useGameStore.getState().gameState).toBe('playing');
     });
 
-    it('Test 4.4: Physics container in App receives paused=true attribute when game is paused', () => {
+    it('Test 4.4: Resuming from pause restarts engine audio', () => {
+      render(<App />);
+      act(() => {
+        useGameStore.setState({ gameState: 'countdown', countdown: 1 });
+      });
+      act(() => {
+        vi.advanceTimersByTime(1000);
+        triggerFrames(1 / 60, 1);
+      });
+      expect(useGameStore.getState().gameState).toBe('playing');
+      expect(audioEngine.isPlaying).toBe(true);
+      fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
+      expect(useGameStore.getState().gameState).toBe('paused');
+      act(() => {
+        triggerFrames(1 / 60, 1);
+      });
+      expect(audioEngine.isPlaying).toBe(false);
+      fireEvent.click(screen.getByRole('button', { name: 'Resume' }));
+      act(() => {
+        triggerFrames(1 / 60, 1);
+      });
+      expect(audioEngine.isPlaying).toBe(true);
+    });
+
+    it('Test 4.5: Physics container in App receives paused=true attribute when game is paused', () => {
       render(<App />);
       act(() => {
         useGameStore.setState({ gameState: 'paused' });
@@ -280,7 +304,7 @@ describe('Tier 1: Feature Coverage', () => {
       expect(physics.getAttribute('data-paused')).toBe('true');
     });
 
-    it('Test 4.5: Pressing Quit to Menu inside Pause Menu returns state to menu', () => {
+    it('Test 4.6: Pressing Quit to Menu inside Pause Menu returns state to menu', () => {
       render(<App />);
       act(() => {
         useGameStore.setState({ gameState: 'paused' });

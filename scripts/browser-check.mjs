@@ -5,7 +5,36 @@ import { resolve, extname } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 // Reuse an installed Playwright runtime without adding a game dependency.
-const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+async function resolveChromium() {
+  const moduleCandidates = []
+  if (process.env.PLAYWRIGHT_MODULE) moduleCandidates.push(process.env.PLAYWRIGHT_MODULE)
+  moduleCandidates.push('playwright')
+
+  const failures = []
+  for (const candidate of moduleCandidates) {
+    try {
+      const playwright = await import(candidate);
+      if (playwright.chromium) return { chromium: playwright.chromium, source: candidate };
+      failures.push(`${candidate}: resolved without chromium export`);
+    } catch (error) {
+      failures.push(`${candidate}: ${error.message}`);
+    }
+  }
+
+  const fallback = failures
+    .map(message => `  - ${message}`)
+    .join('\n');
+  throw new Error([
+    'Could not load Playwright runtime.',
+    `Tried: ${moduleCandidates.join(', ')}`,
+    'Install Playwright (npm i -D playwright) and run npx playwright install chromium,',
+    'or set PLAYWRIGHT_MODULE to the absolute path of its index.mjs.',
+    `Lookup details:\n${fallback}`,
+  ].join('\n'));
+}
+
+const { chromium, source } = await resolveChromium();
+console.log('Playwright source', source);
 const mode = process.argv[2] ?? 'smoke';
 const root = resolve(process.argv[3] ?? 'dist');
 const label = process.argv[4] ?? mode;
