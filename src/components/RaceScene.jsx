@@ -6,22 +6,13 @@ import Opponents from './Opponents'
 import { useGameStore } from '../store/gameStore'
 import { VEHICLE_DYNAMICS } from '../utils/vehicleDynamics'
 
-function RaceClock({ onReady }) {
-  const gameState = useGameStore(state => state.gameState)
-  const decrementCountdown = useGameStore(state => state.decrementCountdown)
-
+function RaceReady({ onReady }) {
   // Mounted inside Physics so both the scene chunk and Rapier are ready before
   // the countdown starts. Download time must never consume the starting grid.
   useEffect(() => {
     onReady(true)
     return () => onReady(false)
   }, [onReady])
-
-  useEffect(() => {
-    if (gameState !== 'countdown') return undefined
-    const interval = setInterval(decrementCountdown, 1000)
-    return () => clearInterval(interval)
-  }, [gameState, decrementCountdown])
 
   return null
 }
@@ -36,10 +27,10 @@ export default function RaceScene({ track, captureRequest, onReady }) {
       gravity={[0, -9.81, 0]}
       timeStep={VEHICLE_DYNAMICS.physicsStep}
     >
-      <Track track={track} graphicsQuality="high" />
+      <Track track={track} />
       <Car track={track} captureRequest={captureRequest} />
       {gameMode === 'single' && <Opponents track={track} />}
-      <RaceClock onReady={onReady} />
+      <RaceReady onReady={onReady} />
     </Physics>
   )
 }

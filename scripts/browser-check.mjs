@@ -3,6 +3,8 @@ import { createServer } from 'node:http';
 import { readFile, stat, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { gzipSync } from 'node:zlib';
+import { completeBrowserLaps } from './browser-lap.mjs';
+import { measureRaceLoading, summarizeRaceLoading } from './browser-race-loading.mjs';
 
 // Reuse an installed Playwright runtime without adding a game dependency.
 async function resolveChromium() {
@@ -39,7 +41,7 @@ const mode = process.argv[2] ?? 'smoke';
 const root = resolve(process.argv[3] ?? 'dist');
 const label = process.argv[4] ?? mode;
 const output = resolve(process.env.BROWSER_OUTPUT_DIR ?? '/tmp');
-assert.ok(['smoke', 'measure'].includes(mode), 'Mode must be smoke or measure');
+assert.ok(['smoke', 'measure', 'measure-race', 'lap'].includes(mode), 'Mode must be smoke, measure, measure-race or lap');
 await mkdir(output, { recursive: true });
 const mime = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
@@ -82,6 +84,8 @@ try {
   });
   console.log('Browser', browser.version(), url);
   if (mode === 'measure') await measure();
+  else if (mode === 'measure-race') await measureRaceLoading(browser, url, runs);
+  else if (mode === 'lap') await completeBrowserLaps(browser, url, runs);
   else await smoke();
 } catch (error) {
   runs.push({ passed: false, error: error.message });
@@ -91,10 +95,11 @@ try {
 } finally {
   await writeFile(`${output}/racing-${label}-metrics.json`, JSON.stringify({
     browser: browser?.version(),
-    profile: mode === 'measure'
+    profile: mode === 'measure' || mode === 'measure-race'
       ? '1280x720, fresh context per run, cache disabled, gzip, 40ms latency, 10Mbps download, SwiftShader'
       : 'Fresh context per case, production build, SwiftShader, CDP touch emulation (no physical mobile GPU)',
     runs,
+    ...(mode === 'measure-race' ? { summary: summarizeRaceLoading(runs) } : {}),
   }, null, 2));
   await browser?.close();
   await new Promise(resolve => server.close(resolve));

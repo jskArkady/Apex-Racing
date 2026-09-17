@@ -12,28 +12,11 @@ afterEach(() => {
 })
 
 describe('owned Three.js resource lifecycle', () => {
-  it('uses at most six real tunnel lights above low graphics quality', () => {
-    const harbour = getTrackPreset('harbour_street')
-    const view = render(<Track track={harbour} graphicsQuality="high" />)
-
+  it('retains all six tunnel lights and the full circuit floodlights', () => {
+    const view = render(<Track track={getTrackPreset('harbour_street')} />)
     expect(view.container.querySelectorAll('[name^="harbour-tunnel-light-"]')).toHaveLength(6)
-    view.rerender(<Track track={harbour} graphicsQuality="medium" />)
-    expect(view.container.querySelectorAll('[name^="harbour-tunnel-light-"]')).toHaveLength(3)
-    view.rerender(<Track track={harbour} graphicsQuality="low" />)
-    expect(view.container.querySelectorAll('[name^="harbour-tunnel-light-"]')).toHaveLength(0)
-  })
-
-  it('scales circuit floodlights with the selected graphics budget', () => {
-    const view = render(<Track graphicsQuality="high" />)
-    const count = () => view.container
-      .querySelectorAll('[name^="circuit-floodlight-"]').length
-    const highCount = count()
-
-    expect(highCount).toBeGreaterThan(0)
-    view.rerender(<Track graphicsQuality="medium" />)
-    expect(count()).toBe(Math.ceil(highCount / 2))
-    view.rerender(<Track graphicsQuality="low" />)
-    expect(count()).toBe(0)
+    view.rerender(<Track track={getTrackPreset('apex_gp')} />)
+    expect(view.container.querySelectorAll('[name^="circuit-floodlight-"]').length).toBeGreaterThan(0)
   })
 
   it('disposes every externally-created track geometry, material, and texture', () => {

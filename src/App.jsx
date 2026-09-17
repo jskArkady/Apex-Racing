@@ -189,8 +189,6 @@ function App() {
         {environment.stars && <NightStars />}
         <RaceLighting
           environment={environment}
-          graphicsQuality="high"
-          shadowsEnabled
           track={selectedTrack}
           gameMode={gameMode}
         />

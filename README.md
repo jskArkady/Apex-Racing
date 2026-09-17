@@ -69,6 +69,18 @@ npm run lint
 npm run build
 ```
 
+For real Chromium driving, full-lap completion and record persistence checks:
+
+```bash
+npx playwright install chromium
+npm run verify:browser
+```
+
+Pushes and pull requests run the checks through GitHub Actions. See
+[TESTING.md](TESTING.md) for browser setup and coverage limits.
+After a build, `npm run measure:race` records first-race loading and input
+readiness for all circuits under repeatable network conditions.
+
 ## Project layout
 
 - `src/App.jsx` — 3D scene and game-flow composition

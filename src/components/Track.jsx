@@ -105,11 +105,6 @@ import {
   ROAD_SEGMENTS,
 } from './trackGeometry'
 
-const HARBOUR_TUNNEL_LIGHT_PRESETS = Object.freeze({
-  medium: Object.freeze({ intensity: 38, distance: 30, stride: 2 }),
-  high: Object.freeze({ intensity: 52, distance: 34, stride: 1 }),
-})
-const FLOODLIGHT_STRIDES = Object.freeze({ low: Infinity, medium: 2, high: 1 })
 const INFIELD_ALBEDO_BY_VENUE = Object.freeze({
   apex: apexInfieldAlbedoUrl,
   harbour: harbourInfieldAlbedoUrl,
@@ -184,9 +179,8 @@ export function createTrackTrimeshArgs(geometry) {
   ]
 }
 
-export default function Track({ track = getTrackPreset(), graphicsQuality = 'high' }) {
+export default function Track({ track = getTrackPreset() }) {
   const activeTrack = track ?? getTrackPreset()
-  const activeGraphicsQuality = graphicsQuality
   const trackCurve = activeTrack.curve
   const trackBounds = activeTrack.bounds
   const roadWidth = activeTrack.roadWidth ?? 16
@@ -1520,14 +1514,6 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
   }, [assets])
   const infieldWidth = Math.max(900, trackBounds.width + 360)
   const infieldDepth = Math.max(900, trackBounds.depth + 360)
-  const tunnelLightPreset = HARBOUR_TUNNEL_LIGHT_PRESETS[activeGraphicsQuality]
-  const visibleTunnelLights = tunnelLightPreset
-    ? assets.tunnelLights.filter((_, index) => index % tunnelLightPreset.stride === 0)
-    : []
-  const floodlightStride = FLOODLIGHT_STRIDES[activeGraphicsQuality] ?? 1
-  const visibleFloodlights = Number.isFinite(floodlightStride)
-    ? assets.floodlights.filter((_, index) => index % floodlightStride === 0)
-    : []
 
   return (
     <group>
@@ -1593,21 +1579,21 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
       <mesh
         geometry={assets.sceneryGeometry}
         material={assets.sceneryMaterial}
-        castShadow={activeGraphicsQuality === 'high'}
+        castShadow
         receiveShadow
       />
       <mesh
         name="track-surface-wear"
         geometry={assets.trackSurfaceWearGeometry}
         material={assets.trackSurfaceWearMaterial}
-        castShadow={activeGraphicsQuality === 'high'}
+        castShadow
         receiveShadow
       />
       <mesh
         name="track-kerb-surfaces"
         geometry={assets.kerbSurfaceGeometry}
         material={assets.kerbSurfaceMaterial}
-        castShadow={activeGraphicsQuality === 'high'}
+        castShadow
         receiveShadow
       />
       {assets.templeGrassVergeMaterial && (
@@ -1623,7 +1609,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           name="track-harbour-hairpin-island-surface"
           geometry={assets.harbourHairpinIslandSurfaceGeometry}
           material={assets.harbourHairpinIslandSurfaceMaterial}
-          castShadow={activeGraphicsQuality === 'high'}
+          castShadow
           receiveShadow
         />
       )}
@@ -1786,7 +1772,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           name="track-harbour-apartment-upper-surfaces"
           geometry={assets.apartmentUpperSurfaceGeometry}
           material={assets.apartmentUpperSurfaceMaterial}
-          castShadow={activeGraphicsQuality === 'high'}
+          castShadow
           receiveShadow
         />
       )}
@@ -1834,7 +1820,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           name="track-harbour-yacht-rig-surfaces"
           geometry={assets.yachtRigSurfaceGeometry}
           material={assets.yachtRigSurfaceMaterial}
-          castShadow={activeGraphicsQuality === 'high'}
+          castShadow
           receiveShadow
         />
       )}
@@ -1859,7 +1845,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
           name="track-palm-trunk-surfaces"
           geometry={assets.palmTrunkSurfaceGeometry}
           material={assets.palmTrunkSurfaceMaterial}
-          castShadow={activeGraphicsQuality === 'high'}
+          castShadow
           receiveShadow
         />
       )}
@@ -1895,7 +1881,7 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
         renderOrder={2}
       />
 
-      {visibleFloodlights.map((position, index) => (
+      {assets.floodlights.map((position, index) => (
         <pointLight
           key={index}
           name={`circuit-floodlight-${index}`}
@@ -1907,19 +1893,18 @@ export default function Track({ track = getTrackPreset(), graphicsQuality = 'hig
         />
       ))}
 
-      {tunnelLightPreset
-        && visibleTunnelLights.map(({ position }, index) => (
-          <pointLight
-            key={`harbour-tunnel-${index}`}
-            name={`harbour-tunnel-light-${index}`}
-            position={position}
-            color="#ffd9a0"
-            intensity={tunnelLightPreset.intensity}
-            distance={tunnelLightPreset.distance}
-            decay={2}
-            castShadow={false}
-          />
-        ))}
+      {assets.tunnelLights.map(({ position }, index) => (
+        <pointLight
+          key={`harbour-tunnel-${index}`}
+          name={`harbour-tunnel-light-${index}`}
+          position={position}
+          color="#ffd9a0"
+          intensity={52}
+          distance={34}
+          decay={2}
+          castShadow={false}
+        />
+      ))}
     </group>
   )
 }

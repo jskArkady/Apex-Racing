@@ -7,55 +7,24 @@ const SHADOW_HALF_EXTENT = 72
 const SHADOW_CAMERA_NEAR = 1
 const SHADOW_CAMERA_FAR = 360
 
-const SHADOW_QUALITY_PRESETS = Object.freeze({
-  low: Object.freeze({
-    enabled: false,
-    mapSize: 512,
-    halfExtent: SHADOW_HALF_EXTENT,
-    texelSize: (SHADOW_HALF_EXTENT * 2) / 512,
-    near: SHADOW_CAMERA_NEAR,
-    far: SHADOW_CAMERA_FAR,
-    bias: -0.0001,
-    normalBias: 0.035,
-  }),
-  medium: Object.freeze({
-    enabled: true,
-    mapSize: 1024,
-    halfExtent: SHADOW_HALF_EXTENT,
-    texelSize: (SHADOW_HALF_EXTENT * 2) / 1024,
-    near: SHADOW_CAMERA_NEAR,
-    far: SHADOW_CAMERA_FAR,
-    bias: -0.0001,
-    normalBias: 0.035,
-  }),
-  high: Object.freeze({
-    enabled: true,
-    mapSize: 1536,
-    halfExtent: SHADOW_HALF_EXTENT,
-    texelSize: (SHADOW_HALF_EXTENT * 2) / 1536,
-    near: SHADOW_CAMERA_NEAR,
-    far: SHADOW_CAMERA_FAR,
-    bias: -0.0001,
-    normalBias: 0.035,
-  }),
+export const SHADOW_SETTINGS = Object.freeze({
+  mapSize: 1536,
+  halfExtent: SHADOW_HALF_EXTENT,
+  texelSize: (SHADOW_HALF_EXTENT * 2) / 1536,
+  near: SHADOW_CAMERA_NEAR,
+  far: SHADOW_CAMERA_FAR,
+  bias: -0.0001,
+  normalBias: 0.035,
 })
-
-export function getShadowQualityPreset(quality = 'high') {
-  return SHADOW_QUALITY_PRESETS[quality] ?? SHADOW_QUALITY_PRESETS.high
-}
 
 const finiteOr = (value, fallback) => Number.isFinite(value) ? value : fallback
 
 export function calculateShadowRigPose(
   focus,
   sunOffset,
-  preset,
   fallbackFocus,
   target = {},
 ) {
-  const safePreset = preset?.texelSize > 0
-    ? preset
-    : SHADOW_QUALITY_PRESETS.high
   const fallbackX = finiteOr(fallbackFocus?.x, 0)
   const fallbackY = finiteOr(fallbackFocus?.y, 0)
   const fallbackZ = finiteOr(fallbackFocus?.z, 0)
@@ -65,7 +34,7 @@ export function calculateShadowRigPose(
   const sunX = finiteOr(sunOffset?.[0], 0)
   const sunY = finiteOr(sunOffset?.[1], 0)
   const sunZ = finiteOr(sunOffset?.[2], 0)
-  const texelSize = safePreset.texelSize
+  const texelSize = SHADOW_SETTINGS.texelSize
 
   target.targetX = Math.round(focusX / texelSize) * texelSize
   target.targetY = focusY
@@ -78,8 +47,6 @@ export function calculateShadowRigPose(
 
 export default function RaceLighting({
   environment,
-  graphicsQuality = 'high',
-  shadowsEnabled = true,
   track,
   gameMode = 'single',
 }) {
@@ -94,7 +61,6 @@ export default function RaceLighting({
     lightY: 0,
     lightZ: 0,
   })
-  const preset = getShadowQualityPreset(graphicsQuality)
   const fallbackFocus = useMemo(() => {
     const pose = getStartGridPose('player', gameMode, track.curve, track.length)
     return {
@@ -106,10 +72,9 @@ export default function RaceLighting({
   const initialPose = useMemo(() => calculateShadowRigPose(
     fallbackFocus,
     environment.sunPosition,
-    preset,
     fallbackFocus,
     {},
-  ), [environment.sunPosition, fallbackFocus, preset])
+  ), [environment.sunPosition, fallbackFocus])
 
   useEffect(() => () => {
     if (attachedSceneRef.current) {
@@ -132,7 +97,6 @@ export default function RaceLighting({
     const pose = calculateShadowRigPose(
       playerFocus,
       environment.sunPosition,
-      preset,
       fallbackFocus,
       poseRef.current,
     )
@@ -155,19 +119,19 @@ export default function RaceLighting({
       <directionalLight
         ref={lightRef}
         target={targetObject}
-        castShadow={shadowsEnabled && preset.enabled}
+        castShadow
         color={environment.sunColor}
         position={[initialPose.lightX, initialPose.lightY, initialPose.lightZ]}
         intensity={environment.sunIntensity}
-        shadow-mapSize={[preset.mapSize, preset.mapSize]}
-        shadow-camera-near={preset.near}
-        shadow-camera-far={preset.far}
-        shadow-camera-left={-preset.halfExtent}
-        shadow-camera-right={preset.halfExtent}
-        shadow-camera-top={preset.halfExtent}
-        shadow-camera-bottom={-preset.halfExtent}
-        shadow-bias={preset.bias}
-        shadow-normalBias={preset.normalBias}
+        shadow-mapSize={[SHADOW_SETTINGS.mapSize, SHADOW_SETTINGS.mapSize]}
+        shadow-camera-near={SHADOW_SETTINGS.near}
+        shadow-camera-far={SHADOW_SETTINGS.far}
+        shadow-camera-left={-SHADOW_SETTINGS.halfExtent}
+        shadow-camera-right={SHADOW_SETTINGS.halfExtent}
+        shadow-camera-top={SHADOW_SETTINGS.halfExtent}
+        shadow-camera-bottom={-SHADOW_SETTINGS.halfExtent}
+        shadow-bias={SHADOW_SETTINGS.bias}
+        shadow-normalBias={SHADOW_SETTINGS.normalBias}
       />
     </>
   )

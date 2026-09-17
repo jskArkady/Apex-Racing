@@ -63,6 +63,7 @@ export default function HUD() {
   const lastLapTime = useGameStore(state => state.lastLapTime)
   const countdown = useGameStore(state => state.countdown)
   const gameState = useGameStore(state => state.gameState)
+  const decrementCountdown = useGameStore(state => state.decrementCountdown)
   const isDrivingBackwards = useGameStore(state => state.isDrivingBackwards)
   const nextCheckpointIndex = useGameStore(state => state.nextCheckpointIndex)
   const totalCheckpoints = useGameStore(state => state.totalCheckpoints)
@@ -80,6 +81,14 @@ export default function HUD() {
   })
   const [startCue, setStartCue] = useState('')
   const previousGameState = useRef(gameState)
+
+  // Start only after the ready HUD has committed. Starting inside the physics
+  // tree can consume the first second while a cold scene delays this overlay.
+  useEffect(() => {
+    if (gameState !== 'countdown') return undefined
+    const interval = window.setInterval(decrementCountdown, 1000)
+    return () => window.clearInterval(interval)
+  }, [gameState, decrementCountdown])
 
   useEffect(() => {
     let cueTimer

@@ -97,3 +97,104 @@ were not tested. Browser smoke checks do not complete a full lap; storage failur
 on completion are covered by the store regression tests. Personal bests remain
 session-only when storage is denied. A failed dynamic module import is recovered
 by reloading the page.
+
+## Follow-up validation — 2026-09-17
+
+Removed the global graphics-quality props and low/medium lighting branches.
+The fixed renderer retains the former high settings: 1536 shadow map, all
+circuit floodlights, six harbour tunnel lights and the same shadow casters.
+
+Added a pinned Playwright development dependency, full-lap keyboard driver and
+GitHub Actions workflow. The workflow runs lint/tests/build, then smoke and lap
+checks against the uploaded production build, and retains browser diagnostics.
+
+Local verification used WSL2, Node.js 24.16.0, Chromium 143.0.7499.4 and
+SwiftShader. Chromium and its missing Linux libraries were extracted under
+`/tmp`; the browser script used `CHROMIUM_EXECUTABLE` and
+`CHROMIUM_LIBRARY_PATH`. No system library installation was required.
+
+- `npm run verify`: 62 files / **609 tests**, lint and production build passed.
+- Final lint, JavaScript syntax checks and `git diff --check` passed.
+- Workflow YAML parsed and package/lockfile dependency declarations matched.
+- Production smoke: all six track/viewport cases and both download-recovery
+  scenarios passed (eight cases total).
+- Full-lap tests ran separately with `BROWSER_TRACK` for each circuit, through
+  `node scripts/browser-check.mjs lap`. All passed:
+
+| Circuit | Completed lap | Physical distance observed |
+| --- | ---: | ---: |
+| Apex Grand Prix | 02:56:520 | 1713.1 m |
+| Harbour Street | 01:54:533 | 983.7 m |
+| Temple Speedway | 02:19:793 | 1367.3 m |
+
+Every lap accepted checkpoints 1–9 and finish in order, produced a saved record
+matching the result screen, and retained that record after page reload. The
+driver injected keyboard events and observed existing HUD/minimap telemetry;
+it did not write race state, teleport bodies or advance the clock artificially.
+The lap times are test-driver results, not gameplay performance benchmarks.
+
+Local evidence is in `/tmp/racing-verify.log`, `/tmp/racing-smoke-metrics.json`,
+`/tmp/racing-lap-metrics.json`, `/tmp/racing-harbour-lap-metrics.json` and
+`/tmp/racing-temple-lap-metrics.json`. These temporary files are not committed.
+The GitHub-hosted workflow has not been run; its Node.js 22 runner remains to
+be verified after a push. Full four-car race completion, physical mobile GPUs,
+Safari, screen readers and audio output remain outside this browser run.
+
+## First-race loading measurement — 2026-09-17
+
+Added `npm run measure:race` and `scripts/browser-race-loading.mjs`, reusing the
+production browser server/runtime. The current script measured the preserved
+pre-change build at `/tmp/racing-before-loading` and the corrected build at
+`dist`, sequentially, five fresh contexts per track/build (30 samples total).
+Both used Chromium 143.0.7499.4, SwiftShader, 1280×720, disabled HTTP cache,
+40 ms latency and 10 Mbps download bandwidth without CPU throttling.
+
+All numbers below are medians of five samples, in milliseconds. The playing
+milestone includes the intentional countdown and 15 Hz HUD observation delay;
+movement includes keyboard dispatch and acceleration to a 0.1 m displacement.
+
+| Track | Before HUD ready | After HUD ready | Before playing | After playing | After movement |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Apex Grand Prix | 3186.0 | 3277.1 | 7868.3 | 8916.4 | 9459.1 |
+| Harbour Street | 2878.6 | 2935.8 | 6000.2 | 7437.3 | 8013.5 |
+| Temple Speedway | 2181.6 | 2320.1 | 5359.0 | 5801.6 | 6066.3 |
+
+The measurement exposed a countdown race: `RaceClock` started its interval in
+the physics tree before the HUD committed. The baseline missed the initial `3`
+in one Apex sample; two Harbour samples and one Temple sample spent less than
+2.9 seconds between observed HUD readiness and playing. The timer now belongs
+to the mounted HUD; scene readiness still gates mounting. All 15 corrected
+samples observed `3`, `2`, `1` in order and preserved at least 2.9 seconds after
+HUD readiness (100 ms tolerance for observation). Longer click-to-playing
+times include the restored countdown; these results do not claim a speedup.
+
+The last deferred JavaScript response arrived at roughly 829–839 ms in the
+corrected-build medians. The remaining interval to HUD readiness was 2427 ms
+for Apex, 2113 ms for Harbour and 1481 ms for Temple. It combines evaluation,
+Rapier initialization, geometry/React work and rendering delays. Image response
+completion medians were 5416, 6158 and 4581 ms respectively, overlapping the
+countdown. Resource bytes are Resource Timing encoded-body totals, not packet
+capture measurements; duplicate/coalesced image loads can affect these totals.
+
+This identifies post-JavaScript scene preparation and overlapping texture work
+as profiling candidates in this software-rendered environment. It does not
+isolate physics initialization from geometry or shader/GPU work, establish
+real-device bottlenecks, or justify changing graphics quality. No asset,
+rendering-quality or physics optimization was made from these timings.
+
+Verification: `npm run verify` passed **63 files / 610 tests**, lint and build.
+The focused loading/countdown/UI/timing run passed 28 tests. A separate Python
+check confirmed all 30 samples and recomputed every recorded summary median.
+The new deterministic regression holds back HUD mounting for five seconds
+after scene readiness, then checks countdown start, unmount and remount.
+The corrected production build also passed all eight browser smoke scenarios:
+six track/viewport/input cases plus delayed-download and failed-download
+recovery. Final syntax, lint and diff checks passed. Full-lap checks were not
+repeated for this timer-only change; their earlier results are recorded above.
+
+Evidence: `/tmp/racing-first-race-before-metrics.json`,
+`/tmp/racing-first-race-after-metrics.json` and
+`/tmp/racing-loading-verify.log`, with smoke evidence in
+`/tmp/racing-loading-fix-smoke-metrics.json`. These temporary files contain per-resource
+timings and per-track min/median/max; the checked-in table preserves the main
+results. See `TESTING.md` for field definitions and repeatable commands.
