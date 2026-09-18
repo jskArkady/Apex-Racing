@@ -309,6 +309,48 @@ describe('progressGuard', () => {
     expect(shouldRecoverFromProgressFailure('outside-corridor')).toBe(false);
   });
 
+  it('recovers after consecutive slow frames without awarding their progress', () => {
+    let result = sampleFrame(createProgressGuardState(), { x: 0, progress: 0, speed: 10 });
+    for (let x = 6; x <= 60; x += 6) {
+      result = sampleFrame(result.state, { x, progress: x / trackLength, speed: 10, delta: 0.6 });
+      expect(result.valid).toBe(false);
+      expect(result.state.timingReanchorAllowed).toBe(true);
+      expect(result.state.worldPosition.x).toBe(0);
+      expect(result.state.curveProgress).toBe(0);
+    }
+    result = sampleFrame(result.state, { x: 60.1, progress: 60.1 / trackLength, speed: 10 });
+    expect(result.reason).toBe('continuity-reanchored');
+    expect(result.valid).toBe(false);
+    result = sampleFrame(result.state, { x: 60.2, progress: 60.2 / trackLength, speed: 10 });
+    expect(result.valid).toBe(true);
+  });
+
+  it.each([0.6, 1 / 60])('rejects a teleport during timing recovery at delta %s', delta => {
+    let result = sampleFrame(createProgressGuardState(), { x: 0, progress: 0, speed: 10 });
+    result = sampleFrame(result.state, { x: 6, progress: 6 / trackLength, speed: 10, delta: 0.6 });
+    result = sampleFrame(result.state, { x: 200, progress: 200 / trackLength, speed: 10, delta });
+    expect(result.valid).toBe(false);
+    expect(result.state.timingReanchorAllowed).toBe(false);
+    expect(result.state.timingPosition).toBeNull();
+    for (let frame = 0; frame < 3; frame++) {
+      result = sampleFrame(result.state, { x: 200, progress: 200 / trackLength, speed: 10 });
+      expect(result.reason).toBe('world-teleport');
+      expect(result.state.worldPosition.x).toBe(0);
+    }
+  });
+
+  it.each([
+    { progress: 0.5, centerlineDistance: 0, reason: 'curve-alias-jump' },
+    { progress: 12 / trackLength, centerlineDistance: 17, reason: 'outside-corridor' },
+  ])('rejects $reason inside a slow-frame chain', ({ progress, centerlineDistance, reason }) => {
+    let result = sampleFrame(createProgressGuardState(), { x: 0, progress: 0, speed: 10 });
+    result = sampleFrame(result.state, { x: 6, progress: 6 / trackLength, speed: 10, delta: 0.6 });
+    result = sampleFrame(result.state, { x: 12, progress, centerlineDistance, speed: 10, delta: 0.6 });
+    expect(result.reason).toBe(reason);
+    expect(result.state.timingReanchorAllowed).toBe(false);
+    expect(result.state.worldPosition.x).toBe(0);
+  });
+
   it('reanchors after a rejected sample without validating the discontinuous frame', () => {
     const initial = sampleFrame(createProgressGuardState(), {
       x: 0,
@@ -317,7 +359,7 @@ describe('progressGuard', () => {
     });
     const interrupted = sampleFrame(initial.state, {
       x: 15,
-      progress: 0.3,
+      progress: 0.2 + 15 / trackLength,
       speed: 20,
       delta: 1
     });
@@ -326,17 +368,17 @@ describe('progressGuard', () => {
 
     const reanchored = sampleFrame(interrupted.state, {
       x: 15.25,
-      progress: 0.301,
+      progress: 0.2 + 15.25 / trackLength,
       speed: 20
     });
     expect(reanchored.valid).toBe(false);
     expect(reanchored.reason).toBe('continuity-reanchored');
     expect(reanchored.state.segmentValid).toBe(true);
-    expect(reanchored.state.curveProgress).toBeCloseTo(0.301);
+    expect(reanchored.state.curveProgress).toBeCloseTo(0.2 + 15.25 / trackLength);
 
     const resumed = sampleFrame(reanchored.state, {
       x: 15.5,
-      progress: 0.30125,
+      progress: 0.2 + 15.5 / trackLength,
       speed: 20
     });
     expect(resumed.valid).toBe(true);

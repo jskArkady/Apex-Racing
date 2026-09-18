@@ -198,3 +198,37 @@ Evidence: `/tmp/racing-first-race-before-metrics.json`,
 `/tmp/racing-loading-fix-smoke-metrics.json`. These temporary files contain per-resource
 timings and per-track min/median/max; the checked-in table preserves the main
 results. See `TESTING.md` for field definitions and repeatable commands.
+
+## Consecutive slow-frame progress recovery (2026-09-18)
+
+The failing Actions job showed physical driving with checkpoint 1 unchanged.
+A deterministic regression reproduced a continuity guard failure: successive
+legal slow frames were compared against a frozen position until recovery was
+permanently disabled. This explains a possible failure path; the original job
+had no guard diagnostics to prove that it was the exact cause.
+
+The guard now keeps separate pending position/progress observations and checks
+each hop against the existing bounded movement budget, track corridor and curve
+alias limits. Race progress stays frozen during slow frames. A validated normal
+frame reanchors it without awarding an ordinary checkpoint; subsequent continuous
+frames can accept checkpoints. Invalid hops discard the pending chain. Forward
+finish crossings survive a legal chain only once and are cancelled by crossing
+backwards.
+
+The browser lap report now includes `gameProgress` (frame delta, projected and
+approved progress, rejection reason and recovery state). Timeout artifacts also
+include the bounded runtime event snapshot and structured track telemetry.
+
+Validation: `npm run verify` passed lint, 616 tests across 63 files, and production
+build. Two additional forward/reverse finish-chain cases subsequently passed in
+`src/test/raceIntegrity.regression.test.js` (5/5). Integration coverage exercises
+the actual Car controller through repeated 600ms samples and then verifies that
+checkpoint acceptance resumes. Syntax and whitespace checks passed.
+
+Production Chromium 143 / SwiftShader full-lap validation passed on all tracks:
+Apex GP 02:50:402, Harbour Street 01:38:275, Temple Speedway 02:15:739.
+All nine checkpoints and finish were accepted in order; saved times matched the
+results and survived reload. Guard telemetry was present in the output.
+Raw results: `/tmp/racing-guard-fix-metrics.json` (temporary, not committed).
+The updated code has not been pushed or rerun on GitHub Actions. These local
+browser runs do not reproduce every timing condition of the original CI worker.

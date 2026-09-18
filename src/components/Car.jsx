@@ -41,6 +41,7 @@ import {
 } from '../utils/progressGuard'
 import {
   createPhysicsObservationState,
+  getRuntimeDiagnostics,
   observePlayerPhysics,
   recordRuntimeDiagnostic,
   resetPhysicsObservation,
@@ -834,6 +835,17 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
     const approvedProgress = hasContinuousProgress || !progressGuardRef.current.initialized
       ? closestT
       : progressGuardRef.current.curveProgress
+    const diagnostics = getRuntimeDiagnostics()
+    diagnostics.progress ??= {}
+    Object.assign(diagnostics.progress, {
+      frameDelta,
+      projectedProgress: closestT,
+      approvedProgress,
+      guardReason: progressGuardRef.current.reason,
+      hasContinuousProgress,
+      timingReanchorAllowed: progressGuardRef.current.timingReanchorAllowed,
+      pendingProgress: progressGuardRef.current.timingProgress,
+    })
     const trackTangent = trackCurve.getTangentAt(approvedProgress, tempTrackTangent)
     const flatTrackTangent = tempFlatTrackTangent
       .set(trackTangent.x, 0, trackTangent.z)

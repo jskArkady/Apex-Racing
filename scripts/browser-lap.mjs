@@ -3,7 +3,7 @@ import { TRACK_PRESETS } from '../src/utils/trackData.js';
 import { formatTime } from '../src/utils/formatTime.js';
 
 // Follow the centreline using ordinary keyboard events. Only the existing
-// read-only minimap telemetry and visible HUD are observed: no store writes,
+// read-only minimap/guard telemetry and visible HUD are observed: no store writes,
 // checkpoint calls, body teleportation or physics/time overrides.
 export async function completeBrowserLaps(browser, url, runs) {
   const tracks = TRACK_PRESETS.filter(track => !process.env.BROWSER_TRACK
@@ -81,6 +81,7 @@ export async function completeBrowserLaps(browser, url, runs) {
         setKey('KeyW', speed < targetSpeed);
         setKey('Space', speed > targetSpeed + 1);
         Object.assign(report, { progress: nearest / points.length, speed, error, centerlineDistance: bestDistance });
+        report.gameProgress = window.__RACING_RUNTIME_DIAGNOSTICS__?.progress;
         if (now - lastReportTime > 15_000) {
           console.log('LAP ' + JSON.stringify(report));
           lastReportTime = now;
@@ -94,7 +95,11 @@ export async function completeBrowserLaps(browser, url, runs) {
     try {
       await page.waitForFunction(() => window.__browserLap?.done, null, { timeout: 600_000 });
     } catch (error) {
-      const telemetry = await page.evaluate(() => window.__browserLap);
+      const telemetry = await page.evaluate(() => ({
+        ...window.__browserLap,
+        runtimeEvents: window.__RACING_RUNTIME_DIAGNOSTICS__?.snapshot(),
+      }));
+      runs.push({ track: track.id, completion: false, ...telemetry, passed: false });
       throw new Error(`${track.id} did not finish: ${JSON.stringify(telemetry)}`, { cause: error });
     }
     const telemetry = await page.evaluate(() => window.__browserLap);

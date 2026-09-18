@@ -99,4 +99,27 @@ describe('release-blocking race integrity regressions', () => {
     expect(didConfirmForwardSeamCrossing(reanchored.state)).toBe(true)
     expect(didConfirmForwardSeamCrossing(next.state)).toBe(false)
   })
+  it.each([false, true])('retains a slow-frame finish crossing unless reversed: %s', reversed => {
+    let state = sample(createProgressGuardState(), {
+      x: 0, progress: 0.99, speed: 10, delta: 1 / 60,
+    }).state
+    for (const x of [6, 12, 18, ...(reversed ? [12, 6] : [24])]) {
+      const result = sample(state, {
+        x, progress: 0.99 + x / TRACK_LENGTH, speed: 10, delta: 0.6,
+      })
+      expect(result.valid).toBe(false)
+      expect(didConfirmForwardSeamCrossing(result.state)).toBe(false)
+      state = result.state
+    }
+    const x = reversed ? 6 : 24
+    const resumed = sample(state, {
+      x, progress: 0.99 + x / TRACK_LENGTH, speed: 10, delta: 1 / 60,
+    })
+    expect(didConfirmForwardSeamCrossing(resumed.state)).toBe(!reversed)
+    const next = sample(resumed.state, {
+      x, progress: 0.99 + x / TRACK_LENGTH, speed: 10, delta: 1 / 60,
+    })
+    expect(didConfirmForwardSeamCrossing(next.state)).toBe(false)
+  })
+
 })

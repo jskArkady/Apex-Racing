@@ -1,4 +1,4 @@
-export const RUNTIME_DIAGNOSTICS_VERSION = '2026-07-08.1'
+export const RUNTIME_DIAGNOSTICS_VERSION = '2026-09-18.1'
 
 export const RUNTIME_EVENT_ID = Object.freeze({
   PLAYER_TRANSLATION: 'player-translation',
@@ -41,8 +41,10 @@ function getDiagnosticState() {
     // actually created it instead of guessing from the current DOM.
     source: import.meta.url,
     events: [],
+    progress: null,
     clear() {
       this.events.length = 0
+      this.progress = null
     },
     snapshot() {
       return this.events.map(event => ({ ...event }))

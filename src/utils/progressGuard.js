@@ -255,6 +255,8 @@ const rejectProgress = (state, reason) => {
   state.reason = reason;
   state.timingReanchorAllowed = false;
   state.pendingForwardSeamCrossing = false;
+  state.timingPosition = null;
+  state.timingProgress = null;
   return false;
 };
 
@@ -266,6 +268,8 @@ export function createProgressGuardState(segmentValid = true) {
     segmentValid,
     reason: null,
     timingReanchorAllowed: false,
+    timingPosition: null,
+    timingProgress: null,
     pendingForwardSeamCrossing: false,
     confirmedForwardSeamCrossing: false
   };
@@ -285,7 +289,7 @@ export function getSignedWrappedProgressDelta(previousProgress, currentProgress)
 
 /**
  * Validates whether a frame-to-frame race progress sample is physically
- * continuous. Only accepted samples advance the returned guard state.
+ * continuous. Slow-frame observations remain separate from accepted race progress.
  */
 export function updateProgressGuardState(
   state,
@@ -312,37 +316,6 @@ export function updateProgressGuardState(
     return rejectProgress(state, 'invalid-sample');
   }
 
-  if (delta > MAX_SAMPLE_DELTA) {
-    let timingReanchorAllowed = false;
-    if (state.initialized && isFiniteVector(state.worldPosition)) {
-      const suspendedDisplacement = Math.sqrt(squaredDistance(worldPosition, state.worldPosition));
-      const boundedSpeed = Math.min(Math.abs(speed), MAX_PLAUSIBLE_SPEED);
-      // Rapier/render integration is not allowed to claim an arbitrarily large
-      // displacement budget merely because a browser tab was hidden for a
-      // long time. The controller treats at most one normal guard interval as
-      // simulated motion across the gap.
-      const boundedDelta = Math.min(delta, MAX_SAMPLE_DELTA);
-      const suspendedDisplacementLimit = Math.max(
-        MIN_WORLD_DISPLACEMENT_ALLOWANCE,
-        1.5 * boundedSpeed * boundedDelta
-          + 0.5 * MAX_PLAUSIBLE_ACCELERATION * boundedDelta * boundedDelta
-          + 1
-      );
-      timingReanchorAllowed = suspendedDisplacement <= suspendedDisplacementLimit;
-    }
-    const normalizedProgress = wrapProgress(curveProgress);
-    const wrappedDelta = state.initialized
-      ? getSignedWrappedProgressDelta(state.curveProgress, normalizedProgress)
-      : 0;
-    rejectProgress(state, 'timing-discontinuity');
-    state.timingReanchorAllowed = timingReanchorAllowed;
-    state.pendingForwardSeamCrossing = timingReanchorAllowed
-      && state.curveProgress > 0.5
-      && normalizedProgress < 0.5
-      && wrappedDelta > 0;
-    return false;
-  }
-
   if (
     centerlineDistance > PROGRESS_CORRIDOR_LIMIT + CORRIDOR_NUMERICAL_EPSILON
     || centerlineDistance < 0
@@ -352,6 +325,7 @@ export function updateProgressGuardState(
 
   const normalizedProgress = wrapProgress(curveProgress);
   if (!state.initialized) {
+    if (delta > MAX_SAMPLE_DELTA) return rejectProgress(state, 'timing-discontinuity');
     state.initialized = true;
     state.worldPosition = copyPosition(worldPosition);
     state.curveProgress = normalizedProgress;
@@ -360,55 +334,66 @@ export function updateProgressGuardState(
     return true;
   }
 
-  // A suspended-frame timing sample must not permanently pin projection to an
-  // obsolete curve section. Car performs one global projection after this
-  // specific rejection; use it as a fresh anchor, but return false so the
-  // discontinuous frame cannot award a checkpoint.
-  //
-  // Do not apply this to world teleports or curve aliases. Those must retain
-  // the last trusted anchor indefinitely (or until reset), otherwise holding a
-  // teleported position for two frames would turn the guard into an exploit.
-  if (
-    !state.segmentValid
+  // Keep a separate, physically validated observation chain across slow
+  // frames. The accepted race anchor stays frozen until a normal frame returns.
+  // Each hop has its own bounded budget; elapsed wall time never grants a
+  // growing teleport allowance, and invalid hops discard the entire chain.
+  const reanchoring = !state.segmentValid
     && state.reason === 'timing-discontinuity'
     && state.timingReanchorAllowed
-  ) {
+    && isFiniteVector(state.timingPosition)
+    && Number.isFinite(state.timingProgress);
+  const referencePosition = reanchoring ? state.timingPosition : state.worldPosition;
+  const referenceProgress = reanchoring ? state.timingProgress : state.curveProgress;
+  if (!isFiniteVector(referencePosition) || !Number.isFinite(referenceProgress)) {
+    return rejectProgress(state, 'invalid-state');
+  }
+
+  const worldDisplacement = Math.sqrt(squaredDistance(worldPosition, referencePosition));
+  const boundedSpeed = Math.min(Math.abs(speed), MAX_PLAUSIBLE_SPEED);
+  const boundedDelta = Math.min(delta, MAX_SAMPLE_DELTA);
+  const worldDisplacementLimit = Math.max(
+    MIN_WORLD_DISPLACEMENT_ALLOWANCE,
+    1.5 * boundedSpeed * boundedDelta
+      + 0.5 * MAX_PLAUSIBLE_ACCELERATION * boundedDelta * boundedDelta
+      + 1
+  );
+  if (worldDisplacement > worldDisplacementLimit) {
+    return rejectProgress(state, delta > MAX_SAMPLE_DELTA ? 'timing-discontinuity' : 'world-teleport');
+  }
+
+  const wrappedDelta = getSignedWrappedProgressDelta(referenceProgress, normalizedProgress);
+  const curveArcDisplacement = Math.abs(wrappedDelta) * trackLength;
+  const curveArcLimit = 1.25 * worldDisplacement + CURVE_ARC_LANE_ALLOWANCE;
+  if (curveArcDisplacement > curveArcLimit) {
+    return rejectProgress(state, 'curve-alias-jump');
+  }
+
+  const crossedForward = referenceProgress > 0.5 && normalizedProgress < 0.5 && wrappedDelta > 0;
+  const crossedBackward = referenceProgress < 0.5 && normalizedProgress > 0.5 && wrappedDelta < 0;
+  const pendingCrossing = !crossedBackward
+    && (crossedForward || (reanchoring && state.pendingForwardSeamCrossing));
+  if (delta > MAX_SAMPLE_DELTA) {
+    state.timingPosition = copyPosition(worldPosition);
+    state.timingProgress = normalizedProgress;
+    state.segmentValid = false;
+    state.reason = 'timing-discontinuity';
+    state.timingReanchorAllowed = true;
+    state.pendingForwardSeamCrossing = pendingCrossing;
+    return false;
+  }
+
+  if (reanchoring) {
     state.worldPosition = copyPosition(worldPosition);
     state.curveProgress = normalizedProgress;
     state.segmentValid = true;
     state.reason = 'continuity-reanchored';
     state.timingReanchorAllowed = false;
-    state.confirmedForwardSeamCrossing = state.pendingForwardSeamCrossing === true;
+    state.timingPosition = null;
+    state.timingProgress = null;
+    state.confirmedForwardSeamCrossing = pendingCrossing;
     state.pendingForwardSeamCrossing = false;
     return false;
-  }
-
-  if (!isFiniteVector(state.worldPosition) || !Number.isFinite(state.curveProgress)) {
-    return rejectProgress(state, 'invalid-state');
-  }
-
-  const dx = worldPosition.x - state.worldPosition.x;
-  const dy = worldPosition.y - state.worldPosition.y;
-  const dz = worldPosition.z - state.worldPosition.z;
-  const worldDisplacement = Math.sqrt(dx * dx + dy * dy + dz * dz);
-  const boundedSpeed = Math.min(Math.abs(speed), MAX_PLAUSIBLE_SPEED);
-  const worldDisplacementLimit = Math.max(
-    MIN_WORLD_DISPLACEMENT_ALLOWANCE,
-    1.5 * boundedSpeed * delta
-      + 0.5 * MAX_PLAUSIBLE_ACCELERATION * delta * delta
-      + 1
-  );
-
-  if (worldDisplacement > worldDisplacementLimit) {
-    return rejectProgress(state, 'world-teleport');
-  }
-
-  const wrappedDelta = getSignedWrappedProgressDelta(state.curveProgress, normalizedProgress);
-  const curveArcDisplacement = Math.abs(wrappedDelta) * trackLength;
-  const curveArcLimit = 1.25 * worldDisplacement + CURVE_ARC_LANE_ALLOWANCE;
-
-  if (curveArcDisplacement > curveArcLimit) {
-    return rejectProgress(state, 'curve-alias-jump');
   }
 
   state.worldPosition.x = worldPosition.x;

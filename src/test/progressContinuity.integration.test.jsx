@@ -6,6 +6,7 @@ import App from '../App';
 import { useGameStore } from '../store/gameStore';
 import { trackCurve, trackLength } from '../utils/trackData';
 import { activeBodies, triggerFrames } from './setup';
+import { getRuntimeDiagnostics } from '../utils/runtimeDiagnostics';
 import { getStartGridPose } from '../utils/startGrid';
 
 const racers = () => [
@@ -50,6 +51,43 @@ describe('production progress continuity guards', () => {
       isDrivingBackwards: false,
       racers: racers()
     });
+  });
+
+  it('recovers checkpoint detection after repeated slow frames and reports the guard state', () => {
+    const { unmount } = render(<App />);
+    const body = getPlayerBody();
+    act(() => {
+      alignBodyToTrack(body, 0, 10);
+      triggerFrames(1 / 60, 1);
+    });
+    for (let distance = 6; distance <= 60; distance += 6) {
+      act(() => {
+        alignBodyToTrack(body, distance / trackLength, 10);
+        triggerFrames(0.6, 1);
+      });
+      expect(getRuntimeDiagnostics().progress).toMatchObject({
+        frameDelta: 0.6,
+        guardReason: 'timing-discontinuity',
+        hasContinuousProgress: false,
+        timingReanchorAllowed: true,
+      });
+    }
+    act(() => {
+      alignBodyToTrack(body, 60.1 / trackLength, 10);
+      triggerFrames(1 / 60, 1);
+    });
+    expect(getRuntimeDiagnostics().progress.guardReason).toBe('continuity-reanchored');
+    act(() => {
+      for (let distance = 60.2; distance <= trackLength * 0.1; distance += 0.5) {
+        alignBodyToTrack(body, distance / trackLength, 30);
+        triggerFrames(1 / 60, 1);
+      }
+    });
+    expect(useGameStore.getState().nextCheckpointIndex).toBe(2);
+    expect(getRuntimeDiagnostics().progress.hasContinuousProgress).toBe(true);
+    getRuntimeDiagnostics().clear();
+    expect(getRuntimeDiagnostics().progress).toBeNull();
+    unmount();
   });
 
   it('rejects an immediate player or AI teleport to the next checkpoint', () => {
