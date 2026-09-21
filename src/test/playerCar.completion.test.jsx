@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import React from 'react'
 import { act, render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -280,8 +281,8 @@ describe('player car completion controls', () => {
       triggerFrames(1 / 60, 1)
     })
 
-    expect(window.racerProgress.player).toBeGreaterThan(190)
-    expect(window.racerProgress.player).toBeLessThan(200)
+    expect(racerTelemetry.progress.player).toBeGreaterThan(190)
+    expect(racerTelemetry.progress.player).toBeLessThan(200)
     view.unmount()
   })
 

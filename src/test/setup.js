@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import { vi, afterAll, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useMemo } from 'react';
@@ -309,8 +310,8 @@ beforeEach(() => {
   frameCallbacks.clear();
   beforePhysicsStepCallbacks.clear();
   activeBodies.clear();
-  window.racerPositions = {};
-  window.racerProgress = {};
+  racerTelemetry.positions = {};
+  racerTelemetry.progress = {};
   window.mockKeys = {
     forward: false,
     backward: false,

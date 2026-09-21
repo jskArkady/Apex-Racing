@@ -11,9 +11,10 @@ render as end-to-end coverage.
 | `npm run test:regression` | Release-blocking race-integrity regressions: seam ranking, render hitches, recovery and finish |
 | `npm run test:qa` | Long-circuit, stress and adversarial scenarios |
 | `npm run verify` | Lint, full suite and production build |
-| `npm run verify:browser` | Production build + real Chromium smoke and full-lap checks |
+| `npm run verify:browser` | Production build + Chromium smoke, Time Trial/ghost and four-car race checks |
 | `npm run test:browser` | Production Chromium/WebGL driving flow, touch input and deferred-loading recovery (requires a build and Playwright runtime) |
-| `npm run test:browser:lap` | Keyboard-driven full Time Trial lap on each circuit, ordered checkpoints, completion and persistent records after reload |
+| `npm run test:browser:lap` | Keyboard-driven Time Trial on each circuit, ordered checkpoints, persistent sectors/ghost and replay/pause after reload |
+| `npm run test:browser:race` | Four-car races on each circuit: real collision, R recovery, full lap and result classification |
 | `npm run measure:race` | Five first-race loading measurements per track against an existing production build |
 
 ## Test boundaries
@@ -73,8 +74,9 @@ not teleport the car, write the game store, invoke checkpoint/finish actions or
 override physics/time. It checks every checkpoint in order, physical distance
 travelled, a saved lap matching the result screen, and the same personal best
 after reloading the application. These cases use available storage; denied
-storage remains covered by smoke and store tests. This does not cover a full
-four-car race or physical mobile devices.
+storage remains covered by smoke and store tests. Ghost samples and sector references are checked against the saved lap, then the
+next Time Trial checks ghost movement and pause stability. These tests do not
+cover physical mobile devices.
 
 Each circuit has a ten-minute wall-clock timeout. To diagnose one circuit:
 
@@ -159,6 +161,26 @@ These measurements use SwiftShader and do not establish real-GPU or mobile
 performance. Physics initialization and first-frame GPU work are not separately
 instrumented. Failed input/loading assertions still fail the measurement run;
 countdown anomalies remain visible in its samples and summary.
+
+## Four-car browser races
+
+`npm run test:browser:race` reuses the keyboard lap driver with Start Race. Before
+following the circuit, it deliberately steers into a contact and presses R once.
+It requires four participating cars, a reported real collision, one recovery,
+ordered checkpoint acceptance, full physical distance, a final position and four
+classified results. No store writes, checkpoint calls, time scaling or body
+teleportation are used. `BROWSER_TRACK` can select one circuit. CI runs this check
+after smoke and Time Trial against the exact production build.
+
+Browser automation reads detached snapshots from `window.__RACING_TELEMETRY__`;
+controllers, minimap and lighting use the `racerTelemetry` module directly.
+A snapshot cannot mutate the active race positions. Ghost samples are separate
+from the racer positions and never affect traffic, rank or racer count.
+
+Feature regressions cover intermediate-lap PB persistence, sector reference
+matching, championship retries and scoring, ghost corruption/recovery/material
+ownership, selected difficulty actuation, audio effects/muting and menu controls.
+Audio node tests check envelopes and lifetime, not perceived audio quality.
 
 ## Release-blocking scenarios
 

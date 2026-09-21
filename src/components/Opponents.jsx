@@ -1,8 +1,10 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import { useRef, useMemo, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { CuboidCollider, RigidBody, useBeforePhysicsStep } from '@react-three/rapier'
 import { CoefficientCombineRule } from '@dimforge/rapier3d-compat'
 import * as THREE from 'three'
+import { AI_DIFFICULTIES } from '../utils/raceConfig'
 import { useGameStore } from '../store/gameStore'
 import { getTrackPreset } from '../utils/trackData'
 import {
@@ -166,7 +168,10 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
   const bodyRef = useRef()
   const trackCurve = track.curve
   const trackLength = track.length
-  const opponentTopSpeed = VEHICLE_DYNAMICS.nominalTopSpeed * data.paceScale
+  const difficulty = useGameStore(state => state.raceOptions.difficulty)
+  const tuning = AI_DIFFICULTIES[difficulty] ?? AI_DIFFICULTIES.hard
+  const paceScale = data.paceScale * tuning.pace
+  const opponentTopSpeed = VEHICLE_DYNAMICS.nominalTopSpeed * paceScale
   const startPose = useMemo(
     () => getStartGridPose(data.racerId, 'single', trackCurve, trackLength),
     [data.racerId, trackCurve, trackLength]
@@ -214,8 +219,7 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
   // Reset when game starts
   useEffect(() => {
     if (gameState === 'countdown' || gameState === 'menu') {
-      if (window.racerProgress) delete window.racerProgress[myId]
-      if (window.racerPositions) delete window.racerPositions[myId]
+      racerTelemetry.remove(myId)
       progressRef.current = startPose.progress
       lapRef.current = 1
       nextCheckpointIndexRef.current = 1
@@ -267,8 +271,7 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
   }, [gameState, myId, opponentTopSpeed, raceSessionId, startPose.position, startPose.progress, startPose.rotation, startPose.tangent, trackLength])
 
   useEffect(() => () => {
-    if (window.racerProgress) delete window.racerProgress[myId]
-    if (window.racerPositions) delete window.racerPositions[myId]
+    racerTelemetry.remove(myId)
   }, [myId])
 
   useBeforePhysicsStep((world) => {
@@ -347,13 +350,13 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
       // while remaining a physically movable 1,200kg chassis.
       const finishedPosition = bodyRef.current.translation()
       const finishedVelocity = bodyRef.current.linvel()
-      if (!window.racerPositions) window.racerPositions = {}
+
       const racerPosObj = racerPosObjRef.current
       racerPosObj.x = finishedPosition.x
       racerPosObj.z = finishedPosition.z
       racerPosObj.vx = finishedVelocity.x
       racerPosObj.vz = finishedVelocity.z
-      window.racerPositions[myId] = racerPosObj
+      racerTelemetry.positions[myId] = racerPosObj
       return
     }
     currentTimeRef.current += elapsedTimeDelta
@@ -394,10 +397,10 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
        // Never materialize a recovered AI on top of a live racer. If the
        // checkpoint area is occupied, leave it out of play and retry later.
        let recoveryOccupied = false
-       if (window.racerPositions) {
-         for (const racerId in window.racerPositions) {
+       if (racerTelemetry.positions) {
+         for (const racerId in racerTelemetry.positions) {
            if (racerId === myId) continue
-           const racerPosition = window.racerPositions[racerId]
+           const racerPosition = racerTelemetry.positions[racerId]
            if (!racerPosition) continue
            const dx = racerPosition.x - tempCurvePoint.x
            const dz = racerPosition.z - tempCurvePoint.z
@@ -458,9 +461,8 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
        driveCommandRef.current.steeringInput = 0
        driveCommandRef.current.gripScale = 1
 
-       if (!window.racerProgress) window.racerProgress = {}
-       if (!window.racerPositions) window.racerPositions = {}
-       window.racerProgress[myId] = calculateLiveRaceScore(
+
+       racerTelemetry.progress[myId] = calculateLiveRaceScore(
          lapRef.current,
          nextCheckpointIndexRef.current,
          recoveryProgress
@@ -470,7 +472,7 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
        racerPosObj.z = tempCurvePoint.z
        racerPosObj.vx = tempTangent.x * FALL_RECOVERY_SPEED
        racerPosObj.vz = tempTangent.z * FALL_RECOVERY_SPEED
-       window.racerPositions[myId] = racerPosObj
+       racerTelemetry.positions[myId] = racerPosObj
 
        updateRacerProgress(
          myId,
@@ -590,11 +592,11 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
     let carAvoidanceSteer = 0
     let trafficTargetSpeed = opponentTopSpeed
 
-    if (window.racerPositions) {
-      for (const id in window.racerPositions) {
-        if (Object.prototype.hasOwnProperty.call(window.racerPositions, id)) {
+    if (racerTelemetry.positions) {
+      for (const id in racerTelemetry.positions) {
+        if (Object.prototype.hasOwnProperty.call(racerTelemetry.positions, id)) {
           if (id === myId) continue
-          const otherCar = window.racerPositions[id]
+          const otherCar = racerTelemetry.positions[id]
           if (!otherCar) continue
           const dx = otherCar.x - pos.x
           const dz = otherCar.z - pos.z
@@ -636,7 +638,7 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
     if (routePlanElapsedRef.current >= 1 / 30 || frameDelta >= 0.1) {
       const speedVal = Math.max(0, forwardSpeed)
       const steerDistance = 6 + 0.6 * speedVal
-      const brakingDistance = 6 + 0.8 * speedVal + (speedVal * speedVal) / 24
+      const brakingDistance = (6 + 0.8 * speedVal + (speedVal * speedVal) / 24) * tuning.brakingLookAhead
       const lookAheadProgress = wrapProgress(
         progressRef.current + steerDistance / (trackLength || 1)
       )
@@ -670,7 +672,7 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
       )
       plannedTargetSpeedRef.current = Math.min(
         opponentTopSpeed,
-        safeSpeed * data.paceScale,
+        safeSpeed * paceScale,
       )
       routePlanElapsedRef.current %= 1 / 30
     }
@@ -819,10 +821,10 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
     }
     
     // Update global progress for position calculation
-    if (!window.racerProgress) window.racerProgress = {}
-    if (!window.racerPositions) window.racerPositions = {}
+
+
     
-    window.racerProgress[myId] = calculateLiveRaceScore(
+    racerTelemetry.progress[myId] = calculateLiveRaceScore(
       lapRef.current,
       nextCheckpointIndexRef.current,
       progressRef.current
@@ -833,7 +835,7 @@ function AIOpponent({ data, gameState, raceSessionId, track, visualDetail }) {
     racerPosObj.z = pos.z
     racerPosObj.vx = linVel.x
     racerPosObj.vz = linVel.z
-    window.racerPositions[myId] = racerPosObj
+    racerTelemetry.positions[myId] = racerPosObj
 
     // Regularly report AI's race metrics to the store
     if (progressChangedThisFrame || racerReportElapsedRef.current >= 0.1) {

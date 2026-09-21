@@ -1,7 +1,11 @@
+import { racerTelemetry } from '../utils/racerTelemetry';
+import { ghostRecorder } from '../utils/ghostLap';
+import { finishChampionshipRound } from '../utils/championship';
 import { create } from 'zustand';
+import { loadLapRecords, saveLapRecords, recordSector } from '../utils/lapRecords';
 import { handleCheckpointPass, sortRacersWithCheckpoints, getRacerRank } from '../utils/raceLogic';
-import { RACE_LAPS } from '../utils/raceConfig';
-import { DEFAULT_TRACK_ID, isTrackId } from '../utils/trackData';
+import { RACE_LAPS, LAP_OPTIONS, AI_DIFFICULTIES, DEFAULT_RACE_OPTIONS } from '../utils/raceConfig';
+import { DEFAULT_TRACK_ID, isTrackId, TRACK_PRESETS } from '../utils/trackData';
 
 const createRacers = (gameMode = 'single') => [
   { id: 'player', lap: 1, nextCheckpointIndex: 1, lastCheckpointTime: 0, finished: false, totalTime: 0, currentTime: 0 },
@@ -100,16 +104,23 @@ const createRaceReset = (
   gameState = 'countdown',
   previousSessionId = 0,
   selectedTrackId = DEFAULT_TRACK_ID,
-  personalBests = {}
+  personalBests = {},
+  raceOptions = DEFAULT_RACE_OPTIONS
 ) => {
+  racerTelemetry.reset();
   const safeTrackId = normalizeTrackId(selectedTrackId);
   return {
   gameState,
   gameMode,
   selectedTrackId: safeTrackId,
   raceSessionId: nextRaceSessionId(previousSessionId),
+  currentSplits: [],
+  lastLapSplits: [],
+  lastSector: 0,
+  sectorTime: 0,
+  sectorDelta: null,
   lap: 1,
-  maxLaps: RACE_LAPS,
+  maxLaps: LAP_OPTIONS.includes(raceOptions.laps) ? raceOptions.laps : RACE_LAPS,
   position: 1,
   totalRacers: gameMode === 'time_trial' ? 1 : 4,
   currentTime: 0,
@@ -168,6 +179,11 @@ export const useGameStore = create((set) => ({
   }),
   
   // Race state
+  currentSplits: [],
+  lastLapSplits: [],
+  lastSector: 0,
+  sectorTime: 0,
+  sectorDelta: null,
   lap: 1,
   maxLaps: RACE_LAPS,
   position: 1,
@@ -217,33 +233,70 @@ export const useGameStore = create((set) => ({
   // Racers
   racers: createRacers(),
   personalBests: initialPersonalBests,
+  lapRecords: loadLapRecords(),
   
+  championship: null,
+  startChampionship: () => set((state) => {
+    if (state.gameState !== 'menu') return state;
+    const trackIds = TRACK_PRESETS.map(track => track.id);
+    return {
+      ...createRaceReset('single', 'countdown', state.raceSessionId, trackIds[0], state.personalBests, state.raceOptions),
+      championship: { round: 0, trackIds, results: [] },
+    };
+  }),
+  nextChampionshipRound: () => set((state) => {
+    const cup = state.championship;
+    if (state.gameState !== 'finished' || !cup || cup.results.length !== cup.round + 1
+      || cup.round + 1 >= cup.trackIds.length) return state;
+    const round = cup.round + 1;
+    return {
+      ...createRaceReset('single', 'countdown', state.raceSessionId, cup.trackIds[round], state.personalBests, state.raceOptions),
+      championship: { ...cup, round },
+    };
+  }),
+  ghostEnabled: true,
+  setGhostEnabled: (enabled) => set({ ghostEnabled: enabled === true }),
+  raceOptions: { ...DEFAULT_RACE_OPTIONS },
+  updateRaceOptions: (options) => set((state) => {
+    if (state.gameState !== 'menu' || !options) return state;
+    return { raceOptions: {
+      laps: LAP_OPTIONS.includes(options.laps) ? options.laps : state.raceOptions.laps,
+      difficulty: Object.hasOwn(AI_DIFFICULTIES, options.difficulty)
+        ? options.difficulty : state.raceOptions.difficulty,
+    } };
+  }),
   // Actions
   startGame: (mode = 'single') => set((state) => {
     if (state.gameState !== 'menu') return state;
     const safeMode = mode === 'time_trial' ? 'time_trial' : 'single';
-    return createRaceReset(
+    return { championship: null, ...createRaceReset(
       safeMode,
       'countdown',
       state.raceSessionId,
       state.selectedTrackId,
-      state.personalBests
-    );
+      state.personalBests,
+      state.raceOptions
+    ) };
   }),
-  restartRace: () => set((state) => createRaceReset(
+  restartRace: () => set((state) => ({
+    championship: state.championship ? { ...state.championship,
+      results: state.championship.results.slice(0, state.championship.round) } : null,
+    ...createRaceReset(
     state.gameMode,
     'countdown',
     state.raceSessionId,
     state.selectedTrackId,
-    state.personalBests
-  )),
-  returnToMenu: () => set((state) => createRaceReset(
+    state.personalBests,
+    state.raceOptions
+  ) })),
+  returnToMenu: () => set((state) => ({ championship: null, ...createRaceReset(
     state.gameMode,
     'menu',
     state.raceSessionId,
     state.selectedTrackId,
-    state.personalBests
-  )),
+    state.personalBests,
+    state.raceOptions
+  ) })),
   selectTrack: (trackId) => set((state) => {
     if (state.gameState !== 'menu') return state;
     const selectedTrackId = normalizeTrackId(trackId);
@@ -298,6 +351,7 @@ export const useGameStore = create((set) => ({
     if (personalBests !== state.personalBests) savePersonalBests(personalBests);
     return {
       gameState: 'finished',
+      championship: finishChampionshipRound(state.championship, racers),
       totalTime: finalTotalTime,
       lastLapTime: finalLapTime,
       bestLapTime,
@@ -333,7 +387,19 @@ export const useGameStore = create((set) => ({
           currentTime: finiteNonNegativeOr(nextState.currentTime, racer.currentTime)
         }
       : racer);
-    const personalBests = nextState.gameState === 'finished'
+    const sectorUpdate = recordSector(state, index);
+    const lapCompleted = index === 0;
+    const ghostSamples = lapCompleted ? ghostRecorder.complete(state.raceSessionId, nextState.lastLapTime) : null;
+    const lapRecords = lapCompleted && nextState.lastLapTime > 0
+      && (!state.bestLapTime || nextState.lastLapTime < state.bestLapTime)
+      && sectorUpdate.lastLapSplits?.length === 3
+      && [0, 1, 2].every(i => sectorUpdate.lastLapSplits[i] > (sectorUpdate.lastLapSplits[i - 1] ?? 0))
+      ? { ...state.lapRecords, [state.selectedTrackId]: {
+          time: nextState.lastLapTime, splits: sectorUpdate.lastLapSplits, samples: ghostSamples
+        } }
+      : state.lapRecords;
+    if (lapRecords !== state.lapRecords) saveLapRecords(lapRecords);
+    const personalBests = lapCompleted
       ? updatePersonalBest(
           state.personalBests,
           state.selectedTrackId,
@@ -344,6 +410,10 @@ export const useGameStore = create((set) => ({
 
     return {
       ...nextState,
+      ...sectorUpdate,
+      championship: nextState.gameState === 'finished'
+        ? finishChampionshipRound(state.championship, racers) : state.championship,
+      lapRecords,
       racers,
       personalBests,
       ...(nextState.gameState === 'finished'

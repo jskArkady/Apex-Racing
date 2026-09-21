@@ -33,7 +33,7 @@ jobs:
   browser:
     needs: checks
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
       BROWSER_OUTPUT_DIR: browser-results
     steps:
@@ -50,6 +50,7 @@ jobs:
           path: dist
       - run: npm run test:browser
       - run: npm run test:browser:lap
+      - run: npm run test:browser:race
       - uses: actions/upload-artifact@v4
         if: always()
         with:

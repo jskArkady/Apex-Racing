@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -486,7 +487,7 @@ describe('4. Opponents.jsx - AI Edge Cases', () => {
       const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, -1), tangent);
       aiBody.setRotation({ x: q.x, y: q.y, z: q.z, w: q.w });
       aiBody.setLinvel({ x: tangent.x * 20, y: 0, z: tangent.z * 20 });
-      window.racerPositions = {};
+      racerTelemetry.positions = {};
     });
 
     act(() => {
@@ -509,7 +510,7 @@ describe('4. Opponents.jsx - AI Edge Cases', () => {
     act(() => {
       aiBody.setTranslation({ x: pt.x, y: 1, z: pt.z });
       aiBody.setLinvel({ x: tangent.x * 20, y: 0, z: tangent.z * 20 });
-      window.racerPositions = {
+      racerTelemetry.positions = {
         blocker: { x: frontPos.x, z: frontPos.z, color: '#ff3366' }
       };
     });
@@ -549,7 +550,7 @@ describe('4. Opponents.jsx - AI Edge Cases', () => {
     });
 
     const myId = aiBody.name;
-    expect(window.racerProgress[myId]).toBeDefined();
+    expect(racerTelemetry.progress[myId]).toBeDefined();
     unmount();
   });
 });

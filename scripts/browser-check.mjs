@@ -41,7 +41,7 @@ const mode = process.argv[2] ?? 'smoke';
 const root = resolve(process.argv[3] ?? 'dist');
 const label = process.argv[4] ?? mode;
 const output = resolve(process.env.BROWSER_OUTPUT_DIR ?? '/tmp');
-assert.ok(['smoke', 'measure', 'measure-race', 'lap'].includes(mode), 'Mode must be smoke, measure, measure-race or lap');
+assert.ok(['smoke', 'measure', 'measure-race', 'lap', 'race'].includes(mode), 'Mode must be smoke, measure, measure-race, lap or race');
 await mkdir(output, { recursive: true });
 const mime = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
@@ -85,6 +85,7 @@ try {
   console.log('Browser', browser.version(), url);
   if (mode === 'measure') await measure();
   else if (mode === 'measure-race') await measureRaceLoading(browser, url, runs);
+  else if (mode === 'race') await completeBrowserLaps(browser, url, runs, 'single');
   else if (mode === 'lap') await completeBrowserLaps(browser, url, runs);
   else await smoke();
 } catch (error) {
@@ -172,8 +173,18 @@ async function smoke() {
     await page.goto(url, { waitUntil: 'networkidle' });
     assert.ok(!requests.some(request => /\/(rapier-|RaceScene-)/.test(request)), 'Menu must not download race or physics chunks');
     await page.getByRole('radio', { name: new RegExp(testCase.track) }).click();
+    const laps = testCase.width === 320 ? '5' : testCase.width === 390 ? '3' : '1';
+    const difficulty = testCase.width === 320 ? 'easy' : testCase.width === 390 ? 'normal' : 'hard';
+    await page.getByRole('combobox', { name: 'Laps', exact: true }).selectOption(laps);
+    await page.getByRole('combobox', { name: 'AI difficulty', exact: true }).selectOption(difficulty);
+    assert.ok(await page.evaluate(() => {
+      const menu = document.querySelector('.main-menu');
+      return menu.scrollWidth <= menu.clientWidth;
+    }), 'Menu options must fit horizontally');
+    await page.screenshot({ path: `${output}/racing-${label}-menu-${testCase.width}-${testCase.track.replaceAll(' ', '-')}.png` });
     await page.getByRole('button', { name: 'Start Race', exact: true }).click();
     await waitPlaying(page);
+    assert.match(await page.locator('.hud-race-position').innerText(), new RegExp(`Lap\\s*1\\s*/\\s*${laps}`, 'i'), 'HUD must use selected lap count');
     const start = await position(page);
     assert.ok(await page.evaluate(() => !!document.querySelector('canvas')?.getContext('webgl2')), 'Real WebGL2 context required');
     if (testCase.touch) {
@@ -242,14 +253,14 @@ async function smoke() {
 }
 
 async function position(page) {
-  return page.evaluate(() => ({ x: window.racerPositions.player.x, z: window.racerPositions.player.z }));
+  return page.evaluate(() => ({ x: window.__RACING_TELEMETRY__?.positions.player.x, z: window.__RACING_TELEMETRY__?.positions.player.z }));
 }
 async function waitPlaying(page) {
-  await page.waitForFunction(() => window.racerPositions?.player && document.querySelector('.timing-current strong') && Number(document.querySelector('.timing-current strong').textContent.replace(/\D/g, '')) > 0);
+  await page.waitForFunction(() => window.__RACING_TELEMETRY__?.positions?.player && document.querySelector('.timing-current strong') && Number(document.querySelector('.timing-current strong').textContent.replace(/\D/g, '')) > 0);
 }
 async function waitMovement(page, start) {
   await page.waitForFunction(start => {
-    const p = window.racerPositions?.player;
+    const p = window.__RACING_TELEMETRY__?.positions?.player;
     return p && Math.hypot(p.x - start.x, p.z - start.z) > 2;
   }, start);
   assert.ok(Number(await page.locator('.speed-display strong').innerText()) > 0, 'Throttle must produce speed');
@@ -289,7 +300,7 @@ async function delayedDownload() {
   await page.locator('.countdown').waitFor();
   assert.equal(await page.evaluate(() => window.__countdownCues[0]), '3', 'Cold race must start with full countdown');
   await waitPlaying(page);
-  assert.deepEqual(await page.evaluate(() => Object.keys(window.racerPositions)), ['player'], 'Time Trial must not contain AI');
+  assert.deepEqual(await page.evaluate(() => Object.keys(window.__RACING_TELEMETRY__?.positions)), ['player'], 'Time Trial must not contain AI');
   runs.push({ delayedDownload: true, cancelAndRetry: true, pauseDuringLoad: true, timeTrial: true, passed: true });
   console.log('PASS delayed download, cancel and retry, pause during load, Time Trial');
   await context.close();

@@ -133,16 +133,6 @@ function App() {
     audioEngine.setVolume(audioVolume)
   }, [audioVolume])
 
-  // Racer positions are a lightweight render-loop bridge used by the minimap
-  // and AI avoidance. Clear them at every new session so switching from a
-  // four-car race to Time Trial cannot leave ghost opponents on the HUD.
-  useEffect(() => {
-    if (gameState === 'countdown' || gameState === 'menu') {
-      window.racerPositions = {}
-      window.racerProgress = {}
-    }
-  }, [gameState, gameMode])
-
   // Window blur listener to pause the game automatically
   useEffect(() => {
     const handleBlur = () => {

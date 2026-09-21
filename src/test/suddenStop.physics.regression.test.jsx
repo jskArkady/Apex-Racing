@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import React from 'react'
 import { act, render } from '@testing-library/react'
 import * as THREE from 'three'
@@ -264,7 +265,7 @@ describe('suspended-frame sudden-stop regression', () => {
       ai.setTranslation({ x: 321, y: 1, z: -123 })
       triggerFrames(1 / 60, 1)
     })
-    expect(window.racerPositions.ai_1).toMatchObject({ x: 321, z: -123 })
+    expect(racerTelemetry.positions.ai_1).toMatchObject({ x: 321, z: -123 })
 
     view.unmount()
   })

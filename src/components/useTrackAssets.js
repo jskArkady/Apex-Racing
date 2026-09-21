@@ -1,0 +1,1513 @@
+import { useEffect, useMemo } from 'react'
+import * as THREE from 'three'
+import { TriMeshFlags } from '@dimforge/rapier3d-compat'
+import apexBarrierAtlasUrl from '../assets/textures/apex-night-barrier-atlas-1024.webp'
+import apexCrowdPanelUrl from '../assets/textures/apex-night-crowd-panel-1024.webp'
+import apexGantryDisplayUrl from '../assets/textures/apex-night-gantry-display-1024.webp'
+import apexInfieldAlbedoUrl from '../assets/textures/apex-desert-infield-albedo-512.webp'
+import apexPitLaneStaffSpriteAtlasUrl from '../assets/textures/apex-pit-lane-staff-sprite-atlas-1024.webp'
+import apexPitGarageFacadeUrl from '../assets/textures/apex-night-pit-garage-facade-1024.webp'
+import apexRaceControlFacadeAtlasUrl from '../assets/textures/apex-night-race-control-facade-atlas-1024.webp'
+import apexRaceControlRoofSurfaceAtlasUrl from '../assets/textures/apex-race-control-roof-surface-atlas-1024.webp'
+import apexMarshalWindowSurfaceAtlasUrl from '../assets/textures/apex-marshal-window-surface-atlas-1024.webp'
+import apexTentCanopySurfaceAtlasUrl from '../assets/textures/apex-tent-canopy-surface-atlas-1024.webp'
+import apexTowerRingSurfaceAtlasUrl from '../assets/textures/apex-tower-ring-surface-atlas-1024.webp'
+import apexVenueFacadeAtlasUrl from '../assets/textures/apex-night-tower-hospitality-atlas-1024.webp'
+import grandstandStructureAtlasUrl from '../assets/textures/grandstand-structure-surface-atlas-1024.webp'
+import harbourCrowdPanelUrl from '../assets/textures/harbour-day-crowd-panel-1024.webp'
+import harbourGantryDisplayUrl from '../assets/textures/harbour-day-gantry-display-1024.webp'
+import harbourInfieldAlbedoUrl from '../assets/textures/harbour-hardscape-infield-albedo-1024.webp'
+import harbourApartmentFacadeAtlasUrl from '../assets/textures/harbour-apartment-facade-atlas-1024.webp'
+import harbourApartmentUpperSurfaceAtlasUrl from '../assets/textures/harbour-apartment-upper-surface-atlas-1024.webp'
+import harbourBarrierAtlasUrl from '../assets/textures/harbour-day-barrier-atlas-1024.webp'
+import harbourMarinaAtlasUrl from '../assets/textures/harbour-marina-quay-promenade-atlas-1024.webp'
+import harbourOpenWaterRippleHeightUrl from '../assets/textures/harbour-open-water-ripple-height-1024.webp'
+import harbourPitGarageFacadeUrl from '../assets/textures/harbour-day-pit-garage-facade-1024.webp'
+import harbourRetainingWallAtlasUrl from '../assets/textures/harbour-day-retaining-wall-atlas-1024.webp'
+import harbourSwimmingPoolAtlasUrl from '../assets/textures/harbour-swimming-pool-surface-atlas-1024.webp'
+import harbourTunnelCeilingPortalAtlasUrl from '../assets/textures/harbour-tunnel-ceiling-portal-atlas-1024.webp'
+import harbourTunnelWallAtlasUrl from '../assets/textures/harbour-tunnel-wall-atlas-1024.webp'
+import harbourYachtFacadeAtlasUrl from '../assets/textures/harbour-yacht-facade-atlas-1024.webp'
+import harbourYachtRigSurfaceAtlasUrl from '../assets/textures/harbour-yacht-rig-surface-atlas-1024.webp'
+import harbourYachtUpperSurfaceAtlasUrl from '../assets/textures/harbour-yacht-upper-surface-atlas-1024.webp'
+import templeCrowdPanelUrl from '../assets/textures/temple-day-crowd-panel-1024.webp'
+import templeBarrierAtlasUrl from '../assets/textures/temple-day-barrier-atlas-1024.webp'
+import templeBankingTimingAtlasUrl from '../assets/textures/temple-day-banking-timing-atlas-1024.webp'
+import templeGantryDisplayUrl from '../assets/textures/temple-day-gantry-display-1024.webp'
+import templeInfieldAlbedoUrl from '../assets/textures/temple-turf-infield-albedo-512.webp'
+import templePitGarageFacadeUrl from '../assets/textures/temple-day-pit-garage-facade-1024.webp'
+import templeTreeSpriteAtlasUrl from '../assets/textures/temple-tree-sprite-atlas-1024.webp'
+import pitComplexStructureAtlasUrl from '../assets/textures/pit-complex-structure-surface-atlas-1024.webp'
+import sharedBarrierStructuralSurfaceAtlasUrl from '../assets/textures/shared-barrier-structural-surface-atlas-1024.webp'
+import sharedBrakingDistanceBoardAtlasUrl from '../assets/textures/shared-braking-distance-board-atlas-1024.webp'
+import sharedCatchFenceMeshTileUrl from '../assets/textures/shared-catch-fence-mesh-tile-1024.webp'
+import sharedGantryStructureAtlasUrl from '../assets/textures/shared-gantry-structure-surface-atlas-1024.webp'
+import sharedKerbSurfaceAtlasUrl from '../assets/textures/shared-kerb-surface-atlas-1024.webp'
+import sharedPalmTreeSpriteAtlasUrl from '../assets/textures/shared-palm-tree-sprite-atlas-1024.webp'
+import sharedPalmTrunkSurfaceAtlasUrl from '../assets/textures/shared-palm-trunk-surface-atlas-1024.webp'
+import sharedTrackSurfaceWearAtlasUrl from '../assets/textures/shared-track-surface-wear-strip-atlas-1024.webp'
+import sharedTrackLightingSignalAtlasUrl from '../assets/textures/shared-track-lighting-signal-atlas-1024.webp'
+import sharedTracksideOperationsAtlasUrl from '../assets/textures/shared-trackside-operations-atlas-1024.webp'
+import sharedCircuitGlowTrimAtlasUrl from '../assets/textures/shared-circuit-glow-trim-atlas-1024.webp'
+import asphaltAlbedoUrl from '../assets/textures/track-asphalt-albedo-512.webp'
+import { getTrackPreset } from '../utils/trackData'
+import {
+  BARRIER_SEGMENTS,
+  createApexGravelRunoffGeometry,
+  createApexPitStaffBillboardGeometry,
+  createApexMarshalWindowSurfaceGeometry,
+  createApexRaceControlFacadeGeometry,
+  createApexRaceControlRoofSurfaceGeometry,
+  createApexTentCanopyGeometry,
+  createApexTowerRingSurfaceGeometry,
+  createApexVenueFacadeGeometry,
+  createBarrierGraphicsGeometry,
+  createBarrierGeometry,
+  createBarrierStructuralSurfaceGeometry,
+  createBrakingBoardGraphicsGeometry,
+  createCatchFenceGeometry,
+  createCircuitSceneryGeometry,
+  createCircuitGlowGeometry,
+  createCrowdPanelGeometry,
+  createGantryDisplayGeometry,
+  createGantryStructureSurfaceGeometry,
+  createGrandstandStructureGeometry,
+  createHarbourApartmentUpperSurfaceGeometry,
+  createHarbourBuildingFacadeGeometry,
+  createHarbourHairpinIslandSurfaceGeometry,
+  createHarbourMarinaSurfaceGeometry,
+  createHarbourRetainingWallFacadeGeometry,
+  createHarbourSwimmingPoolSurfaceGeometry,
+  createHarbourTunnelCeilingPortalGeometry,
+  createHarbourTunnelWallGeometry,
+  createHarbourYachtFacadeGeometry,
+  createHarbourYachtRigSurfaceGeometry,
+  createHarbourYachtUpperSurfaceGeometry,
+  createKerbSurfaceGeometry,
+  createPitComplexStructureGeometry,
+  createPitGarageFacadeGeometry,
+  createPalmTreeBillboardGeometry,
+  createPalmTrunkSurfaceGeometry,
+  createRoadColliderGeometry,
+  createRoadGeometry,
+  createTempleGrassVergeGeometry,
+  createTempleGravelRunoffGeometry,
+  createTempleTreeBillboardGeometry,
+  createTempleVenueFacadeGeometry,
+  createTrackLightingGraphicsGeometry,
+  createTrackSurfaceWearGeometry,
+  createTracksideOperationsGraphicsGeometry,
+  getFloodlightPositions,
+  getHarbourTunnelLightingLayout,
+  INFIELD_ALBEDO_REPEAT,
+  ROAD_SEGMENTS,
+} from './trackGeometry'
+
+const INFIELD_ALBEDO_BY_VENUE = Object.freeze({
+  apex: apexInfieldAlbedoUrl,
+  harbour: harbourInfieldAlbedoUrl,
+  temple: templeInfieldAlbedoUrl,
+})
+const INFIELD_ALBEDO_TEXTURE_CONFIG_BY_VENUE = Object.freeze({
+  apex: Object.freeze({ repeat: INFIELD_ALBEDO_REPEAT, anisotropy: 2 }),
+  harbour: Object.freeze({ repeat: 28, anisotropy: 4 }),
+  temple: Object.freeze({ repeat: INFIELD_ALBEDO_REPEAT, anisotropy: 2 }),
+})
+const BARRIER_ATLAS_BY_VENUE = Object.freeze({
+  apex: apexBarrierAtlasUrl,
+  harbour: harbourBarrierAtlasUrl,
+  temple: templeBarrierAtlasUrl,
+})
+const CROWD_PANEL_BY_VENUE = Object.freeze({
+  apex: apexCrowdPanelUrl,
+  harbour: harbourCrowdPanelUrl,
+  temple: templeCrowdPanelUrl,
+})
+const PIT_GARAGE_FACADE_BY_VENUE = Object.freeze({
+  apex: apexPitGarageFacadeUrl,
+  harbour: harbourPitGarageFacadeUrl,
+  temple: templePitGarageFacadeUrl,
+})
+const GANTRY_DISPLAY_BY_VENUE = Object.freeze({
+  apex: apexGantryDisplayUrl,
+  harbour: harbourGantryDisplayUrl,
+  temple: templeGantryDisplayUrl,
+})
+
+function createSurfaceTexture(size, contrast = 0.35) {
+  const data = new Uint8Array(size * size * 4)
+  let seed = 0x9e3779b9
+  for (let index = 0; index < size * size; index += 1) {
+    seed ^= seed << 13
+    seed ^= seed >>> 17
+    seed ^= seed << 5
+    const grain = (seed >>> 24) / 255
+    const x = index % size
+    const y = Math.floor(index / size)
+    const seam = (Math.sin(x * 0.43) + Math.sin(y * 0.17)) * 0.04
+    const value = Math.round(154 + (grain - 0.5) * 120 * contrast + seam * 255)
+    const offset = index * 4
+    data[offset] = value
+    data[offset + 1] = value
+    data[offset + 2] = value
+    data[offset + 3] = 255
+  }
+  // MeshStandardMaterial samples roughness from the green channel and bump
+  // from luminance, so all colour channels intentionally carry the grain.
+  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat)
+  texture.wrapS = THREE.RepeatWrapping
+  texture.wrapT = THREE.RepeatWrapping
+  texture.minFilter = THREE.LinearMipmapLinearFilter
+  texture.magFilter = THREE.LinearFilter
+  texture.generateMipmaps = true
+  texture.needsUpdate = true
+  return texture
+}
+
+export function createTrackTrimeshArgs(geometry) {
+  const positions = geometry?.getAttribute?.('position')?.array
+  const sourceIndices = geometry?.getIndex?.()?.array
+  if (!(positions instanceof Float32Array) || !sourceIndices) {
+    throw new TypeError('Track collider geometry must provide indexed Float32 positions')
+  }
+  return [
+    positions,
+    Uint32Array.from(sourceIndices),
+    TriMeshFlags.FIX_INTERNAL_EDGES,
+  ]
+}
+
+export default function useTrackAssets({ track = getTrackPreset() }) {
+  const activeTrack = track ?? getTrackPreset()
+  const trackCurve = activeTrack.curve
+  const roadWidth = activeTrack.roadWidth ?? 16
+  const assets = useMemo(() => {
+    const roadSamples = Math.max(ROAD_SEGMENTS, Math.ceil(activeTrack.length / 3.5))
+    const roadGeometry = createRoadGeometry(
+      trackCurve,
+      roadSamples,
+      roadWidth,
+    )
+    const roadColliderGeometry = createRoadColliderGeometry(
+      trackCurve,
+      roadSamples,
+      roadWidth,
+    )
+    const barrierSamples = Math.max(
+      BARRIER_SEGMENTS,
+      Math.ceil(activeTrack.length / 4.25),
+    )
+    const barrierGeometry = createBarrierGeometry(
+      trackCurve,
+      barrierSamples,
+      roadWidth,
+    )
+    const barrierGraphicsGeometry = createBarrierGraphicsGeometry(
+      trackCurve,
+      barrierSamples,
+      roadWidth,
+    )
+    const barrierStructuralSurfaceGeometry = createBarrierStructuralSurfaceGeometry(
+      trackCurve,
+      activeTrack.venue,
+      barrierSamples,
+      roadWidth,
+    )
+    const brakingBoardGraphicsGeometry = createBrakingBoardGraphicsGeometry(
+      trackCurve,
+      activeTrack.venue,
+      roadWidth,
+    )
+    const tracksideOperationsGraphicsGeometry = createTracksideOperationsGraphicsGeometry(
+      trackCurve,
+      activeTrack.venue,
+      roadWidth,
+    )
+    const trackLightingGraphicsGeometry = createTrackLightingGraphicsGeometry(
+      trackCurve,
+      activeTrack.venue,
+      roadWidth,
+    )
+    const sceneryGeometry = createCircuitSceneryGeometry(trackCurve, activeTrack.venue, roadWidth)
+    const trackSurfaceWearGeometry = createTrackSurfaceWearGeometry(
+      trackCurve,
+      activeTrack.venue,
+      roadWidth,
+    )
+    const kerbSurfaceGeometry = createKerbSurfaceGeometry(
+      trackCurve,
+      activeTrack.venue,
+      roadWidth,
+    )
+    const crowdPanelGeometry = createCrowdPanelGeometry(trackCurve, activeTrack.venue)
+    const grandstandStructureGeometry = createGrandstandStructureGeometry(
+      trackCurve,
+      activeTrack.venue,
+    )
+    const pitComplexStructureGeometry = createPitComplexStructureGeometry(
+      trackCurve,
+      activeTrack.venue,
+      roadWidth,
+    )
+    const pitGarageFacadeGeometry = createPitGarageFacadeGeometry(trackCurve, activeTrack.venue)
+    const gantryDisplayGeometry = createGantryDisplayGeometry(trackCurve, activeTrack.venue)
+    const gantryStructureSurfaceGeometry = createGantryStructureSurfaceGeometry(
+      trackCurve,
+      activeTrack.venue,
+      roadWidth,
+    )
+    const apexVenueFacadeGeometry = activeTrack.venue === 'apex'
+      ? createApexVenueFacadeGeometry(trackCurve)
+      : null
+    const apexRaceControlFacadeGeometry = activeTrack.venue === 'apex'
+      ? createApexRaceControlFacadeGeometry(trackCurve, roadWidth)
+      : null
+    const apexRaceControlRoofSurfaceGeometry = activeTrack.venue === 'apex'
+      ? createApexRaceControlRoofSurfaceGeometry(trackCurve, roadWidth)
+      : null
+    const apexMarshalWindowSurfaceGeometry = activeTrack.venue === 'apex'
+      ? createApexMarshalWindowSurfaceGeometry(trackCurve, roadWidth)
+      : null
+    const apexPitStaffBillboardGeometry = activeTrack.venue === 'apex'
+      ? createApexPitStaffBillboardGeometry(trackCurve)
+      : null
+    const apexTentCanopyGeometry = activeTrack.venue === 'apex'
+      ? createApexTentCanopyGeometry(trackCurve)
+      : null
+    const apexTowerRingSurfaceGeometry = activeTrack.venue === 'apex'
+      ? createApexTowerRingSurfaceGeometry(trackCurve)
+      : null
+    const tunnelWallGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourTunnelWallGeometry(trackCurve, roadWidth)
+      : null
+    const tunnelCeilingPortalGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourTunnelCeilingPortalGeometry(trackCurve, roadWidth)
+      : null
+    const buildingFacadeGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourBuildingFacadeGeometry(trackCurve)
+      : null
+    const apartmentUpperSurfaceGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourApartmentUpperSurfaceGeometry(trackCurve)
+      : null
+    const harbourHairpinIslandSurfaceGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourHairpinIslandSurfaceGeometry(trackCurve)
+      : null
+    const retainingWallFacadeGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourRetainingWallFacadeGeometry(trackCurve, roadWidth)
+      : null
+    const marinaSurfaceGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourMarinaSurfaceGeometry()
+      : null
+    const swimmingPoolSurfaceGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourSwimmingPoolSurfaceGeometry()
+      : null
+    const yachtFacadeGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourYachtFacadeGeometry()
+      : null
+    const yachtUpperSurfaceGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourYachtUpperSurfaceGeometry()
+      : null
+    const yachtRigSurfaceGeometry = activeTrack.venue === 'harbour'
+      ? createHarbourYachtRigSurfaceGeometry()
+      : null
+    const treeBillboardGeometry = activeTrack.venue === 'temple'
+      ? createTempleTreeBillboardGeometry(trackCurve)
+      : null
+    const templeGrassVergeGeometry = activeTrack.venue === 'temple'
+      ? createTempleGrassVergeGeometry(trackCurve, roadWidth)
+      : null
+    const templeGravelRunoffGeometry = activeTrack.venue === 'temple'
+      ? createTempleGravelRunoffGeometry(trackCurve, roadWidth)
+      : null
+    const apexGravelRunoffGeometry = activeTrack.venue === 'apex'
+      ? createApexGravelRunoffGeometry(trackCurve, roadWidth)
+      : null
+    const palmTreeBillboardGeometry = ['apex', 'harbour'].includes(activeTrack.venue)
+      ? createPalmTreeBillboardGeometry(trackCurve, activeTrack.venue)
+      : null
+    const palmTrunkSurfaceGeometry = ['apex', 'harbour'].includes(activeTrack.venue)
+      ? createPalmTrunkSurfaceGeometry(trackCurve, activeTrack.venue)
+      : null
+    const templeVenueFacadeGeometry = activeTrack.venue === 'temple'
+      ? createTempleVenueFacadeGeometry(trackCurve, roadWidth)
+      : null
+    const glowGeometry = createCircuitGlowGeometry(trackCurve, activeTrack.venue, roadWidth)
+    const catchFenceGeometry = createCatchFenceGeometry(
+      trackCurve,
+      Math.ceil(activeTrack.length / 10),
+      roadWidth,
+    )
+    const asphaltAlbedoTexture = new THREE.TextureLoader().load(asphaltAlbedoUrl)
+    asphaltAlbedoTexture.name = 'generated-track-asphalt-albedo'
+    asphaltAlbedoTexture.colorSpace = THREE.SRGBColorSpace
+    asphaltAlbedoTexture.wrapS = THREE.RepeatWrapping
+    asphaltAlbedoTexture.wrapT = THREE.RepeatWrapping
+    asphaltAlbedoTexture.minFilter = THREE.LinearMipmapLinearFilter
+    asphaltAlbedoTexture.magFilter = THREE.LinearFilter
+    asphaltAlbedoTexture.generateMipmaps = true
+    asphaltAlbedoTexture.anisotropy = 4
+    asphaltAlbedoTexture.repeat.set(7, 110)
+    const trackSurfaceWearTexture = new THREE.TextureLoader().load(
+      sharedTrackSurfaceWearAtlasUrl,
+    )
+    trackSurfaceWearTexture.name = 'generated-shared-track-surface-wear-strip-atlas'
+    trackSurfaceWearTexture.colorSpace = THREE.SRGBColorSpace
+    trackSurfaceWearTexture.wrapS = THREE.ClampToEdgeWrapping
+    trackSurfaceWearTexture.wrapT = THREE.RepeatWrapping
+    trackSurfaceWearTexture.minFilter = THREE.LinearMipmapLinearFilter
+    trackSurfaceWearTexture.magFilter = THREE.LinearFilter
+    trackSurfaceWearTexture.generateMipmaps = true
+    trackSurfaceWearTexture.anisotropy = 4
+    const infieldAlbedoUrl = INFIELD_ALBEDO_BY_VENUE[activeTrack.venue]
+    const infieldAlbedoTexture = infieldAlbedoUrl
+      ? new THREE.TextureLoader().load(infieldAlbedoUrl)
+      : null
+    if (infieldAlbedoTexture) {
+      const infieldTextureConfig = INFIELD_ALBEDO_TEXTURE_CONFIG_BY_VENUE[activeTrack.venue]
+      infieldAlbedoTexture.name = `generated-${activeTrack.venue}-infield-albedo`
+      infieldAlbedoTexture.colorSpace = THREE.SRGBColorSpace
+      infieldAlbedoTexture.wrapS = THREE.RepeatWrapping
+      infieldAlbedoTexture.wrapT = THREE.RepeatWrapping
+      infieldAlbedoTexture.minFilter = THREE.LinearMipmapLinearFilter
+      infieldAlbedoTexture.magFilter = THREE.LinearFilter
+      infieldAlbedoTexture.generateMipmaps = true
+      infieldAlbedoTexture.anisotropy = infieldTextureConfig.anisotropy
+      infieldAlbedoTexture.repeat.set(
+        infieldTextureConfig.repeat,
+        infieldTextureConfig.repeat,
+      )
+    }
+    const harbourHairpinIslandTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(templeInfieldAlbedoUrl)
+      : null
+    if (harbourHairpinIslandTexture) {
+      harbourHairpinIslandTexture.name = 'generated-harbour-hairpin-island-turf'
+      harbourHairpinIslandTexture.colorSpace = THREE.SRGBColorSpace
+      harbourHairpinIslandTexture.wrapS = THREE.RepeatWrapping
+      harbourHairpinIslandTexture.wrapT = THREE.RepeatWrapping
+      harbourHairpinIslandTexture.minFilter = THREE.LinearMipmapLinearFilter
+      harbourHairpinIslandTexture.magFilter = THREE.LinearFilter
+      harbourHairpinIslandTexture.generateMipmaps = true
+      harbourHairpinIslandTexture.anisotropy = 4
+    }
+    const templeGravelRunoffTexture = activeTrack.venue === 'temple'
+      ? new THREE.TextureLoader().load(apexInfieldAlbedoUrl)
+      : null
+    if (templeGravelRunoffTexture) {
+      templeGravelRunoffTexture.name = 'generated-temple-gravel-runoff-albedo'
+      templeGravelRunoffTexture.colorSpace = THREE.SRGBColorSpace
+      templeGravelRunoffTexture.wrapS = THREE.RepeatWrapping
+      templeGravelRunoffTexture.wrapT = THREE.RepeatWrapping
+      templeGravelRunoffTexture.minFilter = THREE.LinearMipmapLinearFilter
+      templeGravelRunoffTexture.magFilter = THREE.LinearFilter
+      templeGravelRunoffTexture.generateMipmaps = true
+      templeGravelRunoffTexture.anisotropy = 4
+    }
+    const apexGravelRunoffTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexInfieldAlbedoUrl)
+      : null
+    if (apexGravelRunoffTexture) {
+      apexGravelRunoffTexture.name = 'generated-apex-gravel-runoff-albedo'
+      apexGravelRunoffTexture.colorSpace = THREE.SRGBColorSpace
+      apexGravelRunoffTexture.wrapS = THREE.RepeatWrapping
+      apexGravelRunoffTexture.wrapT = THREE.RepeatWrapping
+      apexGravelRunoffTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexGravelRunoffTexture.magFilter = THREE.LinearFilter
+      apexGravelRunoffTexture.generateMipmaps = true
+      apexGravelRunoffTexture.anisotropy = 4
+    }
+    const barrierAtlasUrl = BARRIER_ATLAS_BY_VENUE[activeTrack.venue]
+    const barrierAtlasTexture = barrierAtlasUrl
+      ? new THREE.TextureLoader().load(barrierAtlasUrl)
+      : null
+    if (barrierAtlasTexture) {
+      barrierAtlasTexture.name = `generated-${activeTrack.venue}-barrier-atlas`
+      barrierAtlasTexture.colorSpace = THREE.SRGBColorSpace
+      barrierAtlasTexture.wrapS = THREE.ClampToEdgeWrapping
+      barrierAtlasTexture.wrapT = THREE.ClampToEdgeWrapping
+      barrierAtlasTexture.minFilter = THREE.LinearMipmapLinearFilter
+      barrierAtlasTexture.magFilter = THREE.LinearFilter
+      barrierAtlasTexture.generateMipmaps = true
+      barrierAtlasTexture.anisotropy = 4
+    }
+    const barrierStructuralSurfaceTexture = new THREE.TextureLoader().load(
+      sharedBarrierStructuralSurfaceAtlasUrl,
+    )
+    barrierStructuralSurfaceTexture.name = 'generated-shared-barrier-structural-surface-atlas'
+    barrierStructuralSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+    barrierStructuralSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+    barrierStructuralSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+    barrierStructuralSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+    barrierStructuralSurfaceTexture.magFilter = THREE.LinearFilter
+    barrierStructuralSurfaceTexture.generateMipmaps = true
+    barrierStructuralSurfaceTexture.anisotropy = 4
+    const catchFenceTexture = new THREE.TextureLoader().load(
+      sharedCatchFenceMeshTileUrl,
+    )
+    catchFenceTexture.name = 'generated-shared-catch-fence-mesh-tile'
+    catchFenceTexture.colorSpace = THREE.SRGBColorSpace
+    catchFenceTexture.wrapS = THREE.RepeatWrapping
+    catchFenceTexture.wrapT = THREE.ClampToEdgeWrapping
+    catchFenceTexture.minFilter = THREE.LinearMipmapLinearFilter
+    catchFenceTexture.magFilter = THREE.LinearFilter
+    catchFenceTexture.generateMipmaps = true
+    catchFenceTexture.anisotropy = 4
+    const brakingBoardGraphicsTexture = new THREE.TextureLoader().load(
+      sharedBrakingDistanceBoardAtlasUrl,
+    )
+    brakingBoardGraphicsTexture.name = 'generated-shared-braking-distance-board-atlas'
+    brakingBoardGraphicsTexture.colorSpace = THREE.SRGBColorSpace
+    brakingBoardGraphicsTexture.wrapS = THREE.ClampToEdgeWrapping
+    brakingBoardGraphicsTexture.wrapT = THREE.ClampToEdgeWrapping
+    brakingBoardGraphicsTexture.minFilter = THREE.LinearMipmapLinearFilter
+    brakingBoardGraphicsTexture.magFilter = THREE.LinearFilter
+    brakingBoardGraphicsTexture.generateMipmaps = true
+    brakingBoardGraphicsTexture.anisotropy = 4
+    const tracksideOperationsGraphicsTexture = new THREE.TextureLoader().load(
+      sharedTracksideOperationsAtlasUrl,
+    )
+    tracksideOperationsGraphicsTexture.name = 'generated-shared-trackside-operations-atlas'
+    tracksideOperationsGraphicsTexture.colorSpace = THREE.SRGBColorSpace
+    tracksideOperationsGraphicsTexture.wrapS = THREE.ClampToEdgeWrapping
+    tracksideOperationsGraphicsTexture.wrapT = THREE.ClampToEdgeWrapping
+    tracksideOperationsGraphicsTexture.minFilter = THREE.LinearMipmapLinearFilter
+    tracksideOperationsGraphicsTexture.magFilter = THREE.LinearFilter
+    tracksideOperationsGraphicsTexture.generateMipmaps = true
+    tracksideOperationsGraphicsTexture.anisotropy = 4
+    const trackLightingGraphicsTexture = new THREE.TextureLoader().load(
+      sharedTrackLightingSignalAtlasUrl,
+    )
+    trackLightingGraphicsTexture.name = 'generated-shared-track-lighting-signal-atlas'
+    trackLightingGraphicsTexture.colorSpace = THREE.SRGBColorSpace
+    trackLightingGraphicsTexture.wrapS = THREE.ClampToEdgeWrapping
+    trackLightingGraphicsTexture.wrapT = THREE.ClampToEdgeWrapping
+    trackLightingGraphicsTexture.minFilter = THREE.LinearMipmapLinearFilter
+    trackLightingGraphicsTexture.magFilter = THREE.LinearFilter
+    trackLightingGraphicsTexture.generateMipmaps = true
+    trackLightingGraphicsTexture.anisotropy = 4
+    const circuitGlowTrimTexture = new THREE.TextureLoader().load(
+      sharedCircuitGlowTrimAtlasUrl,
+    )
+    circuitGlowTrimTexture.name = 'generated-shared-circuit-glow-trim-atlas'
+    circuitGlowTrimTexture.colorSpace = THREE.SRGBColorSpace
+    circuitGlowTrimTexture.wrapS = THREE.ClampToEdgeWrapping
+    circuitGlowTrimTexture.wrapT = THREE.ClampToEdgeWrapping
+    circuitGlowTrimTexture.minFilter = THREE.LinearMipmapLinearFilter
+    circuitGlowTrimTexture.magFilter = THREE.LinearFilter
+    circuitGlowTrimTexture.generateMipmaps = true
+    circuitGlowTrimTexture.anisotropy = 4
+    const kerbSurfaceTexture = new THREE.TextureLoader().load(sharedKerbSurfaceAtlasUrl)
+    kerbSurfaceTexture.name = 'generated-shared-kerb-surface-atlas'
+    kerbSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+    kerbSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+    kerbSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+    kerbSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+    kerbSurfaceTexture.magFilter = THREE.LinearFilter
+    kerbSurfaceTexture.generateMipmaps = true
+    kerbSurfaceTexture.anisotropy = 4
+    const crowdPanelUrl = CROWD_PANEL_BY_VENUE[activeTrack.venue]
+    const crowdPanelTexture = crowdPanelUrl
+      ? new THREE.TextureLoader().load(crowdPanelUrl)
+      : null
+    if (crowdPanelTexture) {
+      crowdPanelTexture.name = `generated-${activeTrack.venue}-crowd-panel`
+      crowdPanelTexture.colorSpace = THREE.SRGBColorSpace
+      crowdPanelTexture.wrapS = THREE.ClampToEdgeWrapping
+      crowdPanelTexture.wrapT = THREE.ClampToEdgeWrapping
+      crowdPanelTexture.minFilter = THREE.LinearMipmapLinearFilter
+      crowdPanelTexture.magFilter = THREE.LinearFilter
+      crowdPanelTexture.generateMipmaps = true
+      crowdPanelTexture.anisotropy = 2
+    }
+    const grandstandStructureTexture = new THREE.TextureLoader().load(
+      grandstandStructureAtlasUrl,
+    )
+    grandstandStructureTexture.name = 'generated-grandstand-structure-surface-atlas'
+    grandstandStructureTexture.colorSpace = THREE.SRGBColorSpace
+    grandstandStructureTexture.wrapS = THREE.ClampToEdgeWrapping
+    grandstandStructureTexture.wrapT = THREE.ClampToEdgeWrapping
+    grandstandStructureTexture.minFilter = THREE.LinearMipmapLinearFilter
+    grandstandStructureTexture.magFilter = THREE.LinearFilter
+    grandstandStructureTexture.generateMipmaps = true
+    grandstandStructureTexture.anisotropy = 4
+    const pitComplexStructureTexture = new THREE.TextureLoader().load(
+      pitComplexStructureAtlasUrl,
+    )
+    pitComplexStructureTexture.name = 'generated-pit-complex-structure-surface-atlas'
+    pitComplexStructureTexture.colorSpace = THREE.SRGBColorSpace
+    pitComplexStructureTexture.wrapS = THREE.ClampToEdgeWrapping
+    pitComplexStructureTexture.wrapT = THREE.ClampToEdgeWrapping
+    pitComplexStructureTexture.minFilter = THREE.LinearMipmapLinearFilter
+    pitComplexStructureTexture.magFilter = THREE.LinearFilter
+    pitComplexStructureTexture.generateMipmaps = true
+    pitComplexStructureTexture.anisotropy = 4
+    const pitGarageFacadeUrl = PIT_GARAGE_FACADE_BY_VENUE[activeTrack.venue]
+    const pitGarageFacadeTexture = pitGarageFacadeUrl
+      ? new THREE.TextureLoader().load(pitGarageFacadeUrl)
+      : null
+    if (pitGarageFacadeTexture) {
+      pitGarageFacadeTexture.name = `generated-${activeTrack.venue}-pit-garage-facade`
+      pitGarageFacadeTexture.colorSpace = THREE.SRGBColorSpace
+      pitGarageFacadeTexture.wrapS = THREE.ClampToEdgeWrapping
+      pitGarageFacadeTexture.wrapT = THREE.ClampToEdgeWrapping
+      pitGarageFacadeTexture.minFilter = THREE.LinearMipmapLinearFilter
+      pitGarageFacadeTexture.magFilter = THREE.LinearFilter
+      pitGarageFacadeTexture.generateMipmaps = true
+      pitGarageFacadeTexture.anisotropy = 2
+    }
+    const gantryDisplayUrl = GANTRY_DISPLAY_BY_VENUE[activeTrack.venue]
+    const gantryDisplayTexture = gantryDisplayUrl
+      ? new THREE.TextureLoader().load(gantryDisplayUrl)
+      : null
+    if (gantryDisplayTexture) {
+      gantryDisplayTexture.name = `generated-${activeTrack.venue}-gantry-display`
+      gantryDisplayTexture.colorSpace = THREE.SRGBColorSpace
+      gantryDisplayTexture.wrapS = THREE.ClampToEdgeWrapping
+      gantryDisplayTexture.wrapT = THREE.ClampToEdgeWrapping
+      gantryDisplayTexture.minFilter = THREE.LinearMipmapLinearFilter
+      gantryDisplayTexture.magFilter = THREE.LinearFilter
+      gantryDisplayTexture.generateMipmaps = true
+      gantryDisplayTexture.anisotropy = 2
+    }
+    const gantryStructureSurfaceTexture = new THREE.TextureLoader()
+      .load(sharedGantryStructureAtlasUrl)
+    gantryStructureSurfaceTexture.name = 'generated-shared-gantry-structure-surface-atlas'
+    gantryStructureSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+    gantryStructureSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+    gantryStructureSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+    gantryStructureSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+    gantryStructureSurfaceTexture.magFilter = THREE.LinearFilter
+    gantryStructureSurfaceTexture.generateMipmaps = true
+    gantryStructureSurfaceTexture.anisotropy = 4
+    const apexVenueFacadeTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexVenueFacadeAtlasUrl)
+      : null
+    if (apexVenueFacadeTexture) {
+      apexVenueFacadeTexture.name = 'generated-apex-venue-facade-atlas'
+      apexVenueFacadeTexture.colorSpace = THREE.SRGBColorSpace
+      apexVenueFacadeTexture.wrapS = THREE.ClampToEdgeWrapping
+      apexVenueFacadeTexture.wrapT = THREE.ClampToEdgeWrapping
+      apexVenueFacadeTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexVenueFacadeTexture.magFilter = THREE.LinearFilter
+      apexVenueFacadeTexture.generateMipmaps = true
+      apexVenueFacadeTexture.anisotropy = 4
+    }
+    const apexRaceControlFacadeTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexRaceControlFacadeAtlasUrl)
+      : null
+    if (apexRaceControlFacadeTexture) {
+      apexRaceControlFacadeTexture.name = 'generated-apex-race-control-facade-atlas'
+      apexRaceControlFacadeTexture.colorSpace = THREE.SRGBColorSpace
+      apexRaceControlFacadeTexture.wrapS = THREE.ClampToEdgeWrapping
+      apexRaceControlFacadeTexture.wrapT = THREE.ClampToEdgeWrapping
+      apexRaceControlFacadeTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexRaceControlFacadeTexture.magFilter = THREE.LinearFilter
+      apexRaceControlFacadeTexture.generateMipmaps = true
+      apexRaceControlFacadeTexture.anisotropy = 4
+    }
+    const apexRaceControlRoofSurfaceTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexRaceControlRoofSurfaceAtlasUrl)
+      : null
+    if (apexRaceControlRoofSurfaceTexture) {
+      apexRaceControlRoofSurfaceTexture.name = 'generated-apex-race-control-roof-surface-atlas'
+      apexRaceControlRoofSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      apexRaceControlRoofSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      apexRaceControlRoofSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      apexRaceControlRoofSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexRaceControlRoofSurfaceTexture.magFilter = THREE.LinearFilter
+      apexRaceControlRoofSurfaceTexture.generateMipmaps = true
+      apexRaceControlRoofSurfaceTexture.anisotropy = 4
+    }
+    const apexMarshalWindowSurfaceTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexMarshalWindowSurfaceAtlasUrl)
+      : null
+    if (apexMarshalWindowSurfaceTexture) {
+      apexMarshalWindowSurfaceTexture.name = 'generated-apex-marshal-window-surface-atlas'
+      apexMarshalWindowSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      apexMarshalWindowSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      apexMarshalWindowSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      apexMarshalWindowSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexMarshalWindowSurfaceTexture.magFilter = THREE.LinearFilter
+      apexMarshalWindowSurfaceTexture.generateMipmaps = true
+      apexMarshalWindowSurfaceTexture.anisotropy = 4
+    }
+    const apexPitStaffBillboardTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexPitLaneStaffSpriteAtlasUrl)
+      : null
+    if (apexPitStaffBillboardTexture) {
+      apexPitStaffBillboardTexture.name = 'generated-apex-pit-lane-staff-sprite-atlas'
+      apexPitStaffBillboardTexture.colorSpace = THREE.SRGBColorSpace
+      apexPitStaffBillboardTexture.wrapS = THREE.ClampToEdgeWrapping
+      apexPitStaffBillboardTexture.wrapT = THREE.ClampToEdgeWrapping
+      apexPitStaffBillboardTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexPitStaffBillboardTexture.magFilter = THREE.LinearFilter
+      apexPitStaffBillboardTexture.generateMipmaps = true
+      apexPitStaffBillboardTexture.anisotropy = 2
+    }
+    const apexTentCanopyTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexTentCanopySurfaceAtlasUrl)
+      : null
+    if (apexTentCanopyTexture) {
+      apexTentCanopyTexture.name = 'generated-apex-tent-canopy-surface-atlas'
+      apexTentCanopyTexture.colorSpace = THREE.SRGBColorSpace
+      apexTentCanopyTexture.wrapS = THREE.ClampToEdgeWrapping
+      apexTentCanopyTexture.wrapT = THREE.ClampToEdgeWrapping
+      apexTentCanopyTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexTentCanopyTexture.magFilter = THREE.LinearFilter
+      apexTentCanopyTexture.generateMipmaps = true
+      apexTentCanopyTexture.anisotropy = 4
+    }
+    const apexTowerRingSurfaceTexture = activeTrack.venue === 'apex'
+      ? new THREE.TextureLoader().load(apexTowerRingSurfaceAtlasUrl)
+      : null
+    if (apexTowerRingSurfaceTexture) {
+      apexTowerRingSurfaceTexture.name = 'generated-apex-tower-ring-surface-atlas'
+      apexTowerRingSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      apexTowerRingSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      apexTowerRingSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      apexTowerRingSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apexTowerRingSurfaceTexture.magFilter = THREE.LinearFilter
+      apexTowerRingSurfaceTexture.generateMipmaps = true
+      apexTowerRingSurfaceTexture.anisotropy = 4
+    }
+    const tunnelWallTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourTunnelWallAtlasUrl)
+      : null
+    if (tunnelWallTexture) {
+      tunnelWallTexture.name = 'generated-harbour-tunnel-wall-atlas'
+      tunnelWallTexture.colorSpace = THREE.SRGBColorSpace
+      tunnelWallTexture.wrapS = THREE.ClampToEdgeWrapping
+      tunnelWallTexture.wrapT = THREE.ClampToEdgeWrapping
+      tunnelWallTexture.minFilter = THREE.LinearMipmapLinearFilter
+      tunnelWallTexture.magFilter = THREE.LinearFilter
+      tunnelWallTexture.generateMipmaps = true
+      tunnelWallTexture.anisotropy = 4
+    }
+    const tunnelCeilingPortalTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourTunnelCeilingPortalAtlasUrl)
+      : null
+    if (tunnelCeilingPortalTexture) {
+      tunnelCeilingPortalTexture.name = 'generated-harbour-tunnel-ceiling-portal-atlas'
+      tunnelCeilingPortalTexture.colorSpace = THREE.SRGBColorSpace
+      tunnelCeilingPortalTexture.wrapS = THREE.ClampToEdgeWrapping
+      tunnelCeilingPortalTexture.wrapT = THREE.ClampToEdgeWrapping
+      tunnelCeilingPortalTexture.minFilter = THREE.LinearMipmapLinearFilter
+      tunnelCeilingPortalTexture.magFilter = THREE.LinearFilter
+      tunnelCeilingPortalTexture.generateMipmaps = true
+      tunnelCeilingPortalTexture.anisotropy = 4
+    }
+    const buildingFacadeTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourApartmentFacadeAtlasUrl)
+      : null
+    if (buildingFacadeTexture) {
+      buildingFacadeTexture.name = 'generated-harbour-apartment-facade-atlas'
+      buildingFacadeTexture.colorSpace = THREE.SRGBColorSpace
+      buildingFacadeTexture.wrapS = THREE.ClampToEdgeWrapping
+      buildingFacadeTexture.wrapT = THREE.ClampToEdgeWrapping
+      buildingFacadeTexture.minFilter = THREE.LinearMipmapLinearFilter
+      buildingFacadeTexture.magFilter = THREE.LinearFilter
+      buildingFacadeTexture.generateMipmaps = true
+      buildingFacadeTexture.anisotropy = 4
+    }
+    const apartmentUpperSurfaceTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourApartmentUpperSurfaceAtlasUrl)
+      : null
+    if (apartmentUpperSurfaceTexture) {
+      apartmentUpperSurfaceTexture.name = 'generated-harbour-apartment-upper-surface-atlas'
+      apartmentUpperSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      apartmentUpperSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      apartmentUpperSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      apartmentUpperSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      apartmentUpperSurfaceTexture.magFilter = THREE.LinearFilter
+      apartmentUpperSurfaceTexture.generateMipmaps = true
+      apartmentUpperSurfaceTexture.anisotropy = 4
+    }
+    const retainingWallFacadeTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourRetainingWallAtlasUrl)
+      : null
+    if (retainingWallFacadeTexture) {
+      retainingWallFacadeTexture.name = 'generated-harbour-retaining-wall-atlas'
+      retainingWallFacadeTexture.colorSpace = THREE.SRGBColorSpace
+      retainingWallFacadeTexture.wrapS = THREE.ClampToEdgeWrapping
+      retainingWallFacadeTexture.wrapT = THREE.ClampToEdgeWrapping
+      retainingWallFacadeTexture.minFilter = THREE.LinearMipmapLinearFilter
+      retainingWallFacadeTexture.magFilter = THREE.LinearFilter
+      retainingWallFacadeTexture.generateMipmaps = true
+      retainingWallFacadeTexture.anisotropy = 4
+    }
+    const marinaSurfaceTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourMarinaAtlasUrl)
+      : null
+    if (marinaSurfaceTexture) {
+      marinaSurfaceTexture.name = 'generated-harbour-marina-surface-atlas'
+      marinaSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      marinaSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      marinaSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      marinaSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      marinaSurfaceTexture.magFilter = THREE.LinearFilter
+      marinaSurfaceTexture.generateMipmaps = true
+      marinaSurfaceTexture.anisotropy = 4
+    }
+    const swimmingPoolSurfaceTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourSwimmingPoolAtlasUrl)
+      : null
+    if (swimmingPoolSurfaceTexture) {
+      swimmingPoolSurfaceTexture.name = 'generated-harbour-swimming-pool-surface-atlas'
+      swimmingPoolSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      swimmingPoolSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      swimmingPoolSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      swimmingPoolSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      swimmingPoolSurfaceTexture.magFilter = THREE.LinearFilter
+      swimmingPoolSurfaceTexture.generateMipmaps = true
+      swimmingPoolSurfaceTexture.anisotropy = 4
+    }
+    const openWaterRippleTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourOpenWaterRippleHeightUrl)
+      : null
+    if (openWaterRippleTexture) {
+      openWaterRippleTexture.name = 'generated-harbour-open-water-ripple-height'
+      openWaterRippleTexture.colorSpace = THREE.NoColorSpace
+      openWaterRippleTexture.wrapS = THREE.RepeatWrapping
+      openWaterRippleTexture.wrapT = THREE.RepeatWrapping
+      openWaterRippleTexture.minFilter = THREE.LinearMipmapLinearFilter
+      openWaterRippleTexture.magFilter = THREE.LinearFilter
+      openWaterRippleTexture.generateMipmaps = true
+      openWaterRippleTexture.anisotropy = 4
+      openWaterRippleTexture.repeat.set(4, 1)
+      openWaterRippleTexture.offset.set(0.17, 0.29)
+    }
+    const yachtFacadeTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourYachtFacadeAtlasUrl)
+      : null
+    if (yachtFacadeTexture) {
+      yachtFacadeTexture.name = 'generated-harbour-yacht-facade-atlas'
+      yachtFacadeTexture.colorSpace = THREE.SRGBColorSpace
+      yachtFacadeTexture.wrapS = THREE.ClampToEdgeWrapping
+      yachtFacadeTexture.wrapT = THREE.ClampToEdgeWrapping
+      yachtFacadeTexture.minFilter = THREE.LinearMipmapLinearFilter
+      yachtFacadeTexture.magFilter = THREE.LinearFilter
+      yachtFacadeTexture.generateMipmaps = true
+      yachtFacadeTexture.anisotropy = 4
+    }
+    const yachtUpperSurfaceTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourYachtUpperSurfaceAtlasUrl)
+      : null
+    if (yachtUpperSurfaceTexture) {
+      yachtUpperSurfaceTexture.name = 'generated-harbour-yacht-upper-surface-atlas'
+      yachtUpperSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      yachtUpperSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      yachtUpperSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      yachtUpperSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      yachtUpperSurfaceTexture.magFilter = THREE.LinearFilter
+      yachtUpperSurfaceTexture.generateMipmaps = true
+      yachtUpperSurfaceTexture.anisotropy = 4
+    }
+    const yachtRigSurfaceTexture = activeTrack.venue === 'harbour'
+      ? new THREE.TextureLoader().load(harbourYachtRigSurfaceAtlasUrl)
+      : null
+    if (yachtRigSurfaceTexture) {
+      yachtRigSurfaceTexture.name = 'generated-harbour-yacht-rig-surface-atlas'
+      yachtRigSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      yachtRigSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      yachtRigSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      yachtRigSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      yachtRigSurfaceTexture.magFilter = THREE.LinearFilter
+      yachtRigSurfaceTexture.generateMipmaps = true
+      yachtRigSurfaceTexture.anisotropy = 4
+    }
+    const treeBillboardTexture = activeTrack.venue === 'temple'
+      ? new THREE.TextureLoader().load(templeTreeSpriteAtlasUrl)
+      : null
+    if (treeBillboardTexture) {
+      treeBillboardTexture.name = 'generated-temple-tree-sprite-atlas'
+      treeBillboardTexture.colorSpace = THREE.SRGBColorSpace
+      treeBillboardTexture.wrapS = THREE.ClampToEdgeWrapping
+      treeBillboardTexture.wrapT = THREE.ClampToEdgeWrapping
+      treeBillboardTexture.minFilter = THREE.LinearMipmapLinearFilter
+      treeBillboardTexture.magFilter = THREE.LinearFilter
+      treeBillboardTexture.generateMipmaps = true
+      treeBillboardTexture.anisotropy = 2
+    }
+    const palmTreeBillboardTexture = ['apex', 'harbour'].includes(activeTrack.venue)
+      ? new THREE.TextureLoader().load(sharedPalmTreeSpriteAtlasUrl)
+      : null
+    if (palmTreeBillboardTexture) {
+      palmTreeBillboardTexture.name = 'generated-shared-palm-tree-sprite-atlas'
+      palmTreeBillboardTexture.colorSpace = THREE.SRGBColorSpace
+      palmTreeBillboardTexture.wrapS = THREE.ClampToEdgeWrapping
+      palmTreeBillboardTexture.wrapT = THREE.ClampToEdgeWrapping
+      palmTreeBillboardTexture.minFilter = THREE.LinearMipmapLinearFilter
+      palmTreeBillboardTexture.magFilter = THREE.LinearFilter
+      palmTreeBillboardTexture.generateMipmaps = true
+      palmTreeBillboardTexture.anisotropy = 2
+    }
+    const palmTrunkSurfaceTexture = ['apex', 'harbour'].includes(activeTrack.venue)
+      ? new THREE.TextureLoader().load(sharedPalmTrunkSurfaceAtlasUrl)
+      : null
+    if (palmTrunkSurfaceTexture) {
+      palmTrunkSurfaceTexture.name = 'generated-shared-palm-trunk-surface-atlas'
+      palmTrunkSurfaceTexture.colorSpace = THREE.SRGBColorSpace
+      palmTrunkSurfaceTexture.wrapS = THREE.ClampToEdgeWrapping
+      palmTrunkSurfaceTexture.wrapT = THREE.ClampToEdgeWrapping
+      palmTrunkSurfaceTexture.minFilter = THREE.LinearMipmapLinearFilter
+      palmTrunkSurfaceTexture.magFilter = THREE.LinearFilter
+      palmTrunkSurfaceTexture.generateMipmaps = true
+      palmTrunkSurfaceTexture.anisotropy = 4
+    }
+    const templeVenueFacadeTexture = activeTrack.venue === 'temple'
+      ? new THREE.TextureLoader().load(templeBankingTimingAtlasUrl)
+      : null
+    if (templeVenueFacadeTexture) {
+      templeVenueFacadeTexture.name = 'generated-temple-banking-timing-atlas'
+      templeVenueFacadeTexture.colorSpace = THREE.SRGBColorSpace
+      templeVenueFacadeTexture.wrapS = THREE.ClampToEdgeWrapping
+      templeVenueFacadeTexture.wrapT = THREE.ClampToEdgeWrapping
+      templeVenueFacadeTexture.minFilter = THREE.LinearMipmapLinearFilter
+      templeVenueFacadeTexture.magFilter = THREE.LinearFilter
+      templeVenueFacadeTexture.generateMipmaps = true
+      templeVenueFacadeTexture.anisotropy = 4
+    }
+    const asphaltTexture = createSurfaceTexture(128, 0.5)
+    asphaltTexture.repeat.set(7, 110)
+    const terrainTexture = createSurfaceTexture(96, 0.8)
+    terrainTexture.repeat.set(70, 70)
+    const waterMaterial = activeTrack.venue === 'harbour'
+      ? new THREE.MeshPhysicalMaterial({
+        color: '#168da8',
+        map: openWaterRippleTexture,
+        bumpMap: openWaterRippleTexture,
+        bumpScale: 0.045,
+        roughnessMap: openWaterRippleTexture,
+        emissive: '#06384a',
+        emissiveIntensity: 0.24,
+        roughness: 0.34,
+        metalness: 0.02,
+        clearcoat: 1,
+        clearcoatRoughness: 0.2,
+        clearcoatRoughnessMap: openWaterRippleTexture,
+        transparent: true,
+        opacity: 0.94,
+      })
+      : null
+    if (waterMaterial) waterMaterial.name = 'harbour-open-water-material'
+
+    return {
+      roadGeometry,
+      roadColliderGeometry,
+      barrierGeometry,
+      barrierGraphicsGeometry,
+      barrierStructuralSurfaceGeometry,
+      brakingBoardGraphicsGeometry,
+      tracksideOperationsGraphicsGeometry,
+      trackLightingGraphicsGeometry,
+      sceneryGeometry,
+      trackSurfaceWearGeometry,
+      kerbSurfaceGeometry,
+      crowdPanelGeometry,
+      grandstandStructureGeometry,
+      pitComplexStructureGeometry,
+      pitGarageFacadeGeometry,
+      gantryDisplayGeometry,
+      gantryStructureSurfaceGeometry,
+      apexVenueFacadeGeometry,
+      apexRaceControlFacadeGeometry,
+      apexRaceControlRoofSurfaceGeometry,
+      apexMarshalWindowSurfaceGeometry,
+      apexPitStaffBillboardGeometry,
+      apexTentCanopyGeometry,
+      apexTowerRingSurfaceGeometry,
+      tunnelWallGeometry,
+      tunnelCeilingPortalGeometry,
+      buildingFacadeGeometry,
+      apartmentUpperSurfaceGeometry,
+      harbourHairpinIslandSurfaceGeometry,
+      retainingWallFacadeGeometry,
+      marinaSurfaceGeometry,
+      swimmingPoolSurfaceGeometry,
+      yachtFacadeGeometry,
+      yachtUpperSurfaceGeometry,
+      yachtRigSurfaceGeometry,
+      templeGrassVergeGeometry,
+      templeGravelRunoffGeometry,
+      apexGravelRunoffGeometry,
+      treeBillboardGeometry,
+      palmTreeBillboardGeometry,
+      palmTrunkSurfaceGeometry,
+      templeVenueFacadeGeometry,
+      glowGeometry,
+      catchFenceGeometry,
+      asphaltAlbedoTexture,
+      trackSurfaceWearTexture,
+      infieldAlbedoTexture,
+      harbourHairpinIslandTexture,
+      templeGravelRunoffTexture,
+      apexGravelRunoffTexture,
+      barrierAtlasTexture,
+      barrierStructuralSurfaceTexture,
+      catchFenceTexture,
+      brakingBoardGraphicsTexture,
+      tracksideOperationsGraphicsTexture,
+      trackLightingGraphicsTexture,
+      circuitGlowTrimTexture,
+      kerbSurfaceTexture,
+      crowdPanelTexture,
+      grandstandStructureTexture,
+      pitComplexStructureTexture,
+      pitGarageFacadeTexture,
+      gantryDisplayTexture,
+      gantryStructureSurfaceTexture,
+      apexVenueFacadeTexture,
+      apexRaceControlFacadeTexture,
+      apexRaceControlRoofSurfaceTexture,
+      apexMarshalWindowSurfaceTexture,
+      apexPitStaffBillboardTexture,
+      apexTentCanopyTexture,
+      apexTowerRingSurfaceTexture,
+      tunnelWallTexture,
+      tunnelCeilingPortalTexture,
+      buildingFacadeTexture,
+      apartmentUpperSurfaceTexture,
+      retainingWallFacadeTexture,
+      marinaSurfaceTexture,
+      swimmingPoolSurfaceTexture,
+      openWaterRippleTexture,
+      yachtFacadeTexture,
+      yachtUpperSurfaceTexture,
+      yachtRigSurfaceTexture,
+      treeBillboardTexture,
+      palmTreeBillboardTexture,
+      palmTrunkSurfaceTexture,
+      templeVenueFacadeTexture,
+      asphaltTexture,
+      terrainTexture,
+      roadColliderArgs: createTrackTrimeshArgs(roadColliderGeometry),
+      barrierColliderArgs: createTrackTrimeshArgs(barrierGeometry),
+      floodlights: getFloodlightPositions(trackCurve, activeTrack.venue, roadWidth),
+      tunnelLights: activeTrack.venue === 'harbour'
+        ? getHarbourTunnelLightingLayout(trackCurve, roadWidth).lights
+        : [],
+      roadMaterial: new THREE.MeshStandardMaterial({
+        color: activeTrack.theme.roadColor,
+        map: asphaltAlbedoTexture,
+        roughness: activeTrack.venue === 'harbour' ? 0.78 : 0.9,
+        roughnessMap: asphaltTexture,
+        bumpMap: asphaltTexture,
+        bumpScale: activeTrack.venue === 'harbour' ? 0.022 : 0.035,
+        metalness: 0.04,
+      }),
+      barrierMaterial: new THREE.MeshStandardMaterial({
+        color: activeTrack.theme.barrierColor ?? '#bec4be',
+        roughness: activeTrack.venue === 'harbour' ? 0.28 : 0.44,
+        metalness: activeTrack.venue === 'harbour' ? 0.78 : 0.62,
+      }),
+      barrierGraphicsMaterial: barrierAtlasTexture
+        ? new THREE.MeshStandardMaterial({
+          map: barrierAtlasTexture,
+          roughness: activeTrack.venue === 'apex' ? 0.9 : 0.48,
+          metalness: activeTrack.venue === 'apex' ? 0.04 : 0.64,
+        })
+        : null,
+      barrierStructuralSurfaceMaterial: new THREE.MeshStandardMaterial({
+        map: barrierStructuralSurfaceTexture,
+        vertexColors: true,
+        roughness: activeTrack.venue === 'apex' ? 0.9 : 0.48,
+        metalness: activeTrack.venue === 'apex' ? 0.04 : 0.64,
+        side: THREE.FrontSide,
+      }),
+      brakingBoardGraphicsMaterial: new THREE.MeshStandardMaterial({
+        map: brakingBoardGraphicsTexture,
+        roughness: 0.86,
+        metalness: 0.02,
+        emissive: '#ffffff',
+        emissiveMap: brakingBoardGraphicsTexture,
+        emissiveIntensity: activeTrack.venue === 'apex' ? 0.18 : 0.025,
+      }),
+      tracksideOperationsGraphicsMaterial: new THREE.MeshStandardMaterial({
+        map: tracksideOperationsGraphicsTexture,
+        vertexColors: true,
+        roughness: 0.74,
+        metalness: 0.12,
+        emissive: '#ffffff',
+        emissiveMap: tracksideOperationsGraphicsTexture,
+        emissiveIntensity: activeTrack.venue === 'apex' ? 0.24 : 0.045,
+      }),
+      trackLightingGraphicsMaterial: new THREE.MeshStandardMaterial({
+        map: trackLightingGraphicsTexture,
+        roughness: 0.64,
+        metalness: 0.12,
+        emissive: '#ffffff',
+        emissiveMap: trackLightingGraphicsTexture,
+        emissiveIntensity: activeTrack.venue === 'apex'
+          ? 0.72
+          : activeTrack.venue === 'harbour' ? 0.35 : 0.1,
+      }),
+      sceneryMaterial: new THREE.MeshStandardMaterial({
+        vertexColors: true,
+        roughness: 0.62,
+        metalness: 0.18,
+      }),
+      trackSurfaceWearMaterial: new THREE.MeshStandardMaterial({
+        map: trackSurfaceWearTexture,
+        vertexColors: true,
+        roughness: 0.91,
+        metalness: 0,
+        side: THREE.FrontSide,
+      }),
+      kerbSurfaceMaterial: new THREE.MeshStandardMaterial({
+        map: kerbSurfaceTexture,
+        vertexColors: true,
+        roughness: 0.9,
+        metalness: 0.02,
+        side: THREE.FrontSide,
+      }),
+      crowdPanelMaterial: crowdPanelTexture
+        ? new THREE.MeshStandardMaterial({
+          map: crowdPanelTexture,
+          roughness: 0.96,
+          metalness: 0,
+          emissive: '#ffffff',
+          emissiveMap: crowdPanelTexture,
+          emissiveIntensity: activeTrack.venue === 'apex' ? 0.34 : 0.06,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      grandstandStructureMaterial: new THREE.MeshStandardMaterial({
+        map: grandstandStructureTexture,
+        vertexColors: true,
+        roughness: 0.84,
+        metalness: 0.08,
+        side: THREE.DoubleSide,
+      }),
+      pitComplexStructureMaterial: new THREE.MeshStandardMaterial({
+        map: pitComplexStructureTexture,
+        vertexColors: true,
+        roughness: 0.86,
+        metalness: 0.08,
+        side: THREE.DoubleSide,
+      }),
+      pitGarageFacadeMaterial: pitGarageFacadeTexture
+        ? new THREE.MeshStandardMaterial({
+          map: pitGarageFacadeTexture,
+          roughness: 0.84,
+          metalness: 0.08,
+          emissive: '#ffffff',
+          emissiveMap: pitGarageFacadeTexture,
+          emissiveIntensity: activeTrack.venue === 'apex' ? 0.48 : 0.08,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      gantryDisplayMaterial: gantryDisplayTexture
+        ? new THREE.MeshBasicMaterial({
+          map: gantryDisplayTexture,
+          side: THREE.DoubleSide,
+          toneMapped: false,
+        })
+        : null,
+      gantryStructureSurfaceMaterial: new THREE.MeshStandardMaterial({
+        map: gantryStructureSurfaceTexture,
+        roughness: 0.68,
+        metalness: 0.25,
+        emissive: '#ffffff',
+        emissiveMap: gantryStructureSurfaceTexture,
+        emissiveIntensity: activeTrack.venue === 'apex' ? 0.11 : 0.015,
+        side: THREE.FrontSide,
+      }),
+      apexVenueFacadeMaterial: apexVenueFacadeTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexVenueFacadeTexture,
+          roughness: 0.72,
+          metalness: 0.08,
+          emissive: '#ffffff',
+          emissiveMap: apexVenueFacadeTexture,
+          emissiveIntensity: 0.18,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      apexRaceControlFacadeMaterial: apexRaceControlFacadeTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexRaceControlFacadeTexture,
+          roughness: 0.72,
+          metalness: 0.1,
+          emissive: '#ffffff',
+          emissiveMap: apexRaceControlFacadeTexture,
+          emissiveIntensity: 0.22,
+        })
+        : null,
+      apexRaceControlRoofSurfaceMaterial: apexRaceControlRoofSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexRaceControlRoofSurfaceTexture,
+          roughness: 0.78,
+          metalness: 0.18,
+          side: THREE.FrontSide,
+        })
+        : null,
+      apexMarshalWindowSurfaceMaterial: apexMarshalWindowSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexMarshalWindowSurfaceTexture,
+          vertexColors: true,
+          roughness: 0.38,
+          metalness: 0.32,
+          emissive: '#ffffff',
+          emissiveMap: apexMarshalWindowSurfaceTexture,
+          emissiveIntensity: 0.1,
+          side: THREE.FrontSide,
+        })
+        : null,
+      apexPitStaffBillboardMaterial: apexPitStaffBillboardTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexPitStaffBillboardTexture,
+          roughness: 0.94,
+          metalness: 0,
+          emissive: '#ffffff',
+          emissiveMap: apexPitStaffBillboardTexture,
+          emissiveIntensity: 0.12,
+          alphaTest: 0.42,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      apexTentCanopyMaterial: apexTentCanopyTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexTentCanopyTexture,
+          vertexColors: true,
+          roughness: 0.96,
+          metalness: 0,
+          emissive: '#ffffff',
+          emissiveMap: apexTentCanopyTexture,
+          emissiveIntensity: 0.08,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      apexTowerRingSurfaceMaterial: apexTowerRingSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexTowerRingSurfaceTexture,
+          vertexColors: true,
+          roughness: 0.78,
+          metalness: 0.12,
+          emissive: '#ffffff',
+          emissiveMap: apexTowerRingSurfaceTexture,
+          emissiveIntensity: 0.06,
+          side: THREE.FrontSide,
+        })
+        : null,
+      tunnelWallMaterial: tunnelWallTexture
+        ? new THREE.MeshStandardMaterial({
+          map: tunnelWallTexture,
+          roughness: 0.82,
+          metalness: 0.08,
+          emissive: '#a9c3c8',
+          emissiveMap: tunnelWallTexture,
+          emissiveIntensity: 0.045,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      tunnelCeilingPortalMaterial: tunnelCeilingPortalTexture
+        ? new THREE.MeshStandardMaterial({
+          map: tunnelCeilingPortalTexture,
+          roughness: 0.88,
+          metalness: 0.14,
+          emissive: '#4f5555',
+          emissiveMap: tunnelCeilingPortalTexture,
+          emissiveIntensity: 0.035,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      buildingFacadeMaterial: buildingFacadeTexture
+        ? new THREE.MeshStandardMaterial({
+          map: buildingFacadeTexture,
+          roughness: 0.86,
+          metalness: 0.04,
+          emissive: '#27343b',
+          emissiveMap: buildingFacadeTexture,
+          emissiveIntensity: 0.025,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      apartmentUpperSurfaceMaterial: apartmentUpperSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apartmentUpperSurfaceTexture,
+          roughness: 0.78,
+          metalness: 0.04,
+          side: THREE.FrontSide,
+        })
+        : null,
+      harbourHairpinIslandSurfaceMaterial: (
+        harbourHairpinIslandSurfaceGeometry && harbourHairpinIslandTexture
+      )
+        ? new THREE.MeshStandardMaterial({
+          map: harbourHairpinIslandTexture,
+          vertexColors: true,
+          roughness: 1,
+          metalness: 0,
+          side: THREE.FrontSide,
+        })
+        : null,
+      retainingWallFacadeMaterial: retainingWallFacadeTexture
+        ? new THREE.MeshStandardMaterial({
+          map: retainingWallFacadeTexture,
+          roughness: 0.88,
+          metalness: 0.04,
+        })
+        : null,
+      marinaSurfaceMaterial: marinaSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: marinaSurfaceTexture,
+          roughness: 0.9,
+          metalness: 0.02,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      swimmingPoolSurfaceMaterial: swimmingPoolSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: swimmingPoolSurfaceTexture,
+          roughness: 0.42,
+          metalness: 0.03,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      yachtFacadeMaterial: yachtFacadeTexture
+        ? new THREE.MeshStandardMaterial({
+          map: yachtFacadeTexture,
+          roughness: 0.64,
+          metalness: 0.05,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      yachtUpperSurfaceMaterial: yachtUpperSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: yachtUpperSurfaceTexture,
+          roughness: 0.64,
+          metalness: 0.05,
+          vertexColors: true,
+          side: THREE.FrontSide,
+        })
+        : null,
+      yachtRigSurfaceMaterial: yachtRigSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: yachtRigSurfaceTexture,
+          roughness: 0.48,
+          metalness: 0.62,
+          vertexColors: true,
+          side: THREE.FrontSide,
+        })
+        : null,
+      templeGrassVergeMaterial: templeGrassVergeGeometry && infieldAlbedoTexture
+        ? new THREE.MeshStandardMaterial({
+          map: infieldAlbedoTexture,
+          vertexColors: true,
+          roughness: 1,
+          metalness: 0,
+          side: THREE.FrontSide,
+        })
+        : null,
+      templeGravelRunoffMaterial: templeGravelRunoffGeometry && templeGravelRunoffTexture
+        ? new THREE.MeshStandardMaterial({
+          map: templeGravelRunoffTexture,
+          vertexColors: true,
+          roughness: 1,
+          metalness: 0,
+          side: THREE.FrontSide,
+        })
+        : null,
+      apexGravelRunoffMaterial: apexGravelRunoffGeometry && apexGravelRunoffTexture
+        ? new THREE.MeshStandardMaterial({
+          map: apexGravelRunoffTexture,
+          vertexColors: true,
+          roughness: 1,
+          metalness: 0,
+          side: THREE.FrontSide,
+        })
+        : null,
+      treeBillboardMaterial: treeBillboardTexture
+        ? new THREE.MeshStandardMaterial({
+          map: treeBillboardTexture,
+          roughness: 0.94,
+          metalness: 0,
+          alphaTest: 0.34,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      palmTreeBillboardMaterial: palmTreeBillboardTexture
+        ? new THREE.MeshStandardMaterial({
+          map: palmTreeBillboardTexture,
+          roughness: 0.94,
+          metalness: 0,
+          alphaTest: 0.42,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      palmTrunkSurfaceMaterial: palmTrunkSurfaceTexture
+        ? new THREE.MeshStandardMaterial({
+          map: palmTrunkSurfaceTexture,
+          roughness: 0.94,
+          metalness: 0,
+          side: THREE.FrontSide,
+        })
+        : null,
+      templeVenueFacadeMaterial: templeVenueFacadeTexture
+        ? new THREE.MeshStandardMaterial({
+          map: templeVenueFacadeTexture,
+          roughness: 0.88,
+          metalness: 0.04,
+          side: THREE.DoubleSide,
+        })
+        : null,
+      fenceMaterial: new THREE.MeshStandardMaterial({
+        color: '#c8cfcc',
+        map: catchFenceTexture,
+        roughness: 0.58,
+        metalness: 0.62,
+        alphaTest: 0.34,
+        side: THREE.DoubleSide,
+      }),
+      glowMaterial: new THREE.MeshBasicMaterial({
+        map: circuitGlowTrimTexture,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.76,
+      }),
+      waterMaterial,
+    }
+  }, [activeTrack, roadWidth, trackCurve])
+  useEffect(() => () => {
+    // These resources are constructed outside JSX, so their ownership is
+    // explicit. Dispose them when a track asset set is replaced or unmounted;
+    // otherwise repeated track switches retain GPU buffers and textures.
+    for (const resource of [
+      assets.roadGeometry,
+      assets.roadColliderGeometry,
+      assets.barrierGeometry,
+      assets.barrierGraphicsGeometry,
+      assets.barrierStructuralSurfaceGeometry,
+      assets.brakingBoardGraphicsGeometry,
+      assets.tracksideOperationsGraphicsGeometry,
+      assets.trackLightingGraphicsGeometry,
+      assets.sceneryGeometry,
+      assets.trackSurfaceWearGeometry,
+      assets.kerbSurfaceGeometry,
+      assets.crowdPanelGeometry,
+      assets.grandstandStructureGeometry,
+      assets.pitComplexStructureGeometry,
+      assets.pitGarageFacadeGeometry,
+      assets.gantryDisplayGeometry,
+      assets.gantryStructureSurfaceGeometry,
+      assets.apexVenueFacadeGeometry,
+      assets.apexRaceControlFacadeGeometry,
+      assets.apexRaceControlRoofSurfaceGeometry,
+      assets.apexMarshalWindowSurfaceGeometry,
+      assets.apexPitStaffBillboardGeometry,
+      assets.apexTentCanopyGeometry,
+      assets.apexTowerRingSurfaceGeometry,
+      assets.tunnelWallGeometry,
+      assets.tunnelCeilingPortalGeometry,
+      assets.buildingFacadeGeometry,
+      assets.apartmentUpperSurfaceGeometry,
+      assets.harbourHairpinIslandSurfaceGeometry,
+      assets.retainingWallFacadeGeometry,
+      assets.marinaSurfaceGeometry,
+      assets.swimmingPoolSurfaceGeometry,
+      assets.yachtFacadeGeometry,
+      assets.yachtUpperSurfaceGeometry,
+      assets.yachtRigSurfaceGeometry,
+      assets.templeGrassVergeGeometry,
+      assets.templeGravelRunoffGeometry,
+      assets.apexGravelRunoffGeometry,
+      assets.treeBillboardGeometry,
+      assets.palmTreeBillboardGeometry,
+      assets.palmTrunkSurfaceGeometry,
+      assets.templeVenueFacadeGeometry,
+      assets.glowGeometry,
+      assets.catchFenceGeometry,
+      assets.asphaltAlbedoTexture,
+      assets.trackSurfaceWearTexture,
+      assets.infieldAlbedoTexture,
+      assets.harbourHairpinIslandTexture,
+      assets.templeGravelRunoffTexture,
+      assets.apexGravelRunoffTexture,
+      assets.barrierAtlasTexture,
+      assets.barrierStructuralSurfaceTexture,
+      assets.catchFenceTexture,
+      assets.brakingBoardGraphicsTexture,
+      assets.tracksideOperationsGraphicsTexture,
+      assets.trackLightingGraphicsTexture,
+      assets.circuitGlowTrimTexture,
+      assets.kerbSurfaceTexture,
+      assets.crowdPanelTexture,
+      assets.grandstandStructureTexture,
+      assets.pitComplexStructureTexture,
+      assets.pitGarageFacadeTexture,
+      assets.gantryDisplayTexture,
+      assets.gantryStructureSurfaceTexture,
+      assets.apexVenueFacadeTexture,
+      assets.apexRaceControlFacadeTexture,
+      assets.apexRaceControlRoofSurfaceTexture,
+      assets.apexMarshalWindowSurfaceTexture,
+      assets.apexPitStaffBillboardTexture,
+      assets.apexTentCanopyTexture,
+      assets.apexTowerRingSurfaceTexture,
+      assets.tunnelWallTexture,
+      assets.tunnelCeilingPortalTexture,
+      assets.buildingFacadeTexture,
+      assets.apartmentUpperSurfaceTexture,
+      assets.retainingWallFacadeTexture,
+      assets.marinaSurfaceTexture,
+      assets.swimmingPoolSurfaceTexture,
+      assets.openWaterRippleTexture,
+      assets.yachtFacadeTexture,
+      assets.yachtUpperSurfaceTexture,
+      assets.yachtRigSurfaceTexture,
+      assets.treeBillboardTexture,
+      assets.palmTreeBillboardTexture,
+      assets.palmTrunkSurfaceTexture,
+      assets.templeVenueFacadeTexture,
+      assets.asphaltTexture,
+      assets.terrainTexture,
+      assets.roadMaterial,
+      assets.barrierMaterial,
+      assets.barrierGraphicsMaterial,
+      assets.barrierStructuralSurfaceMaterial,
+      assets.brakingBoardGraphicsMaterial,
+      assets.tracksideOperationsGraphicsMaterial,
+      assets.trackLightingGraphicsMaterial,
+      assets.sceneryMaterial,
+      assets.trackSurfaceWearMaterial,
+      assets.kerbSurfaceMaterial,
+      assets.crowdPanelMaterial,
+      assets.grandstandStructureMaterial,
+      assets.pitComplexStructureMaterial,
+      assets.pitGarageFacadeMaterial,
+      assets.gantryDisplayMaterial,
+      assets.gantryStructureSurfaceMaterial,
+      assets.apexVenueFacadeMaterial,
+      assets.apexRaceControlFacadeMaterial,
+      assets.apexRaceControlRoofSurfaceMaterial,
+      assets.apexMarshalWindowSurfaceMaterial,
+      assets.apexPitStaffBillboardMaterial,
+      assets.apexTentCanopyMaterial,
+      assets.apexTowerRingSurfaceMaterial,
+      assets.tunnelWallMaterial,
+      assets.tunnelCeilingPortalMaterial,
+      assets.buildingFacadeMaterial,
+      assets.apartmentUpperSurfaceMaterial,
+      assets.harbourHairpinIslandSurfaceMaterial,
+      assets.retainingWallFacadeMaterial,
+      assets.marinaSurfaceMaterial,
+      assets.swimmingPoolSurfaceMaterial,
+      assets.yachtFacadeMaterial,
+      assets.yachtUpperSurfaceMaterial,
+      assets.yachtRigSurfaceMaterial,
+      assets.templeGrassVergeMaterial,
+      assets.templeGravelRunoffMaterial,
+      assets.apexGravelRunoffMaterial,
+      assets.treeBillboardMaterial,
+      assets.palmTreeBillboardMaterial,
+      assets.palmTrunkSurfaceMaterial,
+      assets.templeVenueFacadeMaterial,
+      assets.fenceMaterial,
+      assets.glowMaterial,
+      assets.waterMaterial,
+    ]) {
+      resource?.dispose()
+    }
+  }, [assets])
+  return assets
+}

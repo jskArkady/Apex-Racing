@@ -232,3 +232,57 @@ results and survived reload. Guard telemetry was present in the output.
 Raw results: `/tmp/racing-guard-fix-metrics.json` (temporary, not committed).
 The updated code has not been pushed or rerun on GitHub Actions. These local
 browser runs do not reproduce every timing condition of the original CI worker.
+
+## Gameplay and code quality follow-up — 2026-09-21
+
+Implemented sector splits and personal-best deltas, 1/3/5-lap races with three AI
+difficulties, best-lap ghost playback, driving effects and a three-track
+championship. Separated chase camera control, physical track rendering, scenery
+rendering and asset ownership; replaced mutable window vehicle maps with a
+module and detached browser snapshots.
+
+Validation used WSL2, Node.js 24.16.0, Chromium 143.0.7499.4 and SwiftShader:
+
+- `npm run verify`: **70 files / 633 tests**, lint and production build passed.
+- Subsequent presentation-only changes passed lint and production build.
+  A focused Chromium check confirmed separate championship title/subtitle lines
+  and no menu overflow at 1280px and 320px; screenshots are saved as
+  `/tmp/racing-final-menu-options-{1280,320}.png`.
+- Chromium smoke: all six desktop/touch viewport cases, denied storage,
+  delayed/failed downloads, pause, resume and restart passed. The 390px case
+  selects 3 laps / Normal; the 320px case selects 5 laps / Easy and checks the
+  selected lap count in the actual HUD. Menu horizontal overflow is checked.
+- Four-car race: every circuit passed a real contact, one keyboard R recovery,
+  ordered checkpoints, full physical lap, four-car classification and persisted
+  lap time. All three AI cars also reached the finish in the recorded runs.
+- Time Trial: every circuit passed ordered completion, matching saved sector
+  reference and lap time, persistent ghost samples, reload, subsequent ghost
+  movement and a visible ghost remaining frozen on pause.
+- Independent review found two ghost issues: recovery carried an old pose into
+  the next lap, and translucency could alter shared player materials. Both were
+  fixed and protected by regression tests; the follow-up review found no
+  remaining blocking issue.
+
+| Circuit | Four-car test lap | Time Trial test lap | Ghost replay after reload |
+| --- | ---: | ---: | --- |
+| Apex Grand Prix | 174.915 s | 171.273 s | Passed |
+| Harbour Street | 101.590 s | 101.753 s | Passed |
+| Temple Speedway | 137.679 s | 135.569 s | Passed |
+
+These are conservative keyboard-driver completion times, not performance or
+race-balance benchmarks. The four-car times include the contact/recovery probe.
+The browser scripts never write the game store, advance checkpoints directly,
+scale time or teleport a rigid body.
+
+Raw local results: `/tmp/racing-race-metrics.json`,
+`/tmp/racing-lap-metrics.json`, `/tmp/racing-smoke-metrics.json`,
+`/tmp/racing-verify-final.log` and `/tmp/racing-build-final.log`.
+The local runtime uses `CHROMIUM_EXECUTABLE=/tmp/racing-chrome/chrome-linux64/chrome`
+and `CHROMIUM_LIBRARY_PATH=/tmp/racing-browser-libs/usr/lib/x86_64-linux-gnu`.
+Browser libraries were extracted into `/tmp`; no system installation was needed.
+
+Physical mobile GPU performance, Safari, screen-reader operation and perceived
+sound quality were not tested in this headless environment. Audio tests verify
+surface/slip envelopes, volume, impact rate limiting, pause and owned-resource
+cleanup. Championship progression/retries are covered by store/UI tests; the
+full three-round championship was not separately driven in a real browser.

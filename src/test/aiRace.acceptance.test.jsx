@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -193,7 +194,7 @@ describe('AI race acceptance', () => {
 
     expect(observedCheckpointStates).toEqual([2, 3, 4, 5, 6, 7, 8, 9, 0, 1]);
     expect(getAI1State()).toMatchObject({ lap: 2, nextCheckpointIndex: 1 });
-    expect(window.racerProgress.ai_1).toBeGreaterThanOrEqual(200);
+    expect(racerTelemetry.progress.ai_1).toBeGreaterThanOrEqual(200);
     unmount();
   }, 15_000);
 });

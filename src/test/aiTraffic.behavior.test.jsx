@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import React from 'react'
 import { act, render } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -10,8 +11,8 @@ const AI_IDS = ['ai_1', 'ai_2', 'ai_3']
 
 describe('AI traffic response', () => {
   beforeEach(() => {
-    window.racerPositions = {}
-    window.racerProgress = {}
+    racerTelemetry.positions = {}
+    racerTelemetry.progress = {}
     act(() => useGameStore.setState({
       gameState: 'playing',
       gameMode: 'single',
@@ -51,7 +52,7 @@ describe('AI traffic response', () => {
     const position = body.translation()
     body.setLinvel({ x: forward.x * 55, y: 0, z: forward.z * 55 })
 
-    window.racerPositions.traffic_probe = {
+    racerTelemetry.positions.traffic_probe = {
       x: position.x + forward.x * 12,
       z: position.z + forward.z * 12,
       vx: forward.x * 40,
@@ -68,12 +69,12 @@ describe('AI traffic response', () => {
     act(() => triggerFrames(1 / 60, 1))
 
     expect(longitudinalImpulses.some(impulse => impulse < -100)).toBe(true)
-    expect(window.racerPositions.ai_2).toMatchObject({
+    expect(racerTelemetry.positions.ai_2).toMatchObject({
       vx: expect.any(Number),
       vz: expect.any(Number),
     })
-    expect(Number.isFinite(window.racerPositions.ai_2.vx)).toBe(true)
-    expect(Number.isFinite(window.racerPositions.ai_2.vz)).toBe(true)
+    expect(Number.isFinite(racerTelemetry.positions.ai_2.vx)).toBe(true)
+    expect(Number.isFinite(racerTelemetry.positions.ai_2.vz)).toBe(true)
     unmount()
   })
 })

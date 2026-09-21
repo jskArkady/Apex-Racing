@@ -5,12 +5,14 @@ Apex Racing is a browser-based 3D circuit racing game built with React, Three.js
 ## Highlights
 
 - Single Race mode with a four-car grid: the player and three AI opponents
-- Time Trial mode focused on clean laps and personal bests
+- Time Trial with sector splits, personal-best deltas and a translucent best-lap ghost
+- Selectable 1, 3 or 5 laps and Easy / Normal / Hard AI difficulty
+- Three-round championship with standings and 10 / 6 / 4 / 2 points
 - Three circuit identities with track-specific scenery and lighting
 - Arcade handling backed by Rapier rigid-body collision and recovery logic
 - AI corner-speed control, traffic awareness, and stuck recovery
 - Chase camera, minimap, checkpoints, live position, lap timing, gear, RPM, and wrong-way feedback
-- Procedural Web Audio engine sound that responds to speed and RPM
+- Procedural Web Audio engine, tyre-slip, road/off-road and collision sounds
 - Keyboard and multitouch controls
 - Fixed high-quality graphics with shadows; settings provide audio volume control
 
@@ -48,6 +50,34 @@ npm run build
 npm run preview
 ```
 
+## Race options and records
+
+Select the lap count and AI difficulty beside the mode buttons. Hard preserves
+this game's original AI pace; Normal and Easy reduce target speeds and look
+further ahead for braking while sharing the player's vehicle physics.
+
+Three sectors end at checkpoints 4, 7 and the finish. The HUD shows the last
+sector duration and the cumulative difference against the **same point of the
+personal-best lap**, not a prediction or an ideal lap assembled from sectors.
+Every completed lap can improve the saved record, including intermediate laps
+in a 3- or 5-lap race.
+
+A new best with a complete clean recording saves a ghost locally. Enable
+"Personal best ghost" to race it in Time Trial. Playback follows recorded lap
+time, freezes on pause, and has no collision body. Existing records without a
+recording need a new best to acquire a ghost. Using R invalidates only that lap's
+ghost recording; the next lap can be recorded normally. Samples are taken at
+up to 10 Hz and capped at 18,000 per lap. If browser storage is unavailable or
+full, records remain usable in memory for the current page session.
+
+Championship runs Apex, Harbour and Temple in that order with the selected laps
+and difficulty. Each round ends when the player finishes. Completed cars rank by
+finish time; remaining cars are classified by accepted checkpoint progress and
+checkpoint time. Tied race ranks earn equal points; equal championship totals
+share a place. "Next Round" advances, while "Race Again" replaces the current
+round result without double-counting points. Quitting to the menu ends the cup;
+championship progress is not persisted across page reloads.
+
 ## Controls
 
 | Input | Action |
@@ -84,9 +114,14 @@ readiness for all circuits under repeatable network conditions.
 ## Project layout
 
 - `src/App.jsx` — 3D scene and game-flow composition
-- `src/components/Car.jsx` — player controls, vehicle physics, collision recovery, and chase camera
+- `src/components/Car.jsx` — player controls, physics and checkpoint progression
+- `src/components/useChaseCamera.js` — camera framing, follow and recovery snaps
+- `src/components/GhostCar.jsx` — collision-free best-lap playback
 - `src/components/Opponents.jsx` — AI vehicle behavior and race progress
-- `src/components/Track.jsx` — circuit geometry, colliders, and track-side scenery
+- `src/components/Track.jsx` — composition of track assets, physical surface and scenery
+- `src/components/useTrackAssets.js` — geometry/material creation and disposal
+- `src/components/TrackSurface.jsx` / `TrackScenery.jsx` — physics and visual rendering boundaries
+- `src/utils/racerTelemetry.js` — non-reactive live vehicle samples and read-only browser diagnostics
 - `src/store/gameStore.js` — race state, timing, settings, and telemetry
 - `src/ui/` — menus, HUD, pause screen, and results
 - `src/utils/` — track data, audio, visual cues, and shared helpers

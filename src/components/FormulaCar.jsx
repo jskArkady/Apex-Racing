@@ -1,3 +1,4 @@
+import { createGhostMaterials } from '../utils/ghostMaterials'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -1555,8 +1556,21 @@ export default function FormulaCar({
   liveryAtlas = null,
   rigidBodyRef,
   detail = 'hero',
+  ghost = false,
 }) {
   const rootRef = useRef()
+  const ghostMaterials = useMemo(() => createGhostMaterials(), [])
+  useEffect(() => () => ghostMaterials.dispose(), [ghostMaterials])
+  useFrame(() => {
+    if (!ghost) return
+    rootRef.current?.traverse?.(object => {
+      if (!object.isMesh) return
+      object.castShadow = false
+      object.material = Array.isArray(object.material)
+        ? object.material.map(material => ghostMaterials.get(material))
+        : ghostMaterials.get(object.material)
+    })
+  })
   const wheelRefs = useRef([])
   // The player remains the close-camera hero. AI cars get a race LOD, with an
   // additional low-quality silhouette tier that removes hidden mechanical

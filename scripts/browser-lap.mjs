@@ -5,7 +5,7 @@ import { formatTime } from '../src/utils/formatTime.js';
 // Follow the centreline using ordinary keyboard events. Only the existing
 // read-only minimap/guard telemetry and visible HUD are observed: no store writes,
 // checkpoint calls, body teleportation or physics/time overrides.
-export async function completeBrowserLaps(browser, url, runs) {
+export async function completeBrowserLaps(browser, url, runs, raceMode = 'time_trial') {
   const tracks = TRACK_PRESETS.filter(track => !process.env.BROWSER_TRACK
     || track.id === process.env.BROWSER_TRACK);
   assert.ok(tracks.length, 'BROWSER_TRACK must be a known track id');
@@ -21,21 +21,24 @@ export async function completeBrowserLaps(browser, url, runs) {
     await page.goto(url, { waitUntil: 'networkidle' });
     await page.getByRole('radio', { name: `Select ${track.name}`, exact: true }).click();
     assert.equal(await page.locator('.menu-personal-best strong').innerText(), 'NO TIME SET');
-    await page.getByRole('button', { name: 'Time Trial', exact: true }).click();
-    await page.waitForFunction(() => window.racerPositions?.player
+    await page.getByRole('button', { name: raceMode === 'single' ? 'Start Race' : 'Time Trial', exact: true }).click();
+    await page.waitForFunction(() => window.__RACING_TELEMETRY__?.positions?.player
       && !document.querySelector('.countdown'));
     const points = track.curve.getSpacedPoints(4096).slice(0, -1).map(p => ({ x: p.x, z: p.z }));
-    await page.evaluate(({ points, length }) => {
+    await page.evaluate(({ points, length, raceMode }) => {
       const keys = new Set();
       const setKey = (code, pressed) => {
         if (keys.has(code) === pressed) return;
         if (pressed) keys.add(code); else keys.delete(code);
         window.dispatchEvent(new KeyboardEvent(pressed ? 'keydown' : 'keyup', {
-          code, key: { KeyW: 'w', KeyA: 'a', KeyD: 'd', Space: ' ' }[code], bubbles: true,
+          code, key: { KeyW: 'w', KeyA: 'a', KeyD: 'd', KeyR: 'r', Space: ' ' }[code], bubbles: true,
         }));
       };
       const report = window.__browserLap = { checkpoints: [], distance: 0, maxSpeed: 0, done: false };
       let last = null;
+      let collisionProbeDone = raceMode !== 'single';
+      let recoveryRequestedAt = null;
+      const probeStartedAt = performance.now();
       let nearest = points.length - 8;
       let previousError = 0;
       let previousTime = performance.now();
@@ -46,8 +49,35 @@ export async function completeBrowserLaps(browser, url, runs) {
           report.done = true;
           return;
         }
-        const pos = window.racerPositions?.player;
+        const pos = window.__RACING_TELEMETRY__?.positions?.player;
         if (!pos) { requestAnimationFrame(step); return; }
+        const racers = window.__RACING_TELEMETRY__?.positions ?? {};
+        report.maxRacers = Math.max(report.maxRacers ?? 0, Object.keys(racers).length);
+        report.collisions = pos.collisions ?? 0;
+        report.recoveries = pos.recoveries ?? 0;
+        if (!collisionProbeDone) {
+          // Deliberately touch a barrier through keyboard driving, then recover.
+          // This exercises real contacts and R recovery before the full lap.
+          if (pos.collisions > 0 && recoveryRequestedAt === null) {
+            recoveryRequestedAt = now;
+            setKey('KeyW', false); setKey('KeyA', false); setKey('KeyR', true);
+          } else if (recoveryRequestedAt !== null) {
+            if (now - recoveryRequestedAt > 250) {
+              setKey('KeyR', false);
+              collisionProbeDone = true;
+              last = null;
+            }
+          } else if (now - probeStartedAt < 15000) {
+            setKey('KeyW', true); setKey('KeyA', true);
+          } else {
+            report.probeFailed = true;
+            for (const key of keys) setKey(key, false);
+            report.done = true;
+            return;
+          }
+          requestAnimationFrame(step);
+          return;
+        }
         const checkpoint = document.querySelector('.checkpoint-readout')?.getAttribute('aria-label');
         if (checkpoint && checkpoint !== report.checkpoints.at(-1)) report.checkpoints.push(checkpoint);
         const speed = Math.hypot(pos.vx, pos.vz);
@@ -89,7 +119,7 @@ export async function completeBrowserLaps(browser, url, runs) {
         requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
-    }, { points, length: track.length });
+    }, { points, length: track.length, raceMode });
 
     // The timeout is wall-clock time; physics and the race clock run normally.
     try {
@@ -103,6 +133,18 @@ export async function completeBrowserLaps(browser, url, runs) {
       throw new Error(`${track.id} did not finish: ${JSON.stringify(telemetry)}`, { cause: error });
     }
     const telemetry = await page.evaluate(() => window.__browserLap);
+    if (raceMode === 'single') {
+      assert.ok(!telemetry.probeFailed, 'Keyboard driving must produce a real collision');
+      assert.equal(telemetry.maxRacers, 4, 'Full four-car grid must participate');
+      assert.ok(telemetry.collisions > 0 && telemetry.recoveries === 1, 'Contact and one physical recovery must occur');
+      const position = await page.locator('.finish-result strong').innerText();
+      assert.match(position, /^[1-4](ST|ND|RD|TH)$/, 'Race must publish a valid final position');
+      const results = await page.locator('[aria-label="Race classification"] li').allTextContents();
+      assert.equal(results.length, 4, 'All four racers must appear in the final classification');
+      const playerResult = results.find(result => result.includes('You'));
+      assert.equal(parseInt(playerResult, 10), parseInt(position, 10), 'Headline and classification must agree');
+      telemetry.classification = results;
+    }
     assert.deepEqual(telemetry.checkpoints, [
       ...Array.from({ length: 9 }, (_, index) => `Next checkpoint ${index + 1} of 9`),
       'Next checkpoint finish',
@@ -118,8 +160,28 @@ export async function completeBrowserLaps(browser, url, runs) {
     await page.getByRole('radio', { name: `Select ${track.name}`, exact: true }).click();
     assert.equal(await page.locator('.menu-personal-best strong').innerText(), finalLap,
       'Personal best must survive a fresh app load');
+    if (raceMode === 'time_trial') {
+      const record = await page.evaluate(trackId => JSON.parse(localStorage.getItem('apex-racing:lap-records:v1'))?.[trackId], track.id);
+      assert.equal(record.time, best, 'Sector reference and ghost must belong to the fastest lap');
+      assert.equal(record.splits.length, 3);
+      assert.ok(record.samples.length > 10, 'A physically driven clean lap must persist ghost samples');
+      await page.getByRole('button', { name: 'Time Trial', exact: true }).click();
+      await page.waitForFunction(() => window.__RACING_TELEMETRY__?.ghost?.visible && window.__RACING_TELEMETRY__.ghost.time > 2);
+      const ghostBefore = await page.evaluate(() => window.__RACING_TELEMETRY__.ghost);
+      await page.waitForTimeout(600);
+      const ghostAfter = await page.evaluate(() => window.__RACING_TELEMETRY__.ghost);
+      assert.ok(Math.hypot(ghostAfter.x - ghostBefore.x, ghostAfter.z - ghostBefore.z) > 0.2, 'Ghost must move in the replayed lap');
+      await page.keyboard.press('Escape');
+      await page.getByRole('heading', { name: 'PAUSED', exact: true }).waitFor();
+      await page.waitForTimeout(150);
+      const pausedGhost = await page.evaluate(() => window.__RACING_TELEMETRY__.ghost);
+      assert.equal(pausedGhost?.visible, true, 'Pause must retain the visible ghost');
+      await page.waitForTimeout(500);
+      assert.deepEqual(await page.evaluate(() => window.__RACING_TELEMETRY__.ghost), pausedGhost, 'Pause must freeze ghost replay');
+      telemetry.ghostReplay = true;
+    }
     assert.deepEqual(errors, [], 'No uncaught errors during completion or reload');
-    runs.push({ track: track.id, completion: true, reloadPersistence: true, best, ...telemetry, passed: true });
+    runs.push({ track: track.id, raceMode, completion: true, reloadPersistence: true, best, ...telemetry, passed: true });
     console.log('PASS complete lap and persistent record', track.id, finalLap);
     await context.close();
   }

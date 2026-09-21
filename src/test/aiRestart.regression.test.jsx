@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import React from 'react'
 import { act, render } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -55,13 +56,13 @@ describe('AI session reset', () => {
 
   it('removes its window bridge entries when opponents unmount', () => {
     const { unmount } = render(<Opponents />)
-    window.racerPositions.ai_1 = { x: 1, z: 2 }
-    window.racerProgress.ai_1 = 123
+    racerTelemetry.positions.ai_1 = { x: 1, z: 2 }
+    racerTelemetry.progress.ai_1 = 123
 
     unmount()
 
-    expect(window.racerPositions.ai_1).toBeUndefined()
-    expect(window.racerProgress.ai_1).toBeUndefined()
+    expect(racerTelemetry.positions.ai_1).toBeUndefined()
+    expect(racerTelemetry.progress.ai_1).toBeUndefined()
   })
 
   it('does not respawn an AI that is above a low-elevation road section', () => {

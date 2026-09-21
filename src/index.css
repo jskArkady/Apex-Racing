@@ -1495,3 +1495,40 @@ kbd {
     transform: none;
   }
 }
+
+/* Race configuration stays with the mode buttons in the existing menu grid. */
+.mode-panel { min-width: 0; }
+.race-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.race-options label { display: grid; gap: 7px; color: var(--muted); font-size: 0.72rem; }
+.race-options select { min-height: 40px; width: 100%; padding: 8px; color: var(--ink); background: #151b20; border: 1px solid var(--line); font: inherit; }
+.race-options .ghost-option { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+.ghost-option input { accent-color: var(--accent); width: 18px; height: 18px; }
+.sector-readout { position: absolute; top: 128px; left: 28px; display: grid; gap: 4px; padding: 10px 14px; background: #10161cdd; border-left: 2px solid var(--accent); font-variant-numeric: tabular-nums; font-size: 0.8rem; }
+.sector-readout strong { color: #ffd58c; }
+.sector-readout strong[data-ahead="true"] { color: #80efad; }
+.sector-readout small { color: var(--muted); font-size: 0.6rem; }
+.championship-results { grid-column: 2; display: grid; gap: 12px; }
+.championship-results h2 { font-size: 1rem; }
+.championship-results ol { list-style: none; padding: 0; margin: 0; }
+.championship-results li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.championship-results small { color: var(--muted); line-height: 1.5; }
+.finish-overlay { overflow-y: auto; align-items: flex-start; }
+.finish-content { margin-block: auto; row-gap: 24px; }
+@media (max-width: 640px) {
+  .championship-results { grid-column: auto; }
+  .sector-readout { top: 118px; left: 18px; font-size: 0.7rem; padding: 7px 10px; }
+}
+@media (max-height: 480px) and (min-width: 641px) {
+  .sector-readout { top: 102px; }
+}
+
+.race-classification { grid-column: 2; list-style: none; padding: 0; margin: 0; }
+.race-classification li { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; font-size: 0.8rem; }
+@media (max-width: 640px) { .race-classification { grid-column: auto; } }
+@media (any-pointer: coarse) and (max-width: 640px) {
+  .sector-readout { top: calc(max(14px, env(safe-area-inset-top)) + 134px); }
+}
+
+.ghost-hint { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 0.64rem; line-height: 1.5; }
+
+.championship-mode { flex-direction: column; align-items: flex-start; gap: 6px; }

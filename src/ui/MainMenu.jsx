@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
-import { RACE_LAPS } from '../utils/raceConfig'
+import { LAP_OPTIONS, AI_DIFFICULTIES } from '../utils/raceConfig'
 import { START_FINISH_PROGRESS, TRACK_PRESETS } from '../utils/trackData'
 import { formatTime } from '../utils/formatTime'
 import { getTrackPreviewData } from '../utils/trackPreviewData'
@@ -240,16 +240,24 @@ function CircuitPreview({ track }) {
 }
 
 export default function MainMenu() {
+  const ghostEnabled = useGameStore(state => state.ghostEnabled)
+  const setGhostEnabled = useGameStore(state => state.setGhostEnabled)
+  const raceOptions = useGameStore(state => state.raceOptions)
+  const updateRaceOptions = useGameStore(state => state.updateRaceOptions)
+  const startChampionship = useGameStore(state => state.startChampionship)
   const startGame = useGameStore(state => state.startGame)
   const selectedTrackId = useGameStore(state => state.selectedTrackId)
   const selectTrack = useGameStore(state => state.selectTrack)
   const settings = useGameStore(state => state.settings)
+  const lapRecords = useGameStore(state => state.lapRecords)
   const personalBests = useGameStore(state => state.personalBests)
   const updateSettings = useGameStore(state => state.updateSettings)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [failedHeroId, setFailedHeroId] = useState(null)
   const selectedTrack = TRACK_PRESETS.find(track => track.id === selectedTrackId) ?? TRACK_PRESETS[0]
   const selectedPersonalBest = personalBests?.[selectedTrack.id] ?? 0
+  const ghostRecord = lapRecords[selectedTrack.id]
+  const ghostAvailable = ghostRecord?.time === selectedPersonalBest && ghostRecord?.samples?.length > 1
   const menuHero = failedHeroId === selectedTrack.id ? null : getMenuHero(selectedTrack.id)
   const handleTrackOptionKeyDown = (event, currentIndex) => {
     let nextIndex = null
@@ -303,7 +311,7 @@ export default function MainMenu() {
       )}
       <section className="menu-content" aria-labelledby="game-title">
         <div className="menu-heading">
-          <span className="eyebrow">{selectedTrack.shortName} · {RACE_LAPS} lap</span>
+          <span className="eyebrow">{selectedTrack.shortName} · {raceOptions.laps} {raceOptions.laps === 1 ? 'lap' : 'laps'}</span>
           <h1 className="menu-title" id="game-title">APEX RACING</h1>
           <p>{selectedTrack.description}</p>
           <p className="menu-personal-best">
@@ -312,12 +320,30 @@ export default function MainMenu() {
           </p>
         </div>
 
+        <div className="mode-panel">
+        <div className="race-options">
+          <label className="ghost-option"><input type="checkbox" checked={ghostEnabled} onChange={event => setGhostEnabled(event.target.checked)} />Personal best ghost (Time Trial)</label>
+          <p className="ghost-hint">{ghostAvailable ? 'Saved best-lap ghost ready' : 'Set a new best without recovery to save a ghost.'}</p>
+          <label>Laps
+            <select value={raceOptions.laps} onChange={event => updateRaceOptions({ laps: Number(event.target.value) })}>
+              {LAP_OPTIONS.map(laps => <option key={laps} value={laps}>{laps}</option>)}
+            </select>
+          </label>
+          <label>AI difficulty
+            <select value={raceOptions.difficulty} onChange={event => updateRaceOptions({ difficulty: event.target.value })}>
+              {Object.entries(AI_DIFFICULTIES).map(([value, option]) => <option key={value} value={value}>{option.label}</option>)}
+            </select>
+          </label>
+        </div>
         <div className="menu-actions" aria-label="Choose race mode">
           <button aria-label="Start Race" aria-describedby="start-race-description" className="btn btn-primary interactive" onClick={() => startGame('single')}>
-            <span>Start Race</span><small id="start-race-description">4-car grid · {RACE_LAPS} lap</small>
+            <span>Start Race</span><small id="start-race-description">4-car grid · {raceOptions.laps} {raceOptions.laps === 1 ? 'lap' : 'laps'}</small>
           </button>
           <button aria-label="Time Trial" aria-describedby="time-trial-description" className="btn interactive" onClick={() => startGame('time_trial')}>
             <span>Time Trial</span><small id="time-trial-description">Race the clock</small>
+          </button>
+          <button className="btn championship-mode interactive" onClick={startChampionship}>
+            <span>Championship</span><small>3 circuits · 10 / 6 / 4 / 2 points</small>
           </button>
           <button
             className="btn btn-quiet interactive"
@@ -327,6 +353,8 @@ export default function MainMenu() {
           >
             Settings
           </button>
+        </div>
+
         </div>
 
         {settingsOpen ? (

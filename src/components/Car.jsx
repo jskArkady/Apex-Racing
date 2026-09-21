@@ -1,3 +1,6 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
+import { useChaseCamera } from './useChaseCamera'
+export { calculateChaseCameraFraming, calculateChaseCameraLens } from './useChaseCamera'
 import { useRef, useEffect, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useKeyboardControls } from '@react-three/drei'
@@ -5,6 +8,7 @@ import { CuboidCollider, RigidBody, useBeforePhysicsStep } from '@react-three/ra
 import { CoefficientCombineRule } from '@dimforge/rapier3d-compat'
 import * as THREE from 'three'
 import { useGameStore } from '../store/gameStore'
+import { ghostRecorder } from '../utils/ghostLap'
 import { audioEngine } from '../utils/AudioEngine'
 import { getTrackPreset } from '../utils/trackData'
 import {
@@ -51,12 +55,6 @@ import {
 
 const RECOVERY_DIRECTION_GRACE_SECONDS = 0.4
 const LOCAL_PROJECTION_MAX_FRAME_DELTA = 0.25
-const CHASE_CAMERA_LOOK_AHEAD = 10
-const CHASE_CAMERA_BASE_FOV = 58
-const CHASE_CAMERA_MAX_DESKTOP_FOV = 68
-const CHASE_CAMERA_MAX_PORTRAIT_FOV = 63
-const CHASE_CAMERA_FULL_EFFECT_SPEED = 220
-const MAX_PORTRAIT_CAMERA_SCALE = 2.25
 const WORLD_UP = new THREE.Vector3(0, 1, 0)
 const tempPosition = new THREE.Vector3()
 const tempVelocity = new THREE.Vector3()
@@ -66,14 +64,6 @@ const tempRight = new THREE.Vector3()
 const tempForce = new THREE.Vector3()
 const tempTorqueBuffers = [new THREE.Vector3(), new THREE.Vector3()]
 const tempLateralCorrection = new THREE.Vector3()
-const tempVisualPosition = new THREE.Vector3()
-const tempVisualQuaternion = new THREE.Quaternion()
-const tempVisualForward = new THREE.Vector3()
-const tempCameraPosition = new THREE.Vector3()
-const tempCameraOffset = new THREE.Vector3()
-const tempCameraTarget = new THREE.Vector3()
-const tempChaseCameraFraming = { distance: 0, height: 0 }
-const tempChaseCameraLens = { fov: CHASE_CAMERA_BASE_FOV, lookAhead: CHASE_CAMERA_LOOK_AHEAD }
 const tempFlatTrackTangent = new THREE.Vector3()
 const tempTrackTangent = new THREE.Vector3()
 const tempCheckpointPosition = new THREE.Vector3()
@@ -104,46 +94,8 @@ const createTrackYawRotation = (direction) => {
   return new THREE.Quaternion().setFromAxisAngle(WORLD_UP, yaw)
 }
 
-export function calculateChaseCameraFraming(speedKmH, aspect, target = {}) {
-  const safeSpeed = Number.isFinite(speedKmH) ? Math.max(0, speedKmH) : 0
-  const safeAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1
-  const portraitScale = Math.min(
-    MAX_PORTRAIT_CAMERA_SCALE,
-    Math.max(1, 1 / safeAspect)
-  )
-  const baseDistance = 6 + (safeSpeed / 100) * 1.5
-  const distance = baseDistance * portraitScale
-  const baseHeight = 2.5 + (safeSpeed / 100) * 0.5
-
-  target.distance = distance
-  // Preserve the desktop sightline while widening portrait framing.
-  target.height = baseHeight
-    * ((distance + CHASE_CAMERA_LOOK_AHEAD) / (baseDistance + CHASE_CAMERA_LOOK_AHEAD))
-  return target
-}
-
-export function calculateChaseCameraLens(
-  speedKmH,
-  aspect,
-  reducedMotion = false,
-  target = {},
-) {
-  const safeSpeed = Number.isFinite(speedKmH) ? Math.max(0, speedKmH) : 0
-  const safeAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1
-  const linearProgress = Math.min(1, safeSpeed / CHASE_CAMERA_FULL_EFFECT_SPEED)
-  const progress = reducedMotion
-    ? 0
-    : linearProgress * linearProgress * (3 - 2 * linearProgress)
-  const maximumFov = safeAspect < 0.8
-    ? CHASE_CAMERA_MAX_PORTRAIT_FOV
-    : CHASE_CAMERA_MAX_DESKTOP_FOV
-  target.fov = CHASE_CAMERA_BASE_FOV
-    + (maximumFov - CHASE_CAMERA_BASE_FOV) * progress
-  target.lookAhead = CHASE_CAMERA_LOOK_AHEAD + 5 * progress
-  return target
-}
-
 export default function Car({ track = getTrackPreset(), captureRequest = null }) {
+  const { reset: resetCamera, follow: followCamera, snap: snapCamera } = useChaseCamera()
   const bodyRef = useRef()
   const visualRef = useRef()
   const [, getKeys] = useKeyboardControls()
@@ -189,15 +141,14 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
   const telemetryElapsedRef = useRef(0)
   const racerReportElapsedRef = useRef(0)
   const lastRacerReportRef = useRef({ lap: 1, nextCheckpointIndex: 1 })
-  const cameraLookTargetRef = useRef(new THREE.Vector3())
-  const cameraInitializedRef = useRef(false)
-  const reducedMotionRef = useRef(false)
   const torqueBufferIndexRef = useRef(0)
   const skipNextActuationRef = useRef(false)
   const collisionEscapeSecondsRef = useRef(0)
   const collisionEscapeActiveRef = useRef(false)
   const blockingCollisionHandlesRef = useRef(new Set())
   const captureFrameTimesRef = useRef([])
+  const recoveriesRef = useRef(0)
+  const collisionsRef = useRef(0)
   const playerPositionRef = useRef({ x: 0, z: 0, vx: 0, vz: 0, color: '#ff3366' })
   const mergedControlsRef = useRef(mergeDrivingControlSources())
   const physicsSampleRef = useRef({
@@ -217,6 +168,11 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
 
   useEffect(() => {
     if (gameState === 'countdown' || gameState === 'menu') {
+      ghostRecorder.reset(raceSessionId,
+        { x: startPose.position[0], y: startPose.position[1], z: startPose.position[2] },
+        startPose.rotation)
+      recoveriesRef.current = 0
+      collisionsRef.current = 0
       playerLastCheckpointTimeRef.current = 0
       progressGuardRef.current = createProgressGuardState()
       resetKeyDownRef.current = false
@@ -226,7 +182,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       telemetryElapsedRef.current = 0
       racerReportElapsedRef.current = 0
       lastRacerReportRef.current = { lap: 1, nextCheckpointIndex: 1 }
-      cameraInitializedRef.current = false
+      resetCamera()
       skipNextActuationRef.current = false
       collisionEscapeSecondsRef.current = 0
       collisionEscapeActiveRef.current = false
@@ -282,23 +238,12 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
         )
       }
     }
-  }, [gameMode, gameState, raceSessionId, setDrivingBackwards, startPose.lateralOffset, startPose.position, startPose.progress, startPose.rotation, trackLength])
+  }, [gameMode, gameState, raceSessionId, resetCamera, setDrivingBackwards, startPose.lateralOffset, startPose.position, startPose.progress, startPose.rotation, trackLength])
 
   useEffect(() => {
     return () => {
       audioEngine.stop()
     }
-  }, [])
-
-  useEffect(() => {
-    if (typeof window.matchMedia !== 'function') return undefined
-    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const updatePreference = () => {
-      reducedMotionRef.current = preference.matches
-    }
-    updatePreference()
-    preference.addEventListener?.('change', updatePreference)
-    return () => preference.removeEventListener?.('change', updatePreference)
   }, [])
 
   // Actuation belongs to Rapier's fixed step, not the render callback. During
@@ -430,15 +375,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
        if (gridCameraPendingRef.current && bodyRef.current) {
          const gridCenterPoint = startPose.point.clone()
            .addScaledVector(startPose.right, -startPose.lateralOffset)
-         const gridCameraPosition = gridCenterPoint.clone()
-           .addScaledVector(startPose.tangent, -8)
-           .add(new THREE.Vector3(0, 3.5, 0))
-         state.camera.position.lerp(gridCameraPosition, 1)
-         state.camera.lookAt(
-           gridCenterPoint
-             .addScaledVector(startPose.tangent, 10)
-             .add(new THREE.Vector3(0, 1, 0))
-         )
+         snapCamera(state.camera, gridCenterPoint, startPose.tangent, 8)
          gridCameraPendingRef.current = false
        }
        audioEngine.start()
@@ -492,6 +429,8 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
     // height and velocity are observations, not proof that teleporting is safe.
     // This closed contract eliminates every calculation-driven auto-respawn.
     if (resetPressed) {
+      recoveriesRef.current += 1
+      ghostRecorder.invalidate(raceSessionId)
       skipNextActuationRef.current = true
       const recoveryState = useGameStore.getState()
       const checkpointCount = Number.isFinite(recoveryState.totalCheckpoints) && recoveryState.totalCheckpoints > 0
@@ -578,9 +517,8 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
         trackLength
       )
 
-      if (!window.racerProgress) window.racerProgress = {}
-      if (!window.racerPositions) window.racerPositions = {}
-      window.racerProgress.player = calculateLiveRaceScore(
+
+      racerTelemetry.progress.player = calculateLiveRaceScore(
         recoveryState.lap,
         nextCheckpointIndex,
         recoveryProgress
@@ -588,7 +526,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       const recoveryPlayerPosition = playerPositionRef.current
       recoveryPlayerPosition.x = recoveryPosition.x
       recoveryPlayerPosition.z = recoveryPosition.z
-      window.racerPositions.player = recoveryPlayerPosition
+      racerTelemetry.positions.player = recoveryPlayerPosition
 
       const recoveryReportState = useGameStore.getState()
       updateRacerProgress(
@@ -610,20 +548,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       // Snap the chase camera to the same recovered heading. Letting it lerp
       // from a pre-crash heading makes a correct respawn look as if the car has
       // been rotated the wrong way for several frames.
-      const recoveryCameraTarget = new THREE.Vector3(
-        recoveryPosition.x,
-        recoveryPosition.y,
-        recoveryPosition.z
-      )
-      const recoveryCameraPosition = recoveryCameraTarget.clone()
-        .addScaledVector(recoveryDirection, -6)
-        .add(new THREE.Vector3(0, 3.5, 0))
-      state.camera.position.lerp(recoveryCameraPosition, 1)
-      state.camera.lookAt(
-        recoveryCameraTarget.clone()
-          .addScaledVector(recoveryDirection, 10)
-          .add(new THREE.Vector3(0, 1, 0))
-      )
+      snapCamera(state.camera, recoveryPosition, recoveryDirection, 6)
       return
     }
 
@@ -658,82 +583,15 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
     const rpm = Math.min(8000, 1000 + Math.abs(speedKmH) * 30)
     const gear = Math.max(1, Math.ceil(Math.abs(speedKmH) / 50))
     updateRaceFrame(frameDelta, speedKmH, rpm, gear)
+    ghostRecorder.record(raceSessionId, useGameStore.getState().currentTime, pos, rot)
     telemetryElapsedRef.current += frameDelta
     if (telemetryElapsedRef.current >= 1 / 20) {
       audioEngine.updateEngine(rpm)
       telemetryElapsedRef.current %= 1 / 20
     }
     
-    // Camera follow
-    let cameraSourcePosition = posVec
-    let cameraSourceForward = forwardVector
-    if (
-      visualRef.current
-      && typeof visualRef.current.getWorldPosition === 'function'
-      && typeof visualRef.current.getWorldQuaternion === 'function'
-    ) {
-      visualRef.current.getWorldPosition(tempVisualPosition)
-      visualRef.current.getWorldQuaternion(tempVisualQuaternion)
-      tempVisualForward.set(0, 0, -1).applyQuaternion(tempVisualQuaternion).setY(0)
-      if (tempVisualForward.lengthSq() > 1e-6) {
-        tempVisualForward.normalize()
-        cameraSourcePosition = tempVisualPosition
-        cameraSourceForward = tempVisualForward
-      }
-    }
-    const cameraPosition = tempCameraPosition.copy(cameraSourcePosition)
-    // Keep the desktop chase framing, but move back on portrait screens where
-    // the narrower horizontal FOV would otherwise make the car fill the view.
-    const cameraFraming = calculateChaseCameraFraming(
-      speedKmH,
-      state.camera.aspect,
-      tempChaseCameraFraming
-    )
-    const cameraLens = calculateChaseCameraLens(
-      speedKmH,
-      state.camera.aspect,
-      reducedMotionRef.current,
-      tempChaseCameraLens,
-    )
-    const cameraOffset = tempCameraOffset
-      .copy(cameraSourceForward)
-      .multiplyScalar(-cameraFraming.distance)
-    cameraOffset.y += Number.isFinite(captureRequest?.cameraHeight)
-      ? captureRequest.cameraHeight
-      : cameraFraming.height
-    cameraPosition.add(cameraOffset)
-
-    const cameraDelta = Math.min(frameDelta, 0.1)
-    const positionDamping = 1 - Math.exp(-7.5 * cameraDelta)
-    const targetDamping = 1 - Math.exp(-12 * cameraDelta)
-    if (Number.isFinite(state.camera.fov)) {
-      const nextFov = THREE.MathUtils.lerp(
-        state.camera.fov,
-        cameraLens.fov,
-        1 - Math.exp(-4.5 * cameraDelta),
-      )
-      if (Math.abs(nextFov - state.camera.fov) > 0.001) {
-        state.camera.fov = nextFov
-        state.camera.updateProjectionMatrix?.()
-      }
-    }
-    if (captureLookTarget) {
-      tempCameraTarget.copy(captureLookTarget)
-    } else {
-      tempCameraTarget
-        .copy(cameraSourceForward)
-        .multiplyScalar(cameraLens.lookAhead)
-        .add(cameraSourcePosition)
-    }
-    if (!cameraInitializedRef.current) {
-      state.camera.position.lerp(cameraPosition, 1)
-      cameraLookTargetRef.current.copy(tempCameraTarget)
-      cameraInitializedRef.current = true
-    } else {
-      state.camera.position.lerp(cameraPosition, positionDamping)
-      cameraLookTargetRef.current.lerp(tempCameraTarget, targetDamping)
-    }
-    state.camera.lookAt(cameraLookTargetRef.current)
+    const cameraSourcePosition = followCamera(state.camera, posVec, forwardVector,
+      visualRef.current, speedKmH, frameDelta, captureRequest, captureLookTarget)
     if (captureRequest
       && window.__racingVisualCapture
       && typeof state.camera.updateMatrixWorld === 'function') {
@@ -742,7 +600,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       captureState.speed = speedKmH
       captureState.cameraMode = captureRequest.cameraMode ?? 'landmark'
       captureState.cameraFov = Number.isFinite(state.camera.fov) ? state.camera.fov : null
-      captureState.racerCount = Object.keys(window.racerPositions ?? {}).length
+      captureState.racerCount = Object.keys(racerTelemetry.positions ?? {}).length
       captureState.frameTimes = captureFrameTimesRef.current
       captureState.renderInfo = {
         calls: state.gl?.info?.render?.calls ?? null,
@@ -816,6 +674,9 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
     }
     const closestT = projection.progress
     const minDistance = projection.centerlineDistance
+    audioEngine.updateDriving?.(currentSpeed,
+      velocity.x * -forwardVector.z + velocity.z * forwardVector.x,
+      minDistance > raceTrack.roadWidth / 2)
 
     const hasContinuousProgress = updateProgressGuardState(
       progressGuardRef.current,
@@ -947,8 +808,8 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
     }
 
     // Update global progress for position calculation
-    if (!window.racerProgress) window.racerProgress = {};
-    if (!window.racerPositions) window.racerPositions = {};
+
+
     
     // Use continuous curve progress for the live leaderboard. After CP9 the
     // next checkpoint wraps to zero, but the car is still completing the final
@@ -956,7 +817,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
     // CP0 uses a proximity gate, so the store may advance the lap a few metres
     // before the curve parameter wraps from 1 back to 0. Keep that short seam
     // interval on the previous lap to preserve monotonic visual progress.
-    window.racerProgress.player = calculateLiveRaceScore(
+    racerTelemetry.progress.player = calculateLiveRaceScore(
       lap,
       nextCheckpointIndex,
       approvedProgress
@@ -964,9 +825,11 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
     const playerPosition = playerPositionRef.current
     playerPosition.x = pos.x
     playerPosition.z = pos.z
+    playerPosition.recoveries = recoveriesRef.current
+    playerPosition.collisions = collisionsRef.current
     playerPosition.vx = linVel.x
     playerPosition.vz = linVel.z
-    window.racerPositions.player = playerPosition
+    racerTelemetry.positions.player = playerPosition
 
     // Regularly report player's race metrics to the store
     const finalState = useGameStore.getState()
@@ -989,7 +852,7 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
       if (reportedState.gameMode === 'single' && reportedState.gameState === 'playing') {
         reportedState.updatePosition(getLiveRacerRank(
           reportedState.racers,
-          window.racerProgress,
+          racerTelemetry.progress,
           'player',
           reportedState.position,
         ))
@@ -1017,6 +880,9 @@ export default function Car({ track = getTrackPreset(), captureRequest = null })
         // arm the low-speed escape yaw; otherwise a normal road stop can turn
         // into an unexplained in-place 90-degree rotation.
         if (other?.rigidBodyObject?.name === 'track-road') return
+        if (useGameStore.getState().gameState === 'playing') collisionsRef.current += 1
+        const impactVelocity = bodyRef.current?.linvel()
+        if (impactVelocity) audioEngine.playImpact?.(Math.hypot(impactVelocity.x, impactVelocity.z))
         const handle = other?.collider?.handle
         if (Number.isFinite(handle)) blockingCollisionHandlesRef.current.add(handle)
       }}

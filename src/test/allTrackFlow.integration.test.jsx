@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import React from 'react'
 import { act, render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -189,8 +190,8 @@ describe('selected-track race flow integration', () => {
     act(() => {
       firstPlayerBody.setTranslation({ x: 999, y: -20, z: -777 })
       firstPlayerBody.setLinvel({ x: 20, y: -8, z: 30 })
-      window.racerPositions = { player: { x: 999, z: -777 }, ghost: { x: 1, z: 2 } }
-      window.racerProgress = { player: 188, ghost: 999 }
+      racerTelemetry.positions = { player: { x: 999, z: -777 }, ghost: { x: 1, z: 2 } }
+      racerTelemetry.progress = { player: 188, ghost: 999 }
       useGameStore.setState({
         lap: 1,
         currentTime: 42,
@@ -203,8 +204,8 @@ describe('selected-track race flow integration', () => {
 
     expect(useGameStore.getState().raceSessionId).toBe(firstSessionId + 1)
     expectCleanRaceState(firstTrack.id, 'single')
-    expect(window.racerPositions).toEqual({})
-    expect(window.racerProgress).toEqual({})
+    expect(racerTelemetry.positions).toEqual({})
+    expect(racerTelemetry.progress).toEqual({})
     const resetPose = getStartGridPose('player', 'single', firstTrack.curve, firstTrack.length)
     expect(firstPlayerBody.translation()).toEqual({
       x: resetPose.position[0],
@@ -220,8 +221,8 @@ describe('selected-track race flow integration', () => {
     })
 
     expectCleanRaceState(secondTrack.id, 'time_trial')
-    expect(window.racerPositions).toEqual({})
-    expect(window.racerProgress).toEqual({})
+    expect(racerTelemetry.positions).toEqual({})
+    expect(racerTelemetry.progress).toEqual({})
     expect(getVehicleBodies()).toHaveLength(1)
     const secondPlayerBody = getBody('player')
     const secondPose = getStartGridPose(

@@ -1,7 +1,9 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { formatTime } from '../utils/formatTime'
 import { START_FINISH_PROGRESS, getTrackPreset, trackBounds } from '../utils/trackData'
+import { formatDelta } from '../utils/lapRecords'
 import MobileDrivingControls from './MobileDrivingControls'
 
 const safeNumber = (value, fallback = 0) => Number.isFinite(value) ? value : fallback
@@ -54,6 +56,10 @@ const defaultMinimapTrackPoints = createMinimapTrackPoints(defaultMinimapTrack)
 export const minimapTrackPoints = defaultMinimapTrackPoints
 
 export default function HUD() {
+  const championship = useGameStore(state => state.championship)
+  const lastSector = useGameStore(state => state.lastSector)
+  const sectorTime = useGameStore(state => state.sectorTime)
+  const sectorDelta = useGameStore(state => state.sectorDelta)
   const lap = useGameStore(state => state.lap)
   const maxLaps = useGameStore(state => state.maxLaps)
   const position = useGameStore(state => state.position)
@@ -105,8 +111,8 @@ export default function HUD() {
 
     const interval = window.setInterval(() => {
       const state = useGameStore.getState()
-      const dots = window.racerPositions
-        ? Object.entries(window.racerPositions).map(([id, pos]) => ({
+      const dots = racerTelemetry.positions
+        ? Object.entries(racerTelemetry.positions).map(([id, pos]) => ({
             id,
             x: pos.x,
             z: pos.z,
@@ -171,11 +177,18 @@ export default function HUD() {
         </div>
       )}
 
+      {lastSector > 0 && (
+        <div className="sector-readout" role="status" aria-live="polite">
+          <span>S{lastSector} · {formatTime(sectorTime)}</span>
+          <strong data-ahead={sectorDelta < 0}>{formatDelta(sectorDelta)}</strong>
+          <small>At sector line · vs personal best lap</small>
+        </div>
+      )}
       <header className="hud-top">
         <section className="hud-readout hud-race-position" aria-label="Race position">
           {gameMode === 'single' ? (
             <div>
-              <span className="hud-label">Position</span>
+              <span className="hud-label">{championship ? `Round ${championship.round + 1}/3 · Position` : 'Position'}</span>
               <strong>{safeNumber(position, 1)}<small> / {safeNumber(totalRacers, 1)}</small></strong>
             </div>
           ) : (

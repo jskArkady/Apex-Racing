@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Physics } from '@react-three/rapier'
 import Car from './Car'
+import GhostCar from './GhostCar'
 import Track from './Track'
 import Opponents from './Opponents'
 import { useGameStore } from '../store/gameStore'
@@ -29,6 +30,7 @@ export default function RaceScene({ track, captureRequest, onReady }) {
     >
       <Track track={track} />
       <Car track={track} captureRequest={captureRequest} />
+      {gameMode === 'time_trial' && <GhostCar />}
       {gameMode === 'single' && <Opponents track={track} />}
       <RaceReady onReady={onReady} />
     </Physics>

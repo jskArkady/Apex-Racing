@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -93,7 +94,7 @@ export default function RaceLighting({
 
     const playerFocus = typeof window === 'undefined'
       ? null
-      : window.racerPositions?.player
+      : racerTelemetry.positions?.player
     const pose = calculateShadowRigPose(
       playerFocus,
       environment.sunPosition,

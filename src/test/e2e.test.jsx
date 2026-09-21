@@ -1,3 +1,4 @@
+import { racerTelemetry } from '../utils/racerTelemetry'
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -89,14 +90,14 @@ describe('Tier 1: Feature Coverage', () => {
     it('Test 1.5: Click on Continue on EndScreen transitions game back to menu', () => {
       render(<App />);
       act(() => {
-        window.racerPositions = { player: { x: 10, z: 10 }, ai_1: { x: 20, z: 20 } };
-        window.racerProgress = { player: 250, ai_1: 260 };
+        racerTelemetry.positions = { player: { x: 10, z: 10 }, ai_1: { x: 20, z: 20 } };
+        racerTelemetry.progress = { player: 250, ai_1: 260 };
         useGameStore.setState({ gameState: 'finished' });
       });
       fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
       expect(useGameStore.getState().gameState).toBe('menu');
-      expect(window.racerPositions).toEqual({});
-      expect(window.racerProgress).toEqual({});
+      expect(racerTelemetry.positions).toEqual({});
+      expect(racerTelemetry.progress).toEqual({});
     });
   });
 
@@ -358,7 +359,7 @@ describe('Tier 1: Feature Coverage', () => {
       act(() => {
         useGameStore.setState({ gameState: 'playing' });
       });
-      window.racerPositions = {
+      racerTelemetry.positions = {
         player: { x: 10, z: 20, color: '#ff3366' },
         opponent1: { x: 30, z: 40, color: '#3366ff' }
       };
@@ -674,7 +675,7 @@ describe('Tier 2: Boundary & Corner Cases', () => {
       act(() => {
         useGameStore.setState({ gameState: 'playing' });
       });
-      window.racerPositions = {
+      racerTelemetry.positions = {
         player: { x: 9999, z: 9999, color: '#ff3366' }
       };
       act(() => {

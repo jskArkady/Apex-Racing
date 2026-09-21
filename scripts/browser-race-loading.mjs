@@ -67,7 +67,7 @@ export async function measureRaceLoading(browser, url, runs) {
           subtree: true, childList: true, characterData: true,
         });
         const frame = () => {
-          const player = window.racerPositions?.player;
+          const player = window.__RACING_TELEMETRY__?.positions?.player;
           const clock = document.querySelector('.timing-current strong');
           if (timing.clickedAt && player && clock
             && Number(clock.textContent.replace(/\D/g, '')) > 0) {
