@@ -37,6 +37,18 @@ describe('owned Three.js resource lifecycle', () => {
 
   it.each([
     [
+      'silverstone_gp',
+      'temple-turf-infield-albedo-512.webp',
+      'temple-day-barrier-atlas-1024.webp',
+      'temple-day-crowd-panel-1024.webp',
+      'grandstand-structure-surface-atlas-1024.webp',
+      'pit-complex-structure-surface-atlas-1024.webp',
+      'silverstone-day-pit-garage-facade-1024.webp',
+      'temple-day-gantry-display-1024.webp',
+      null, null, null, null, null, null, null, null, null, null,
+      null, null, null, null, null, null, null, null, null, null,
+    ],
+    [
       'apex_gp',
       'apex-desert-infield-albedo-512.webp',
       'apex-night-barrier-atlas-1024.webp',
@@ -1302,6 +1314,7 @@ describe('owned Three.js resource lifecycle', () => {
     ['apex_gp', 'apex-night-sky-panorama-1024.webp'],
     ['harbour_street', 'harbour-day-sky-panorama-1024.webp'],
     ['temple_speedway', 'temple-day-sky-panorama-1024.webp'],
+    ['silverstone_gp', 'silverstone-day-sky-panorama-1024.webp'],
   ])('loads the venue-specific sky panorama for %s', (trackId, skyFile) => {
     const textureLoad = vi.spyOn(THREE.TextureLoader.prototype, 'load')
     const view = render(<SkyBackdrop track={getTrackPreset(trackId)} />)

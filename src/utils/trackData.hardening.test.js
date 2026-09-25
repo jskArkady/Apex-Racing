@@ -51,11 +51,12 @@ describe('getTrackPointAndTangent hardening', () => {
     }
   });
 
-  it('provides two additional F1-inspired selectable circuit presets', () => {
+  it('provides four F1-inspired selectable circuit presets', () => {
     expect(TRACK_PRESETS.map(track => track.id)).toEqual([
       DEFAULT_TRACK_ID,
       'harbour_street',
       'temple_speedway',
+      'silverstone_gp',
     ]);
 
     const harbour = getTrackPreset('harbour_street');

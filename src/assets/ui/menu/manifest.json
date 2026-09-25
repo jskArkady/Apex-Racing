@@ -240,6 +240,112 @@
         "reviewedAt": null,
         "notes": "No external human or legal review has been claimed. User approval is the gate before moving beyond the menu-hero phase."
       }
+    },
+    {
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-09-25",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "New generated art. Portrait uses the generated wide hero as its composition reference. No external photography used as an image input.",
+      "id": "menu.silverstone_gp.hero",
+      "prompts": {
+        "wide": "Use case: stylized-concept. Asset type: cinematic racing game menu hero, landscape 16:9. Create a high-quality realistic 3D rendered scene inspired by the fast flowing Silverstone airfield circuit in England: wide dry dark asphalt sweeping right then left, red and white kerbs, green grass runoffs, open flat countryside, distant low grandstands and a modern angular silver pit building with a zigzag roof. One fictional graphite-black open-wheel race car with restrained electric-lime accents, rear three-quarter chase view, four correctly formed black slick tyres, car entirely visible low center-right. Soft cool overcast daylight, layered British clouds, subtle pale sunshine on the right. Match a polished realistic browser racing game key art aesthetic. Composition: left 43 percent dark calm low-detail asphalt and softly shadowed grass, for white menu text; main car in bottom right third, architecture right midground. No text, numbers, logos, sponsors, flags, watermark, UI, people, extra cars or recognizable team livery. Deliver one wide image only.",
+        "portrait": "Use case: stylized-concept. Asset type: portrait 9:16 companion image for racing game mobile menu. Use the attached generated wide Silverstone-inspired hero as a style and subject reference. Preserve the fictional graphite open-wheel car with electric-lime edge accents and angular silver pit building with zigzag roof, cool overcast British airfield mood, dry grey track and green grass, red-white kerbs. Recompose vertically: entire car sits in the bottom quarter, pit building on lower right; upper 58 percent is quiet subdued blue-grey overcast sky with low contrast and no bright highlights, providing room for stacked white menu UI. High-quality cinematic realistic 3D render. No text, logos, numbers, sponsors, flags, watermark, UI, people or extra cars. One portrait image only."
+      },
+      "sources": [
+        {
+          "role": "wide master",
+          "dimensions": [
+            1672,
+            941
+          ],
+          "bytes": 1992226,
+          "sha256": "12126e3729e6ce20b7e320806acdb5ec0d1bc729e73e2322ba9bfdff850e0df6"
+        },
+        {
+          "role": "portrait master",
+          "dimensions": [
+            941,
+            1672
+          ],
+          "bytes": 1919630,
+          "sha256": "d31aed5c521fb98fb93753bed0160de64f395c972ac80d74c0534e5bc9b45cb2"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "silverstone-gp-hero-wide-640.webp",
+          "dimensions": [
+            640,
+            360
+          ],
+          "bytes": 25998,
+          "sha256": "9066d160324374f47eac9c816f4e691d5e9abf0bf5ab6a045b11410edfa7f182",
+          "encoding": "WebP quality 85, method 6",
+          "processing": "Lanczos resampling to existing runtime UV / responsive-image dimensions."
+        },
+        {
+          "file": "silverstone-gp-hero-wide-1280.webp",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "bytes": 79306,
+          "sha256": "d15a0abc977e7ad061517111cadc8901ec2f8971ebc7c08b15cfef3906f41450",
+          "encoding": "WebP quality 85, method 6",
+          "processing": "Lanczos resampling to existing runtime UV / responsive-image dimensions."
+        },
+        {
+          "file": "silverstone-gp-hero-wide-1672.webp",
+          "dimensions": [
+            1672,
+            941
+          ],
+          "bytes": 117372,
+          "sha256": "1667bf0059af8e91544af61e8e65b6856ce63b2845f6cbcbf87bd4c89151a533",
+          "encoding": "WebP quality 85, method 6",
+          "processing": "Lanczos resampling to existing runtime UV / responsive-image dimensions."
+        },
+        {
+          "file": "silverstone-gp-hero-portrait-480.webp",
+          "dimensions": [
+            480,
+            853
+          ],
+          "bytes": 37738,
+          "sha256": "becad4417d4575a140c867f74dc69d0c691726f89643a17e3c03768119d05cdb",
+          "encoding": "WebP quality 85, method 6",
+          "processing": "Lanczos resampling to existing runtime UV / responsive-image dimensions."
+        },
+        {
+          "file": "silverstone-gp-hero-portrait-720.webp",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "bytes": 67706,
+          "sha256": "de954862e06182fd8afcb3ec4f17182672b4b694940cb283c51ca2a194ef0547",
+          "encoding": "WebP quality 85, method 6",
+          "processing": "Lanczos resampling to existing runtime UV / responsive-image dimensions."
+        },
+        {
+          "file": "silverstone-gp-hero-portrait-941.webp",
+          "dimensions": [
+            941,
+            1672
+          ],
+          "bytes": 95716,
+          "sha256": "ed3b47f005f677bea82602cbd380b2d8ab7f9cf66b9ae66c4916eb946e8d5a49",
+          "encoding": "WebP quality 85, method 6",
+          "processing": "Lanczos resampling to existing runtime UV / responsive-image dimensions."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "notes": "Generated masters and runtime captures visually reviewed. Four menu viewports (1440, 390, 320, 844 px) show the intended responsive hero without horizontal overflow. Seven driving views pass renderer and visible-car checks; the angular pit roof, garage facade and cloudy sky are visible. Full Silverstone Time Trial and four-car race completed through all checkpoints; all three AI cars finished. No page errors in visual capture checks. Chromium 143 with SwiftShader; physical mobile GPU not tested."
+      }
     }
   ]
 }

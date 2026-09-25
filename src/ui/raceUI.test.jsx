@@ -201,6 +201,12 @@ describe('race interface', () => {
     expect(view.container.querySelector('main')).toHaveClass('main-menu-with-hero')
     expect(view.container.querySelector('main')).toHaveAttribute('data-menu-hero', 'temple_speedway')
 
+    fireEvent.click(screen.getByRole('radio', { name: 'Select Silverstone GP' }))
+    expect(getHeroImage()).toHaveAttribute('src', expect.stringContaining('silverstone-gp-hero-wide-1280'))
+    expect(getHero().querySelector('source').getAttribute('srcset')).toMatch(/silverstone-gp-hero-portrait-480.+480w.+720w.+941w/)
+    expect(view.container.querySelector('main')).toHaveAttribute('data-menu-hero', 'silverstone_gp')
+    expect(screen.getByRole('button', { name: /Championship/ })).toHaveTextContent('4 circuits')
+
     fireEvent.error(getHeroImage())
     expect(getHero()).not.toBeInTheDocument()
     expect(view.container.querySelector('main')).not.toHaveClass('main-menu-with-hero')
@@ -223,7 +229,7 @@ describe('race interface', () => {
     view.unmount()
   })
 
-  it('offers three selectable circuits in the main menu', () => {
+  it('offers all four selectable circuits in the main menu', () => {
     render(<MainMenu />)
 
     for (const track of TRACK_PRESETS) {
@@ -274,8 +280,16 @@ describe('race interface', () => {
     expect(useGameStore.getState().selectedTrackId).toBe('harbour_street')
 
     fireEvent.keyDown(harbour, { key: 'End' })
-    expect(screen.getByRole('radio', { name: 'Select Temple Speedway' })).toHaveFocus()
-    expect(useGameStore.getState().selectedTrackId).toBe('temple_speedway')
+    const silverstone = screen.getByRole('radio', { name: 'Select Silverstone GP' })
+    expect(silverstone).toHaveFocus()
+    expect(useGameStore.getState().selectedTrackId).toBe('silverstone_gp')
+    expect(screen.getByRole('list', { name: 'Circuit landmarks' })).toHaveTextContent('Maggotts-Becketts')
+    fireEvent.keyDown(silverstone, { key: 'ArrowRight' })
+    expect(apex).toHaveFocus()
+    fireEvent.keyDown(apex, { key: 'ArrowLeft' })
+    expect(silverstone).toHaveFocus()
+    fireEvent.keyDown(silverstone, { key: 'Home' })
+    expect(apex).toHaveFocus()
   })
 
   it('announces GO when countdown transitions to racing', () => {

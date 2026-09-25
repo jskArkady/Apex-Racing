@@ -11,6 +11,11 @@ const createPreviewPreset = (code, landmarks) => Object.freeze({
 // Scene/camera cues live in trackVisualCues and can sit far outside the road;
 // reusing them here made the circuit map look like it contained random dots.
 export const TRACK_PREVIEW_DATA = Object.freeze({
+  silverstone_gp: createPreviewPreset('SIL', [
+    { progress: 0.17, shortLabel: '01', label: 'Arena loop' },
+    { progress: 0.655, shortLabel: '02', label: 'Maggotts-Becketts' },
+    { progress: 0.77, shortLabel: '03', label: 'Hangar straight' },
+  ]),
   apex_gp: createPreviewPreset('APX', [
     { progress: 0.16, shortLabel: '01', label: 'Opening braking zone' },
     { progress: 0.34, shortLabel: '02', label: 'Switchback complex' },

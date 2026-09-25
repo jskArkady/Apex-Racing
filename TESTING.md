@@ -33,7 +33,7 @@ render as end-to-end coverage.
   after scene readiness: the timer starts only when the overlay has committed.
 - Most Vitest tests do not cover real WebGL or browser layout. The
   `rapierTrimeshCcd.regression.test.js` cases do run the actual Rapier runtime.
-  Before release, verify the three tracks at desktop, 390 px portrait, 320 px
+  Before release, verify the four tracks at desktop, 390 px portrait, 320 px
   portrait and landscape, including a real mobile GPU and screen reader pass.
 
 ## Production browser checks
@@ -58,16 +58,17 @@ You can run the integrated browser verification with:
 npm run verify:browser
 ```
 
-The smoke checks cover all three tracks at 1280×720, plus Apex at 390×844,
-Harbour at 320×740 and Temple at 844×390 with Chromium touch emulation. They
+The smoke checks cover all four tracks at 1280×720, plus Apex at 390×844,
+Harbour at 320×740 and Temple at 844×390 with Chromium touch emulation.
+Silverstone also runs at all three touch viewports (390×844, 320×740 and 844×390). They
 check real vehicle movement, pause stability, resume, grid reset, simultaneous
 throttle/steering touches, release/cancel, and viewport overflow. Storage access
-is denied from page initialization in these six cases. Separate cases cover
+is denied from page initialization in these ten cases. Separate cases cover
 delayed race downloads, cancel/retry, pause during loading, Time Trial without
 AI, and a failed download followed by reload recovery. Storage writes on race
 completion are covered by the store tests, not by simulated browser finishes.
 
-`npm run test:browser:lap` additionally drives a full Time Trial lap on all three
+`npm run test:browser:lap` additionally drives a full Time Trial lap on all four
 circuits in production Chromium. The test driver follows sampled circuit geometry
 through keyboard events and reads the existing minimap telemetry and HUD. It does
 not teleport the car, write the game store, invoke checkpoint/finish actions or
@@ -84,7 +85,7 @@ Each circuit has a ten-minute wall-clock timeout. To diagnose one circuit:
 BROWSER_TRACK=apex_gp npm run test:browser:lap
 ```
 
-Other ids are `harbour_street` and `temple_speedway`. JSON diagnostics are saved
+Other ids are `harbour_street`, `temple_speedway` and `silverstone_gp`. JSON diagnostics are saved
 alongside the existing smoke results, including a screenshot on failure.
 
 `.github/workflows/verify.yml` runs on pushes and pull requests. It runs

@@ -3508,6 +3508,84 @@
         "reviewedAt": null,
         "notes": "No external human or legal review has been claimed."
       }
+    },
+    {
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-09-25",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "New generated art. Portrait uses the generated wide hero as its composition reference. No external photography used as an image input.",
+      "id": "sky.silverstone.panorama",
+      "prompt": "Use case: stylized-concept. Asset type: game sky texture, wide 2:1 panoramic upper hemisphere map, to wrap horizontally around a 3D racing circuit sky dome. Create a seamless 360-degree British overcast daylight sky ONLY: subtle layered light blue-grey stratocumulus, soft diffused daylight, cool pale horizon band at the bottom, upper edge calm slightly darker blue-grey zenith. Left and right edges must join seamlessly with matched cloud patterns and brightness, no visible seam. Broad soft low-frequency cloud formations, restrained contrast, realistic game environment painting. No ground, horizon objects, buildings, trees, sun disc, moon, stars, birds, aircraft, text, logos, watermark or borders. Full bleed sky only. Top is zenith, bottom is horizon. No fisheye circle, no mirror reflection, no collage.",
+      "sources": [
+        {
+          "role": "sky master",
+          "dimensions": [
+            1774,
+            887
+          ],
+          "bytes": 1320257,
+          "sha256": "21ba121fc5531ae26189f5642a54bbff12182c1988efc112ad2a86786f3bb8eb"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "silverstone-day-sky-panorama-1024.webp",
+          "dimensions": [
+            1024,
+            512
+          ],
+          "bytes": 20132,
+          "sha256": "2131c962c77e3d36364e9e1dddd730c81c2bd983ddc30dda2b9cde83f6641742",
+          "encoding": "WebP quality 85, method 6",
+          "processing": "Lanczos resampling to existing runtime UV / responsive-image dimensions."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "notes": "Generated masters and runtime captures visually reviewed. Four menu viewports (1440, 390, 320, 844 px) show the intended responsive hero without horizontal overflow. Seven driving views pass renderer and visible-car checks; the angular pit roof, garage facade and cloudy sky are visible. Full Silverstone Time Trial and four-car race completed through all checkpoints; all three AI cars finished. No page errors in visual capture checks. Chromium 143 with SwiftShader; physical mobile GPU not tested."
+      }
+    },
+    {
+      "revision": 1,
+      "sourceType": "generated",
+      "generatedAt": "2026-09-25",
+      "tool": "OpenAI built-in imagegen",
+      "model": "built-in default (not exposed)",
+      "seed": null,
+      "referencePolicy": "New generated art. Portrait uses the generated wide hero as its composition reference. No external photography used as an image input.",
+      "id": "surface.silverstone.pit_garage.facade",
+      "prompt": "Use case: stylized-concept. Asset type: seamless horizontally repeatable game texture of a modern British racing-circuit pit garage facade. Wide rectangular texture exactly 4:1 aspect ratio. Strict orthographic straight-on elevation, completely flat, no perspective. Full image is the building wall, no surroundings or margins. Lower two thirds: three evenly spaced dark open garage door bays with subtle interior ribs and silver metallic structural columns. Upper third: a continuous horizontal band of blue-grey tinted hospitality glass divided by slim aluminium mullions and light silver cladding. Neutral soft cloudy daylight, no baked cast shadows, physically plausible restrained details. No roof outline, sky, ground, people, cars, equipment silhouettes, text, lettering, numbers, signs, logos, flags, sponsors, watermarks, borders or grid overlay. Clean realistic PBR albedo appearance. Left and right edges end on matching silver columns for clean repeated bays. Keep the facade readable at 1024 by 256 pixels. One texture image only.",
+      "sources": [
+        {
+          "role": "pit master",
+          "dimensions": [
+            2043,
+            770
+          ],
+          "bytes": 1431361,
+          "sha256": "082deceff0eadc8b1afd6762c9dd2807162d2e2eeb071d132b8d24d974992049"
+        }
+      ],
+      "derivatives": [
+        {
+          "file": "silverstone-day-pit-garage-facade-1024.webp",
+          "dimensions": [
+            1024,
+            256
+          ],
+          "bytes": 13276,
+          "sha256": "ce27f1e71f86beab25a89a68e435bfb5f5ecd430f314a319de9cf6d07793cef0",
+          "encoding": "WebP quality 85, method 6",
+          "processing": "Lanczos resampling to existing runtime UV / responsive-image dimensions."
+        }
+      ],
+      "assetQaReview": {
+        "status": "passed",
+        "notes": "Generated masters and runtime captures visually reviewed. Four menu viewports (1440, 390, 320, 844 px) show the intended responsive hero without horizontal overflow. Seven driving views pass renderer and visible-car checks; the angular pit roof, garage facade and cloudy sky are visible. Full Silverstone Time Trial and four-car race completed through all checkpoints; all three AI cars finished. No page errors in visual capture checks. Chromium 143 with SwiftShader; physical mobile GPU not tested."
+      }
     }
   ]
 }

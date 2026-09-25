@@ -286,3 +286,59 @@ sound quality were not tested in this headless environment. Audio tests verify
 surface/slip envelopes, volume, impact rate limiting, pause and owned-resource
 cleanup. Championship progression/retries are covered by store/UI tests; the
 full three-round championship was not separately driven in a real browser.
+
+## Silverstone fourth circuit — 2026-09-25
+
+Added `silverstone_gp` as the fourth selectable circuit and championship round.
+The flat, uniformly scaled official-map silhouette retains the Arena loop,
+Copse, Maggotts-Becketts and Hangar straight. Arena and Vale are locally rounded
+for continuous full-width barriers. Existing road, grass, crowd and structural
+atlases are reused; the venue adds angular pit-roof blades and airfield hangars.
+
+- `npm run verify`: **70 files / 643 tests**, lint and production build passed.
+  Coverage includes independent official-map silhouette comparison at the
+  existing 80% threshold, road/barrier topology, grid placement, scene geometry,
+  resource disposal, four-round championship progression and isolated records.
+- Built-in image generation produced wide and portrait menu masters, a cloudy
+  sky panorama and a garage facade. Eight WebP derivatives total **457,244 bytes**;
+  every derivative matches its manifest SHA-256 and byte count. Full prompts,
+  source hashes and runtime review notes are recorded in
+  `src/assets/ui/menu/manifest.json` and `src/assets/textures/manifest.json`.
+- Dedicated visual checks passed at menu widths 1440, 390, 320 and 844 px with
+  four selectors, the correct responsive hero and no horizontal overflow.
+  Seven driving captures passed visible-car and renderer checks without page
+  errors. Captures and metrics are in `.screenshots/silverstone/` (ignored).
+- Dedicated Silverstone Time Trial completed in **194.885 s** with zero contact
+  or recovery, all nine checkpoints and finish, matching persisted lap/sector
+  records, and ghost movement after reload plus freeze on pause.
+- Dedicated Silverstone four-car race completed in **194.541 s**, including the
+  deliberate collision and keyboard recovery probe. All AI cars finished:
+  Green 97.978 s, Blue 99.941 s, Orange 101.474 s.
+
+Runtime: WSL2, Node.js 24.16.0, Chromium 143.0.7499.4, SwiftShader. Browser and
+missing libraries were extracted under `/tmp`; no dependency or system package
+changes were made. Test lap times measure conservative keyboard-driver
+completion, not competitive pace or GPU performance. Physical mobile GPUs,
+Safari, screen readers and perceived audio quality were not tested. The full
+four-round championship is covered by store/UI progression tests, rather than
+an additional consecutive browser championship run.
+
+Final `npm run verify:browser` passed against the production build: ten
+viewport/control smoke cases plus delayed/failed-download recovery cases,
+four complete Time Trials and four complete four-car races. Every Time Trial
+passed persisted sectors and ghost replay/freeze checks. Every race passed the
+contact/recovery probe, ordered checkpoints, four-car classification and reload
+persistence; all three AI cars actually finished on every circuit.
+
+| Circuit | Time Trial | Four-car test lap |
+| --- | ---: | ---: |
+| Apex Grand Prix | 169.818 s | 173.662 s |
+| Harbour Street | 98.941 s | 101.464 s |
+| Temple Speedway | 135.771 s | 137.896 s |
+| Silverstone GP | 192.409 s | 194.550 s |
+
+Final review checked the actual diff, unchanged existing circuit definitions,
+asset hashes, test coverage and browser results. No blocking issue remained.
+Raw local results: `/tmp/racing-silverstone-verify-final.log`,
+`/tmp/racing-silverstone-browser-final.log`, `/tmp/racing-smoke-metrics.json`,
+`/tmp/racing-lap-metrics.json` and `/tmp/racing-race-metrics.json`.

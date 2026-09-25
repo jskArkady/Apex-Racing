@@ -1304,6 +1304,7 @@ describe('circuit visual geometry', () => {
         apex: { positions: 18_684, indices: 33_216 },
         harbour: { positions: 14_228, indices: 25_596 },
         temple: { positions: 14_200, indices: 25_428 },
+        silverstone: { positions: 16_240, indices: 28_488 },
       }[preset.venue]
       const yachtRig = preset.venue === 'harbour'
         ? createHarbourYachtRigSurfaceGeometry()
@@ -1556,7 +1557,8 @@ describe('circuit visual geometry', () => {
               ...TEMPLE_START_GANTRY_TRIM_LAYOUT.map(trim => trim.color),
               ...GANTRY_ACCENT_CARRIER_LAYOUTS.temple.map(carrier => carrier.color),
             ]
-          : GANTRY_ACCENT_CARRIER_LAYOUTS.harbour.map(carrier => carrier.color)
+          : GANTRY_ACCENT_CARRIER_LAYOUTS[preset.venue].map(carrier => carrier.color)
+      const wingFaceCount = preset.venue === 'silverstone' ? 3 * 6 : 0
       const extraBoxCount = extraBoxTints.length
       const serviceFacadeExtraCount = preset.venue === 'apex'
         ? APEX_PIT_BAY_SERVICE_LAYOUT.length
@@ -1597,7 +1599,7 @@ describe('circuit visual geometry', () => {
       const expectedQuadrants = {
         '0,1': buildingPanels * 2 + serviceFacadeExtraCount * 4,
         '1,1': 2 + roofPanels * 2 + 2 + pitWallFaces + 2
-          + (extraBoxCount - serviceFacadeExtraCount) * 4,
+          + (extraBoxCount - serviceFacadeExtraCount) * 4 + wingFaceCount,
         '0,0': roofPanels + 1 + extraBoxCount,
         '1,0': roofPanels + 1 + extraBoxCount,
       }
@@ -1636,7 +1638,8 @@ describe('circuit visual geometry', () => {
           carrier.centerY + carrier.size[1] / 2 + carrier.surfaceOffset
         )),
       )
-      const expectedMaxY = Math.max(priorExpectedMaxY, carrierExpectedMaxY)
+      const wingMaxY = wingFaceCount ? 9.5 + Math.sin(0.14) * 10.7 + Math.cos(0.14) * 0.175 : 0
+      const expectedMaxY = Math.max(priorExpectedMaxY, carrierExpectedMaxY, wingMaxY)
       expect(geometry.boundingBox.max.y).toBeCloseTo(
         expectedMaxY,
         4,
@@ -1661,7 +1664,13 @@ describe('circuit visual geometry', () => {
 
         expect((Math.max(...faceU) < 0.5) || (Math.min(...faceU) > 0.5)).toBe(true)
         expect((Math.max(...faceV) < 0.5) || (Math.min(...faceV) > 0.5)).toBe(true)
-        if (quadrant === '0,0') expect(normal.y).toBeGreaterThan(0.99)
+        const wingEnd = faceCount - extraBoxCount * 6
+        if (face >= wingEnd - wingFaceCount && face < wingEnd) {
+          expect(quadrant).toBe('1,1')
+          expect(normal.length()).toBeCloseTo(1, 6)
+          // Tilted roof sides and top must retain their actual rotated normals.
+          expect([0, Math.sin(0.14), Math.cos(0.14)].some(y => Math.abs(Math.abs(normal.y) - y) < 1e-6)).toBe(true)
+        } else if (quadrant === '0,0') expect(normal.y).toBeGreaterThan(0.99)
         else if (quadrant === '1,0') expect(normal.y).toBeLessThan(-0.99)
         else expect(Math.abs(normal.y)).toBeLessThan(0.01)
         if (face >= faceCount - extraBoxCount * 6) {
@@ -1680,7 +1689,7 @@ describe('circuit visual geometry', () => {
       expect(quadrantCounts).toEqual(expectedQuadrants)
 
       const glass = PIT_GARAGE_GLASS_LAYOUTS[preset.venue]
-      const glassFirstFace = faceCount - extraBoxCount * 6 - 4
+      const glassFirstFace = faceCount - extraBoxCount * 6 - wingFaceCount - 4
       const glassPhysicalAspects = [
         glass.size[0] / glass.size[2],
         glass.size[0] / glass.size[2],
@@ -1815,7 +1824,7 @@ describe('circuit visual geometry', () => {
       totalFaceCount += faceCount
       geometry.dispose()
     }
-    expect(totalFaceCount).toBe(554)
+    expect(totalFaceCount).toBe(628)
   })
 
   it('replaces every low-poly palm crown with one road-facing atlas billboard', () => {
@@ -2494,6 +2503,7 @@ describe('circuit visual geometry', () => {
       apex: 21,
       harbour: 15,
       temple: 18,
+      silverstone: 27,
     }
     let totalBoardCount = 0
     const totalSurfaceCounts = {
@@ -2620,14 +2630,14 @@ describe('circuit visual geometry', () => {
       geometry.dispose()
     }
 
-    expect(totalBoardCount).toBe(54)
+    expect(totalBoardCount).toBe(81)
     expect(totalSurfaceCounts).toEqual({
-      front: 54,
-      rear: 54,
-      nearEnd: 54,
-      farEnd: 54,
-      bottom: 54,
-      top: 54,
+      front: 81,
+      rear: 81,
+      nearEnd: 81,
+      farEnd: 81,
+      bottom: 81,
+      top: 81,
     })
   })
 
@@ -2636,6 +2646,7 @@ describe('circuit visual geometry', () => {
       apex: 218,
       harbour: 68,
       temple: 68,
+      silverstone: 68,
     }
     const totalFrontKindCounts = {
       marshalPost: 0,
@@ -2780,34 +2791,34 @@ describe('circuit visual geometry', () => {
 
     expect(totalFrontKindCounts).toEqual({
       marshalPost: 5,
-      broadcastLens: 12,
+      broadcastLens: 16,
       pitWallDisplay: 14,
-      broadcastCabinet: 12,
-      broadcastHead: 12,
+      broadcastCabinet: 16,
+      broadcastHead: 16,
       pitLaneCabinet: 5,
       pitLaneModule: 5,
     })
     expect(totalKindSurfaceCounts).toEqual({
       marshalPost: 20,
-      broadcastLens: 72,
+      broadcastLens: 96,
       pitWallDisplay: 70,
-      broadcastCabinet: 60,
-      broadcastHead: 72,
+      broadcastCabinet: 80,
+      broadcastHead: 96,
       pitLaneCabinet: 30,
       pitLaneModule: 30,
     })
     expect(totalSurfaceCounts).toEqual({
-      front: 65,
-      rear: 65,
-      nearEnd: 65,
-      farEnd: 65,
-      top: 60,
-      bottom: 34,
+      front: 77,
+      rear: 77,
+      nearEnd: 77,
+      farEnd: 77,
+      top: 72,
+      bottom: 42,
     })
   })
 
   it('maps all start signals, floodlight faces, and tunnel luminaires to one atlas', () => {
-    const expectedPanelCounts = { apex: 166, harbour: 154, temple: 70 }
+    const expectedPanelCounts = { apex: 166, harbour: 154, temple: 70, silverstone: 70 }
     const totalKindCounts = {
       floodlightFront: 0,
       startSignal: 0,
@@ -2991,19 +3002,19 @@ describe('circuit visual geometry', () => {
 
     expect(totalKindCounts).toEqual({
       floodlightFront: 16,
-      startSignal: 30,
-      startSignalService: 180,
+      startSignal: 40,
+      startSignalService: 240,
       tunnelLuminaire: 12,
       tunnelLuminaireService: 72,
       floodlightRear: 80,
     })
     expect(startSignalServiceSurfaceCounts).toEqual({
-      frontHousing: 30,
-      rear: 30,
-      nearEnd: 30,
-      farEnd: 30,
-      top: 30,
-      bottom: 30,
+      frontHousing: 40,
+      rear: 40,
+      nearEnd: 40,
+      farEnd: 40,
+      top: 40,
+      bottom: 40,
     })
     expect(apexFloodlightSurfaceCounts).toEqual({
       front: 16,
@@ -3055,6 +3066,15 @@ describe('circuit visual geometry', () => {
     const surfaceRibbonVertices = (SURFACE_SEGMENTS + 1) * 2
     const paintBoxCount = 32 + 26 + 1
     const expected = {
+      silverstone: {
+        cornerCount: 9,
+        positions: 4_840,
+        indices: 11_388,
+        sceneryPositions: 10_512,
+        sceneryIndices: 15_768,
+        min: [-294.807800, 0.065, -176.005981],
+        max: [295.468719, 0.1465, 178.339798],
+      },
       apex: {
         cornerCount: 7,
         positions: 4_696,
@@ -3227,8 +3247,13 @@ describe('circuit visual geometry', () => {
       apex: ['#d23d43', '#fff4df'],
       harbour: ['#d23d43', '#fff4df'],
       temple: ['#d23d43', '#fff4df', '#168447'],
+      silverstone: ['#d23d43', '#fff4df'],
     }
     const expectedBounds = {
+      silverstone: {
+        min: [-296.070496, 0.055, -177.298492],
+        max: [295.305695, 0.185, 179.514587],
+      },
       apex: {
         min: [-208.322662, 0.055, -105.40168],
         max: [172.451538, 0.185, 143.954956],
@@ -3246,6 +3271,7 @@ describe('circuit visual geometry', () => {
       apex: { boundary: 574, corner: 35, chicane: 0 },
       harbour: { boundary: 574, corner: 25, chicane: 13 },
       temple: { boundary: 574, corner: 30, chicane: 0 },
+      silverstone: { boundary: 574, corner: 45, chicane: 0 },
     }
 
     for (const preset of TRACK_PRESETS) {
@@ -5898,7 +5924,13 @@ describe('circuit visual geometry', () => {
         expect(v).toBeLessThanOrEqual(1 - 1 / 1024)
         modules.add(`${Math.floor(u * 2)}:${Math.floor(v * 2)}`)
       }
-      expect(modules.size).toBeGreaterThanOrEqual(3)
+      if (preset.venue === 'silverstone') {
+        // Daytime Silverstone needs only its start signal lenses; no night
+        // floodlights, waterfront shimmer or Monza tower emissive surfaces.
+        expect([...modules]).toEqual(['0:1'])
+      } else {
+        expect(modules.size).toBeGreaterThanOrEqual(3)
+      }
       geometry.dispose()
     }
   })

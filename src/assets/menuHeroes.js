@@ -1,3 +1,9 @@
+import silverstoneWide640 from './ui/menu/silverstone-gp-hero-wide-640.webp'
+import silverstoneWide1280 from './ui/menu/silverstone-gp-hero-wide-1280.webp'
+import silverstoneWide1672 from './ui/menu/silverstone-gp-hero-wide-1672.webp'
+import silverstonePortrait480 from './ui/menu/silverstone-gp-hero-portrait-480.webp'
+import silverstonePortrait720 from './ui/menu/silverstone-gp-hero-portrait-720.webp'
+import silverstonePortrait941 from './ui/menu/silverstone-gp-hero-portrait-941.webp'
 import apexWide640 from './ui/menu/apex-gp-hero-wide-640.webp'
 import apexWide1280 from './ui/menu/apex-gp-hero-wide-1280.webp'
 import apexWide1672 from './ui/menu/apex-gp-hero-wide-1672.webp'
@@ -93,7 +99,21 @@ const templeHero = Object.freeze({
   ),
 })
 
+const silverstoneHero = Object.freeze({
+  wide: createResponsiveAsset(
+    silverstoneWide1280,
+    [[silverstoneWide640, 640], [silverstoneWide1280, 1280], [silverstoneWide1672, 1672]],
+    1672, 941,
+  ),
+  portrait: createResponsiveAsset(
+    silverstonePortrait720,
+    [[silverstonePortrait480, 480], [silverstonePortrait720, 720], [silverstonePortrait941, 941]],
+    941, 1672,
+  ),
+})
+
 export const MENU_HEROES = Object.freeze({
+  silverstone_gp: silverstoneHero,
   apex_gp: apexHero,
   harbour_street: harbourHero,
   temple_speedway: templeHero,

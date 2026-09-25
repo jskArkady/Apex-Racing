@@ -11,6 +11,27 @@ const MINIMUM_COVERAGE = 0.8;
 // stretching its aspect ratio. Keeping the factual bitmap instead of another
 // control polygon makes this oracle independent from the product curve points.
 const REFERENCE_CIRCUITS = Object.freeze({
+  silverstone_gp: Object.freeze({
+    circuit: 'Silverstone Circuit',
+    source: 'https://www.fia.com/system/files/decision-document/2025_british_grand_prix_-_event_notes_-_circuit_map_v2.pdf',
+    maskSource: 'https://media.formula1.com/image/upload/c_fit%2Ch_704/q_auto/v1740000001/content/dam/fom-website/2018-redesign-assets/Circuit%20maps%2016x9/Great_Britain_Circuit.webp',
+    productSource: 'https://www.formula1.com/en/racing/2025/great-britain',
+    // Colour-thresholded official map pixels, aspect-preserving 64x64 raster.
+    // Independent of the game's control points and smoothing adjustments.
+    mask: `
+        00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000000000000000000000000000000000000000000007c00000000000000e7000000000000018380000000000
+        00100c000000000000180700000000000018038000001800001800c000003e0000300070000063c000600038000060e000c0000e00003e300180000700000f18
+        030000018000010c0e0000018000010c38000000800003047000000180000304c0000001800006068000000180000c068000000100001802c000000100003002
+        6000000180006002300000008000c0021c000000c000c002070000006001800203c000003003000300f0000030060003003c0000080c0003000e00000c180001
+        000380000c1800010000e0007c30000100003800e060000100000f00e0c00003000003807f800006000000e01f00007c00000030000007f000000018000fff80
+        000000083e1c00000000000ce3e0000000000007c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      `.replace(/\s/g, ''),
+    requiredKeyFeatures: Object.freeze(['18-turn silhouette', 'Arena loop', 'Copse', 'Maggotts-Becketts', 'Hangar straight']),
+    requiredFidelityMarkers: Object.freeze(['Maggotts-Becketts esses', 'Hangar straight', 'Arena loop', 'angular pit roof', 'open grass runoff']),
+    timeOfDay: 'day',
+  }),
   apex_gp: Object.freeze({
     circuit: 'Bahrain International Circuit',
     source: 'https://www.fia.com/system/files/decision-document/2025_bahrain_grand_prix_-_event_notes_-_circuit_map_v4.pdf',
@@ -242,7 +263,7 @@ describe('circuit reference metadata and venue identity', () => {
     },
   );
 
-  it('keeps Bahrain at night and Monaco and Monza in daylight', () => {
+  it('keeps each circuit in its declared time of day', () => {
     for (const [trackId, reference] of Object.entries(REFERENCE_CIRCUITS)) {
       const environment = getTrackPreset(trackId).environment;
       if (reference.timeOfDay === 'night') {

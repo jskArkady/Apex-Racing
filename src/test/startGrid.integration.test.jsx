@@ -81,7 +81,7 @@ describe('starting-grid physics integration', () => {
     expect(pose.lateralOffset).toBe(0)
   })
 
-  it.each(['harbour_street', 'temple_speedway'])(
+  it.each(['harbour_street', 'temple_speedway', 'silverstone_gp'])(
     'uses the selected %s curve for player and AI grid placement',
     trackId => {
       const track = getTrackPreset(trackId)

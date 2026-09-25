@@ -30,6 +30,7 @@ import harbourTunnelWallAtlasUrl from '../assets/textures/harbour-tunnel-wall-at
 import harbourYachtFacadeAtlasUrl from '../assets/textures/harbour-yacht-facade-atlas-1024.webp'
 import harbourYachtRigSurfaceAtlasUrl from '../assets/textures/harbour-yacht-rig-surface-atlas-1024.webp'
 import harbourYachtUpperSurfaceAtlasUrl from '../assets/textures/harbour-yacht-upper-surface-atlas-1024.webp'
+import silverstonePitGarageFacadeUrl from '../assets/textures/silverstone-day-pit-garage-facade-1024.webp'
 import templeCrowdPanelUrl from '../assets/textures/temple-day-crowd-panel-1024.webp'
 import templeBarrierAtlasUrl from '../assets/textures/temple-day-barrier-atlas-1024.webp'
 import templeBankingTimingAtlasUrl from '../assets/textures/temple-day-banking-timing-atlas-1024.webp'
@@ -104,31 +105,37 @@ import {
 } from './trackGeometry'
 
 const INFIELD_ALBEDO_BY_VENUE = Object.freeze({
+  silverstone: templeInfieldAlbedoUrl,
   apex: apexInfieldAlbedoUrl,
   harbour: harbourInfieldAlbedoUrl,
   temple: templeInfieldAlbedoUrl,
 })
 const INFIELD_ALBEDO_TEXTURE_CONFIG_BY_VENUE = Object.freeze({
+  silverstone: Object.freeze({ repeat: INFIELD_ALBEDO_REPEAT, anisotropy: 2 }),
   apex: Object.freeze({ repeat: INFIELD_ALBEDO_REPEAT, anisotropy: 2 }),
   harbour: Object.freeze({ repeat: 28, anisotropy: 4 }),
   temple: Object.freeze({ repeat: INFIELD_ALBEDO_REPEAT, anisotropy: 2 }),
 })
 const BARRIER_ATLAS_BY_VENUE = Object.freeze({
+  silverstone: templeBarrierAtlasUrl,
   apex: apexBarrierAtlasUrl,
   harbour: harbourBarrierAtlasUrl,
   temple: templeBarrierAtlasUrl,
 })
 const CROWD_PANEL_BY_VENUE = Object.freeze({
+  silverstone: templeCrowdPanelUrl,
   apex: apexCrowdPanelUrl,
   harbour: harbourCrowdPanelUrl,
   temple: templeCrowdPanelUrl,
 })
 const PIT_GARAGE_FACADE_BY_VENUE = Object.freeze({
+  silverstone: silverstonePitGarageFacadeUrl,
   apex: apexPitGarageFacadeUrl,
   harbour: harbourPitGarageFacadeUrl,
   temple: templePitGarageFacadeUrl,
 })
 const GANTRY_DISPLAY_BY_VENUE = Object.freeze({
+  silverstone: templeGantryDisplayUrl,
   apex: apexGantryDisplayUrl,
   harbour: harbourGantryDisplayUrl,
   temple: templeGantryDisplayUrl,

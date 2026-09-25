@@ -3,6 +3,13 @@ const freezeCues = cues => Object.freeze(
 )
 
 export const TRACK_VISUAL_CUES = Object.freeze({
+  silverstone_gp: freezeCues([
+    { key: 'wing', label: 'Angular pit roof', type: 'city', progress: 0.02, captureProgress: 0.985, lateral: 23, targetHeight: 2.5, cameraHeight: 1.8 },
+    { key: 'arena', label: 'Arena loop', type: 'hairpin', progress: 0.17, captureProgress: 0.15, lateral: 0, targetHeight: 1 },
+    { key: 'copse', label: 'Copse', type: 'speed', progress: 0.51, captureProgress: 0.485, lateral: 0, targetHeight: 1 },
+    { key: 'becketts', label: 'Maggotts-Becketts esses', type: 'chicane', progress: 0.655, captureProgress: 0.63, lateral: 0, targetHeight: 1 },
+    { key: 'hangar', label: 'Hangar straight', type: 'speed', progress: 0.77, captureProgress: 0.74, lateral: 0, targetHeight: 1 },
+  ]),
   apex_gp: freezeCues([
     { key: 'pit', label: 'Floodlit main straight', type: 'speed', progress: 0.03, captureProgress: 0.015, lateral: -18, targetHeight: 4 },
     // Visual-cue lateral values use the preview/camera right-vector convention,

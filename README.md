@@ -1,14 +1,14 @@
 # Apex Racing
 
-Apex Racing is a browser-based 3D circuit racing game built with React, Three.js, React Three Fiber, and Rapier. It combines responsive arcade handling with rigid-body physics, AI rivals, race timing, and three distinct stylized circuits.
+Apex Racing is a browser-based 3D circuit racing game built with React, Three.js, React Three Fiber, and Rapier. It combines responsive arcade handling with rigid-body physics, AI rivals, race timing, and four distinct stylized circuits.
 
 ## Highlights
 
 - Single Race mode with a four-car grid: the player and three AI opponents
 - Time Trial with sector splits, personal-best deltas and a translucent best-lap ghost
 - Selectable 1, 3 or 5 laps and Easy / Normal / Hard AI difficulty
-- Three-round championship with standings and 10 / 6 / 4 / 2 points
-- Three circuit identities with track-specific scenery and lighting
+- Four-round championship with standings and 10 / 6 / 4 / 2 points
+- Four circuit identities with track-specific scenery and lighting
 - Arcade handling backed by Rapier rigid-body collision and recovery logic
 - AI corner-speed control, traffic awareness, and stuck recovery
 - Chase camera, minimap, checkpoints, live position, lap timing, gear, RPM, and wrong-way feedback
@@ -23,6 +23,13 @@ Apex Racing is a browser-based 3D circuit racing game built with React, Three.js
 | Apex Grand Prix | Bahrain / Sakhir | Wide desert circuit with floodlit grand-prix atmosphere |
 | Harbour Street | Monaco | Tight harbour-side street racing with barriers and close scenery |
 | Temple Speedway | Monza | Fast parkland circuit with long straights and historic racing character |
+| Silverstone GP | Silverstone | Open airfield circuit with the Arena loop, fast esses and the Hangar straight |
+
+Silverstone preserves the official layout silhouette at game scale, with locally
+rounded tight corners for full-width barriers and a flat driving surface. Its
+overcast sky, silver pit facade and responsive menu art use generated images;
+shared road, grass, kerb and grandstand textures are reused. Generation prompts
+and asset hashes are recorded in the two asset manifests.
 
 The circuits are original, stylized interpretations designed for this game. They are not laser-scanned reproductions.
 
@@ -70,7 +77,7 @@ ghost recording; the next lap can be recorded normally. Samples are taken at
 up to 10 Hz and capped at 18,000 per lap. If browser storage is unavailable or
 full, records remain usable in memory for the current page session.
 
-Championship runs Apex, Harbour and Temple in that order with the selected laps
+Championship runs Apex, Harbour, Temple and Silverstone in that order with the selected laps
 and difficulty. Each round ends when the player finishes. Completed cars rank by
 finish time; remaining cars are classified by accepted checkpoint progress and
 checkpoint time. Tied race ranks earn equal points; equal championship totals

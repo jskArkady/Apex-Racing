@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useGameStore } from './gameStore'
-import { DEFAULT_TRACK_ID } from '../utils/trackData'
+import { DEFAULT_TRACK_ID, TRACK_PRESETS } from '../utils/trackData'
 import { championshipStandings } from '../utils/championship'
+import { loadLapRecords } from '../utils/lapRecords'
 
 const initial = useGameStore.getState()
 const state = () => useGameStore.getState()
@@ -18,10 +19,10 @@ beforeEach(() => {
 })
 
 describe('sector timing', () => {
-  it('scores three different rounds once each and rolls back a retried result', () => {
+  it('scores every circuit once and rolls back a retried result', () => {
     state().startChampionship()
     const tracks = []
-    for (let round = 0; round < 3; round++) {
+    for (let round = 0; round < TRACK_PRESETS.length; round++) {
       tracks.push(state().selectedTrackId)
       useGameStore.setState({ gameState: 'playing' })
       passLap(100)
@@ -35,9 +36,9 @@ describe('sector timing', () => {
       }
       state().nextChampionshipRound()
     }
-    expect(new Set(tracks).size).toBe(3)
+    expect(tracks).toEqual(TRACK_PRESETS.map(track => track.id))
     expect(state().gameState).toBe('finished')
-    expect(championshipStandings(state().championship).find(r => r.id === 'player').points).toBe(30)
+    expect(championshipStandings(state().championship).find(r => r.id === 'player').points).toBe(10 * TRACK_PRESETS.length)
     state().returnToMenu()
     expect(state().championship).toBeNull()
   })
@@ -74,6 +75,31 @@ describe('sector timing', () => {
     for (let cp = 1; cp <= 4; cp++) state().passCheckpoint(cp)
     expect(state().sectorDelta).toBe(-10)
     expect(state().sectorTime).toBe(30)
+  })
+
+  it('keeps all four circuit records isolated and reloads the new circuit record', () => {
+    const expectedBests = {}
+    const expectedRecords = {}
+    for (const [index, track] of TRACK_PRESETS.entries()) {
+      state().selectTrack(track.id)
+      state().startGame('time_trial')
+      expect(state().bestLapTime).toBe(0)
+      useGameStore.setState({ gameState: 'playing' })
+      const duration = 100 + index * 10
+      passLap(duration)
+      expectedBests[track.id] = duration
+      expectedRecords[track.id] = { time: duration, splits: [duration * 0.4, duration * 0.7, duration], samples: null }
+      expect(state().personalBests).toEqual(expectedBests)
+      expect(loadLapRecords()).toEqual(expectedRecords)
+      state().returnToMenu()
+    }
+    state().selectTrack('silverstone_gp')
+    state().startGame('time_trial')
+    expect(state().bestLapTime).toBe(130)
+    state().returnToMenu()
+    state().selectTrack(DEFAULT_TRACK_ID)
+    state().startGame('time_trial')
+    expect(state().bestLapTime).toBe(100)
   })
 
   it('does not compare splits from a different, older personal best', () => {

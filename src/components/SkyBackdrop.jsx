@@ -4,7 +4,10 @@ import apexSkyPanoramaUrl from '../assets/textures/apex-night-sky-panorama-1024.
 import harbourSkyPanoramaUrl from '../assets/textures/harbour-day-sky-panorama-1024.webp'
 import templeSkyPanoramaUrl from '../assets/textures/temple-day-sky-panorama-1024.webp'
 
+import silverstoneSkyPanoramaUrl from '../assets/textures/silverstone-day-sky-panorama-1024.webp'
+
 const SKY_PANORAMA_BY_VENUE = Object.freeze({
+  silverstone: silverstoneSkyPanoramaUrl,
   apex: apexSkyPanoramaUrl,
   harbour: harbourSkyPanoramaUrl,
   temple: templeSkyPanoramaUrl,

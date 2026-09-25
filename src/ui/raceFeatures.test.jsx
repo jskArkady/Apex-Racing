@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, expect, it } from 'vitest'
 import MainMenu from './MainMenu'
 import EndScreen from './EndScreen'
+import { TRACK_PRESETS } from '../utils/trackData'
 import { useGameStore } from '../store/gameStore'
 
 const initial = useGameStore.getState()
@@ -27,7 +28,7 @@ it('shows cup points, moves to the next track and removes advancement after the 
   expect(screen.getByRole('list', { name: 'Race classification' }).children).toHaveLength(4)
   fireEvent.click(screen.getByRole('button', { name: 'Next Round' }))
   expect(useGameStore.getState()).toMatchObject({ selectedTrackId: 'harbour_street', championship: { round: 1 } })
-  act(() => useGameStore.setState({ championship: { ...useGameStore.getState().championship, round: 2 } }))
+  act(() => useGameStore.setState({ championship: { ...useGameStore.getState().championship, round: TRACK_PRESETS.length - 1 } }))
   expect(screen.queryByRole('button', { name: 'Next Round' })).not.toBeInTheDocument()
   expect(screen.getByText('Championship complete')).toBeInTheDocument()
 })

@@ -757,6 +757,38 @@ export const GRANDSTAND_ROOF_RIB = Object.freeze({
   count: 5,
 })
 export const GRANDSTAND_LAYOUTS = Object.freeze({
+  silverstone: Object.freeze([
+    Object.freeze({
+      progress: 0.02,
+      side: 1,
+      tiers: 6,
+      length: 62,
+      seatStart: 18,
+      crowdSeats: 8,
+      crowdSpacing: 3.2,
+      accent: '#84cbe8',
+    }),
+    Object.freeze({
+      progress: 0.64,
+      side: 1,
+      tiers: 5,
+      length: 32,
+      seatStart: 24,
+      crowdSeats: 7,
+      crowdSpacing: 2,
+      accent: '#84cbe8',
+    }),
+    Object.freeze({
+      progress: 0.82,
+      side: -1,
+      tiers: 5,
+      length: 28,
+      seatStart: 23,
+      crowdSeats: 6,
+      crowdSpacing: 2,
+      accent: '#d6dce0',
+    }),
+  ]),
   apex: Object.freeze([
     Object.freeze({
       progress: PIT_STRAIGHT_PROGRESS,
@@ -822,6 +854,15 @@ export const GRANDSTAND_LAYOUTS = Object.freeze({
   ]),
 })
 export const PIT_GARAGE_FACADE_LAYOUTS = Object.freeze({
+  silverstone: Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -17.3,
+    centerY: 3.8,
+    totalWidth: 57,
+    height: 5.4,
+    panelCount: 3,
+    panelGap: 0.25,
+  }),
   apex: Object.freeze({
     progress: PIT_STRAIGHT_PROGRESS,
     lateral: -16.66,
@@ -851,6 +892,12 @@ export const PIT_GARAGE_FACADE_LAYOUTS = Object.freeze({
   }),
 })
 export const PIT_GARAGE_GLASS_LAYOUTS = Object.freeze({
+  silverstone: Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    lateral: -17.8,
+    centerY: 3.8,
+    size: Object.freeze([0.7, 6.4, 60]),
+  }),
   apex: Object.freeze({
     progress: PIT_STRAIGHT_PROGRESS,
     lateral: -17.7,
@@ -878,6 +925,13 @@ export const APEX_PIT_GARAGE_HEADER = Object.freeze({
   color: '#d8b45c',
 })
 export const PIT_COMPLEX_STRUCTURE_LAYOUTS = Object.freeze({
+  silverstone: Object.freeze({
+    progress: PIT_STRAIGHT_PROGRESS,
+    maxPanelLength: 10,
+    building: Object.freeze({ lateral: -23, centerY: 3.8, size: Object.freeze([10, 7.6, 62]) }),
+    roof: Object.freeze({ lateral: -23, centerY: 7.8, size: Object.freeze([11, 0.35, 64]) }),
+    pitWall: null,
+  }),
   apex: Object.freeze({
     progress: PIT_STRAIGHT_PROGRESS,
     maxPanelLength: 10,
@@ -931,6 +985,15 @@ export const PIT_COMPLEX_STRUCTURE_LAYOUTS = Object.freeze({
 })
 const MEDIA_BRIDGE_PROGRESS = Object.freeze([0.245, 0.585, 0.855])
 export const GANTRY_DISPLAY_LAYOUTS = Object.freeze({
+  silverstone: Object.freeze([
+    Object.freeze({
+      progress: START_GANTRY_PROGRESS,
+      centerY: 7.28,
+      width: 7.2,
+      height: 0.48,
+      approachOffset: -0.402,
+    }),
+  ]),
   apex: Object.freeze([
     Object.freeze({
       progress: START_GANTRY_PROGRESS,
@@ -967,6 +1030,14 @@ export const GANTRY_DISPLAY_LAYOUTS = Object.freeze({
   ]),
 })
 export const GANTRY_ACCENT_CARRIER_LAYOUTS = Object.freeze({
+  silverstone: Object.freeze(GANTRY_DISPLAY_LAYOUTS.silverstone.map(display => Object.freeze({
+    progress: display.progress,
+    lateral: 0,
+    centerY: 7.18,
+    size: Object.freeze([7.2, 0.22, 0.78]),
+    color: '#84cbe8',
+    surfaceOffset: 0.006,
+  }))),
   apex: Object.freeze(GANTRY_DISPLAY_LAYOUTS.apex.map((display, index) => (
     Object.freeze({
       progress: display.progress,
@@ -1029,6 +1100,7 @@ export const DIRECTION_MARKER_PROGRESS = Object.freeze([
 export const MAJOR_CORNER_PROGRESS = Object.freeze([0.168, 0.504, 0.544, 0.59, 0.716, 0.906, 0.952])
 export const SECTOR_LANDMARK_PROGRESS = Object.freeze([1 / 3, 2 / 3])
 const VENUE_CORNER_PROGRESS = Object.freeze({
+  silverstone: Object.freeze([0.067, 0.14, 0.17, 0.325, 0.365, 0.51, 0.655, 0.85, 0.94]),
   apex: Object.freeze([0.135, 0.255, 0.445, 0.585, 0.705, 0.805, 0.925]),
   harbour: Object.freeze([0.055, 0.234, 0.59, 0.735, 0.905]),
   temple: Object.freeze([0.19, 0.35, 0.475, 0.535, 0.695, 0.91]),
@@ -2192,7 +2264,7 @@ function addCornerReadability(parts, curve, venue, roadWidth = ROAD_WIDTH) {
     const turnSide = getTurnSide(curve, progress)
     const outside = -turnSide * (roadWidth / 2 + 2.05)
 
-    if (venue === 'apex' || venue === 'temple') {
+    if (venue === 'apex' || venue === 'temple' || venue === 'silverstone') {
       pushTrackSurfaceWearBox(
         parts,
         curve,
@@ -4517,6 +4589,23 @@ export function createPitComplexStructureGeometry(
         ...trim,
         preservePhysicalAspect: true,
       })
+    }
+  }
+  if (venue === 'silverstone') {
+    // Three rising roof blades echo the Wing silhouette. Reuse the metal
+    // quadrant of the shared generated pit-structure atlas on every face.
+    for (const along of [-21, 0, 21]) {
+      const roof = new THREE.BoxGeometry(12, 0.35, 21.4)
+      roof.rotateX(-0.14)
+      const matrix = new THREE.Matrix4().makeBasis(side, WORLD_UP, tangent)
+      matrix.setPosition(point.clone()
+        .addScaledVector(side, layout.roof.lateral)
+        .addScaledVector(tangent, along)
+        .addScaledVector(WORLD_UP, 9.5))
+      roof.applyMatrix4(matrix)
+      remapAtlasQuadrant(roof, 1, 1)
+      addVertexColor(roof, '#ffffff')
+      parts.push(roof)
     }
   }
   for (const carrier of GANTRY_ACCENT_CARRIER_LAYOUTS[venue]) {
@@ -8246,8 +8335,23 @@ function addTempleSignature(parts, curve, roadWidth = ROAD_WIDTH) {
   )
 }
 
+function addSilverstoneSignature(parts, curve) {
+  addGrandstands(parts, curve, 'silverstone')
+  const pit = PIT_COMPLEX_STRUCTURE_LAYOUTS.silverstone
+  for (const box of [pit.building, pit.roof]) {
+    pushTrackBox(parts, curve, pit.progress, box.lateral, box.centerY, box.size, '#d6dce0')
+  }
+  // Low airfield service hangars sit beyond the outside of the long straight.
+  for (const progress of [0.765, 0.795]) {
+    pushTrackBox(parts, curve, progress, -48, 3, [14, 6, 24], '#aab4b7')
+    pushTrackBox(parts, curve, progress, -48, 6.15, [15, 0.3, 25], '#d6dce0')
+  }
+}
+
 function addVenueSignature(parts, curve, venue, roadWidth = ROAD_WIDTH) {
-  if (venue === 'harbour') {
+  if (venue === 'silverstone') {
+    addSilverstoneSignature(parts, curve)
+  } else if (venue === 'harbour') {
     addHarbourSignature(parts, curve, roadWidth)
   } else if (venue === 'temple') {
     addTempleSignature(parts, curve, roadWidth)
@@ -8360,7 +8464,7 @@ export function createCircuitGlowGeometry(curve, venue = 'apex', roadWidth = ROA
       COLORS.waterGlow,
       TRACK_GLOW_SURFACE_VARIANTS.waterShimmer,
     )
-  } else {
+  } else if (venue === 'temple') {
     for (const trim of TEMPLE_START_GANTRY_TRIM_LAYOUT) {
       pushTrackGlowBox(
         parts,

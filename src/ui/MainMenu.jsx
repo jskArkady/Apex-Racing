@@ -343,7 +343,7 @@ export default function MainMenu() {
             <span>Time Trial</span><small id="time-trial-description">Race the clock</small>
           </button>
           <button className="btn championship-mode interactive" onClick={startChampionship}>
-            <span>Championship</span><small>3 circuits · 10 / 6 / 4 / 2 points</small>
+            <span>Championship</span><small>{TRACK_PRESETS.length} circuits · 10 / 6 / 4 / 2 points</small>
           </button>
           <button
             className="btn btn-quiet interactive"

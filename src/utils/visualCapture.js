@@ -7,6 +7,7 @@ const APEX_TOWER_CHASE_PROGRESS = 0.4375
 const APEX_HOSPITALITY_CHASE_PROGRESS = 0.095
 const START_SIGNAL_CHASE_PROGRESS = 0.985
 const KERB_CHASE_PROGRESS = Object.freeze({
+  silverstone_gp: 0.655,
   apex_gp: 0.135,
   harbour_street: 0.59,
   temple_speedway: 0.695,
@@ -16,6 +17,7 @@ const GRAVEL_CHASE_PROGRESS = Object.freeze({
   temple_speedway: 0.18,
 })
 const GRANDSTAND_CHASE_PROGRESS = Object.freeze({
+  silverstone_gp: 0.99,
   apex_gp: 0.99,
   harbour_street: 0.62,
   temple_speedway: 0.17,
@@ -248,6 +250,7 @@ export function parseVisualCaptureRequest(search, enabled = true) {
       apex_gp: 0.105,
       harbour_street: 0.19,
       temple_speedway: 0.16,
+      silverstone_gp: 0.12,
     }[trackId]
     if (!Number.isFinite(captureProgress)) return null
     return Object.freeze({
